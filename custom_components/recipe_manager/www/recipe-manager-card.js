@@ -1,4 +1,4 @@
-import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-CL7dNL-L.js";const l=/^[½¼¾⅓⅔⅛⅜⅝⅞\d][\d.,/½¼¾⅓⅔⅛⅜⅝⅞\s]*\s*(?:tsp|tbsp|tablespoons?|teaspoons?|cups?|oz|lbs?|g|kg|ml|cl|dl|L|(?:milli|centi|deci)?lit(?:re|er)s?|kilo(?:gramme|gram)s?|(?:gramme|gram)s?|pints?|quarts?|gallons?|fl\.?\s*oz|cans?|bunches?|heads?|cloves?|slices?|pieces?|sheets?|pinch(?:es)?|dash(?:es)?|handfuls?|sprigs?|stalks?)\s*/i;function c(e){if(e.amount||e.unit)return e.name;return e.name.replace(l,"").trim()||e.name}function d(e,t,i){return`[RM] ${e} — ${function(e,t){return e.amount||e.unit?[e.amount,e.unit,t].filter(Boolean).join(" "):e.name}(t,i)}`}function p(e){if(!e)return 1;const t={"½":.5,"¼":.25,"¾":.75,"⅓":1/3,"⅔":2/3,"⅛":.125,"⅜":.375,"⅝":.625,"⅞":.875};let i=String(e).trim();for(const[e,r]of Object.entries(t))i=i.replace(e,String(r));const r=i.match(/^(\d+)\s+(\d+)\/(\d+)$/);if(r)return parseInt(r[1])+parseInt(r[2])/parseInt(r[3]);const n=i.match(/^(\d+)\/(\d+)$/);return n?parseInt(n[1])/parseInt(n[2]):parseFloat(i)||1}class h{constructor(e){this.hass=e}subscribe(e){return this.hass.connection.subscribeMessage(e,{type:"recipe_manager/subscribe"})}async getAllRecipes(){return this.hass.callWS({type:"recipe_manager/recipes/get_all"})}async getRecipe(e){return this.hass.callWS({type:"recipe_manager/recipes/get",recipe_id:e})}async scrapeRecipe(e){return this.hass.callWS({type:"recipe_manager/recipes/scrape",url:e})}async addRecipe(e){return this.hass.callWS({type:"recipe_manager/recipes/add",...e})}async updateRecipe(e,t){return this.hass.callWS({type:"recipe_manager/recipes/update",recipe_id:e,...t})}async deleteRecipe(e){return this.hass.callWS({type:"recipe_manager/recipes/delete",recipe_id:e})}async toggleFavourite(e){return this.hass.callWS({type:"recipe_manager/recipes/toggle_favourite",recipe_id:e})}async downloadRecipeImage(e,t){return this.hass.callWS({type:"recipe_manager/recipes/download_image",recipe_id:e,image_url:t})}async getTags(){return this.hass.callWS({type:"recipe_manager/tags/get_all"})}async getMealPlan(e){const t={type:"recipe_manager/meal_plan/get"};return e&&(t.week_start=e),this.hass.callWS(t)}async addToMealPlan(e,t,i,r=1,n=null){const a={type:"recipe_manager/meal_plan/add",recipe_id:e,date:t,meal_type:i,servings:r};return n&&(a.notes=n),this.hass.callWS(a)}async removeFromMealPlan(e){return this.hass.callWS({type:"recipe_manager/meal_plan/remove",entry_id:e})}async clearMealPlanWeek(e){return this.hass.callWS({type:"recipe_manager/meal_plan/clear",week_start:e})}async addIngredientsToShoppingList(e,t,i=null){let r=[];try{const t=await this.getSlmItems(e);r=(t?.items??[]).filter(e=>!e.checked)}catch{}const n=[];for(const a of t)try{const t=c(a),s=a.product_name??t,o=i?d(i,a,t):null,l=r.find(e=>e.name.toLowerCase().trim()===s.toLowerCase().trim());if(l&&o){const e=l.note?`${l.note}\n${o}`:o;await this.hass.callWS({type:"shopping_list_manager/items/update",item_id:l.id,note:e}),n.push({success:!0,name:s,merged:!0})}else{const t={type:"shopping_list_manager/items/add",list_id:e,name:s,quantity:p(a.amount),unit:a.unit||null};a.product_id&&(t.product_id=a.product_id),a.category_id&&(t.category_id=a.category_id),o&&(t.note=o),await this.hass.callWS(t),n.push({success:!0,name:s})}}catch(e){n.push({success:!1,name:a.name,error:e.message})}return n}async updateSlmItem(e,t){return this.hass.callWS({type:"shopping_list_manager/items/update",item_id:e,...t})}async getShoppingLists(){return this.hass.callWS({type:"shopping_list_manager/lists/get_all"})}async getSlmItems(e){return this.hass.callWS({type:"shopping_list_manager/items/get",list_id:e})}async checkSlmItem(e,t){return this.hass.callWS({type:"shopping_list_manager/items/check",item_id:e,checked:t})}async clearSlmChecked(e){return this.hass.callWS({type:"shopping_list_manager/items/clear_checked",list_id:e})}async deleteSlmItem(e){return this.hass.callWS({type:"shopping_list_manager/items/delete",item_id:e})}async addSlmItem(e,t){return this.hass.callWS({type:"shopping_list_manager/items/add",list_id:e,...t})}async getSlmCategories(){return this.hass.callWS({type:"shopping_list_manager/categories/get_all"})}async getSlmProductsByIds(e){return this.hass.callWS({type:"shopping_list_manager/products/get_by_ids",product_ids:e})}async getSlmProductSuggestions(e=20){return this.hass.callWS({type:"shopping_list_manager/products/suggestions",limit:e})}async searchSlmProducts(e,t=5){return this.hass.callWS({type:"shopping_list_manager/products/search",query:e,limit:t})}async getGlobalTimers(){return this.hass.callWS({type:"recipe_manager/global_timers/get"})}async addGlobalTimer(e){return this.hass.callWS({type:"recipe_manager/global_timers/add",...e})}async updateGlobalTimer(e,t){return this.hass.callWS({type:"recipe_manager/global_timers/update",timer_id:e,...t})}async deleteGlobalTimer(e){return this.hass.callWS({type:"recipe_manager/global_timers/delete",timer_id:e})}async importRecipeKeeper(e){return this.hass.callWS({type:"recipe_manager/import/recipe_keeper",html_content:e})}async uploadRecipeImage(e,t){return this.hass.callWS({type:"recipe_manager/recipes/upload_image",recipe_id:e,image_data:t})}}const u=["de","es","fr","it","nl","pt"],m=["de","en","es","fr","it","nl","pt"],{getLocale:g,setLocale:f}=e({sourceLocale:"en",targetLocales:u,loadLocale:e=>import(`./locales/${e}.js`)});async function b(e){const t=m.includes(e)?e:"en";t!==g()&&await f(t)}const v=new Set,_=new Set;let x=null;function y(){return"undefined"!=typeof navigator&&"wakeLock"in navigator}function w(){const e=!!x;_.forEach(t=>t(e))}async function k(){if(y()&&!x&&("undefined"==typeof document||"visible"===document.visibilityState))try{x=await navigator.wakeLock.request("screen"),x.addEventListener("release",()=>{x=null,w()}),w()}catch(e){console.warn("[RM] Wake Lock request failed:",e)}}async function $(){v.size>0?await k():await async function(){if(x){try{await x.release()}catch{}x=null,w()}}()}async function S(e){v.add(e),await $()}async function z(e){v.delete(e),await $()}"undefined"!=typeof document&&document.addEventListener("visibilitychange",()=>{"visible"===document.visibilityState&&v.size>0&&k()});class I extends t{static properties={recipes:{type:Array},allRecipes:{type:Array},tags:{type:Array},searchQuery:{type:String},activeTag:{type:String},columns:{type:Number},showFavourites:{type:Boolean},hideSidebar:{type:Boolean},scrollPos:{type:Number},recentRecipes:{type:Array},recentCount:{type:Number},_filterMode:{type:String},_starFilter:{type:Number},_sortByRating:{type:Boolean},_showRatingMenu:{type:Boolean},_selectedCourses:{type:Object},_selectedCategories:{type:Object},_selectedCollections:{type:Object},filterPreset:{type:Object}};constructor(){super(),this.recipes=[],this.allRecipes=[],this.tags=[],this.searchQuery="",this.activeTag=null,this.columns=3,this.showFavourites=!0,this.hideSidebar=!1,this.scrollPos=0,this.recentRecipes=[],this.recentCount=12,this._filterMode="all",this._starFilter=0,this._sortByRating=!1,this._showRatingMenu=!1,this._selectedCourses=new Set,this._selectedCategories=new Set,this._selectedCollections=new Set,this._lastScrollPos=0,this._hasRestoredScroll=!1,this.filterPreset=null}_toggleChip(e,t){const i="courses"===e?"_selectedCourses":"categories"===e?"_selectedCategories":"_selectedCollections",r=new Set(this[i]);r.has(t)?r.delete(t):r.add(t),this[i]=r}updated(e){if(e.has("filterPreset")&&this.filterPreset){const{filterMode:e,selectedValues:t}=this.filterPreset;this._filterMode=e,this._selectedCourses=new Set,this._selectedCategories=new Set,this._selectedCollections=new Set,"courses"===e&&(this._selectedCourses=new Set(t)),"categories"===e&&(this._selectedCategories=new Set(t)),"collections"===e&&(this._selectedCollections=new Set(t))}e.has("scrollPos")&&(this._hasRestoredScroll=!1),null==this.scrollPos||this._hasRestoredScroll||(this._hasRestoredScroll=!0,this.updateComplete.then(()=>{requestAnimationFrame(()=>{const e=this.shadowRoot?.querySelector(".grid-scroll");e&&(e.scrollTop=this.scrollPos)})}))}_handleSearchInput(e){this.dispatchEvent(new CustomEvent("rm-search",{detail:{query:e.target.value},bubbles:!0,composed:!0}))}_handleClearSearch(){this.dispatchEvent(new CustomEvent("rm-search",{detail:{query:""},bubbles:!0,composed:!0}))}_handleTagClick(e){this.dispatchEvent(new CustomEvent("rm-tag-filter",{detail:{tag:e},bubbles:!0,composed:!0}))}_handleOpenRecipe(e){this.dispatchEvent(new CustomEvent("rm-open-recipe",{detail:{recipe:e},bubbles:!0,composed:!0}))}_handleToggleFavourite(e,t){e.stopPropagation(),this.dispatchEvent(new CustomEvent("rm-toggle-favourite",{detail:{recipeId:t.id},bubbles:!0,composed:!0}))}_recipeMatchesTag(e,t){return!t||(e.tags?.includes(t)||e.courses?.includes(t)||e.categories?.includes(t)||e.collections?.includes(t))}_recipeMatchesSearch(e,t){const i=(t||"").trim().toLowerCase();return!i||(e.name?.toLowerCase().includes(i)||e.description?.toLowerCase().includes(i)||e.tags?.some(e=>e.toLowerCase().includes(i)))}_formatTime(e){if(!e)return null;if(e<60)return`${e}m`;const t=Math.floor(e/60),i=e%60;return i?`${t}h ${i}m`:`${t}h`}_getFilteredList(){const e=this._selectedCourses.size>0,t=this._selectedCategories.size>0,i=this._selectedCollections.size>0,r=e||t||i;let n;switch(n=r?this.allRecipes.filter(r=>{const n=!e||(r.courses||[]).some(e=>this._selectedCourses.has(e)),a=!t||(r.categories||[]).some(e=>this._selectedCategories.has(e)),s=!i||(r.collections||[]).some(e=>this._selectedCollections.has(e));return n&&a&&s&&this._recipeMatchesSearch(r,this.searchQuery)}):this.recipes,this._filterMode){case"favourites":n=this.allRecipes.filter(e=>e.is_favourite).filter(e=>!r||n.some(t=>t.id===e.id));break;case"recent":n=this.recentRecipes.slice(0,this.recentCount).filter(e=>!r||n.some(t=>t.id===e.id))}return this._starFilter>0&&(n=n.filter(e=>(e.rating||0)>=this._starFilter)),this._sortByRating&&(n=[...n].sort((e,t)=>(t.rating||0)-(e.rating||0))),n}get _allCourses(){const e=new Set;return this.allRecipes.forEach(t=>(t.courses||[]).forEach(t=>e.add(t))),[...e].sort()}get _coursecounts(){const e={};return this.allRecipes.forEach(t=>(t.courses||[]).forEach(t=>{e[t]=(e[t]||0)+1})),e}get _allCategories(){const e=new Set;return this.allRecipes.forEach(t=>(t.categories||[]).forEach(t=>e.add(t))),[...e].sort()}get _categorycounts(){const e={};return this.allRecipes.forEach(t=>(t.categories||[]).forEach(t=>{e[t]=(e[t]||0)+1})),e}get _allCollections(){const e=new Set;return this.allRecipes.forEach(t=>(t.collections||[]).forEach(t=>e.add(t))),[...e].sort()}get _collectioncounts(){const e={};return this.allRecipes.forEach(t=>(t.collections||[]).forEach(t=>{e[t]=(e[t]||0)+1})),e}_renderStars(e){const t=e||0;return i`
+import{c as e,i as t,b as i,m as r,s as a,a as n,A as s,E as o}from"./chunks/runtime-CL7dNL-L.js";const l=/^[½¼¾⅓⅔⅛⅜⅝⅞\d][\d.,/½¼¾⅓⅔⅛⅜⅝⅞\s]*\s*(?:tsp|tbsp|tablespoons?|teaspoons?|cups?|oz|lbs?|g|kg|ml|cl|dl|L|(?:milli|centi|deci)?lit(?:re|er)s?|kilo(?:gramme|gram)s?|(?:gramme|gram)s?|pints?|quarts?|gallons?|fl\.?\s*oz|cans?|bunches?|heads?|cloves?|slices?|pieces?|sheets?|pinch(?:es)?|dash(?:es)?|handfuls?|sprigs?|stalks?)\s*/i;function c(e){if(e.amount||e.unit)return e.name;return e.name.replace(l,"").trim()||e.name}function d(e,t,i){return`[RM] ${e} — ${function(e,t){return e.amount||e.unit?[e.amount,e.unit,t].filter(Boolean).join(" "):e.name}(t,i)}`}function p(e){if(!e)return 1;const t={"½":.5,"¼":.25,"¾":.75,"⅓":1/3,"⅔":2/3,"⅛":.125,"⅜":.375,"⅝":.625,"⅞":.875};let i=String(e).trim();for(const[e,r]of Object.entries(t))i=i.replace(e,String(r));const r=i.match(/^(\d+)\s+(\d+)\/(\d+)$/);if(r)return parseInt(r[1])+parseInt(r[2])/parseInt(r[3]);const a=i.match(/^(\d+)\/(\d+)$/);return a?parseInt(a[1])/parseInt(a[2]):parseFloat(i)||1}class h{constructor(e){this.hass=e}subscribe(e){return this.hass.connection.subscribeMessage(e,{type:"recipe_manager/subscribe"})}async getAllRecipes(){return this.hass.callWS({type:"recipe_manager/recipes/get_all"})}async getRecipe(e){return this.hass.callWS({type:"recipe_manager/recipes/get",recipe_id:e})}async scrapeRecipe(e){return this.hass.callWS({type:"recipe_manager/recipes/scrape",url:e})}async addRecipe(e){return this.hass.callWS({type:"recipe_manager/recipes/add",...e})}async updateRecipe(e,t){return this.hass.callWS({type:"recipe_manager/recipes/update",recipe_id:e,...t})}async deleteRecipe(e){return this.hass.callWS({type:"recipe_manager/recipes/delete",recipe_id:e})}async toggleFavourite(e){return this.hass.callWS({type:"recipe_manager/recipes/toggle_favourite",recipe_id:e})}async downloadRecipeImage(e,t){return this.hass.callWS({type:"recipe_manager/recipes/download_image",recipe_id:e,image_url:t})}async getTags(){return this.hass.callWS({type:"recipe_manager/tags/get_all"})}async getMealPlan(e){const t={type:"recipe_manager/meal_plan/get"};return e&&(t.week_start=e),this.hass.callWS(t)}async addToMealPlan(e,t,i,r=1,a=null){const n={type:"recipe_manager/meal_plan/add",recipe_id:e,date:t,meal_type:i,servings:r};return a&&(n.notes=a),this.hass.callWS(n)}async removeFromMealPlan(e){return this.hass.callWS({type:"recipe_manager/meal_plan/remove",entry_id:e})}async clearMealPlanWeek(e){return this.hass.callWS({type:"recipe_manager/meal_plan/clear",week_start:e})}async addIngredientsToShoppingList(e,t,i=null){let r=[];try{const t=await this.getSlmItems(e);r=(t?.items??[]).filter(e=>!e.checked)}catch{}const a=[];for(const n of t)try{const t=c(n),s=n.product_name??t,o=i?d(i,n,t):null,l=r.find(e=>e.name.toLowerCase().trim()===s.toLowerCase().trim());if(l&&o){const e=l.note?`${l.note}\n${o}`:o;await this.hass.callWS({type:"shopping_list_manager/items/update",item_id:l.id,note:e}),a.push({success:!0,name:s,merged:!0})}else{const t={type:"shopping_list_manager/items/add",list_id:e,name:s,quantity:p(n.amount),unit:n.unit||null};n.product_id&&(t.product_id=n.product_id),n.category_id&&(t.category_id=n.category_id),o&&(t.note=o),await this.hass.callWS(t),a.push({success:!0,name:s})}}catch(e){a.push({success:!1,name:n.name,error:e.message})}return a}async updateSlmItem(e,t){return this.hass.callWS({type:"shopping_list_manager/items/update",item_id:e,...t})}async getShoppingLists(){return this.hass.callWS({type:"shopping_list_manager/lists/get_all"})}async getSlmItems(e){return this.hass.callWS({type:"shopping_list_manager/items/get",list_id:e})}async checkSlmItem(e,t){return this.hass.callWS({type:"shopping_list_manager/items/check",item_id:e,checked:t})}async clearSlmChecked(e){return this.hass.callWS({type:"shopping_list_manager/items/clear_checked",list_id:e})}async deleteSlmItem(e){return this.hass.callWS({type:"shopping_list_manager/items/delete",item_id:e})}async addSlmItem(e,t){return this.hass.callWS({type:"shopping_list_manager/items/add",list_id:e,...t})}async getSlmCategories(){return this.hass.callWS({type:"shopping_list_manager/categories/get_all"})}async getSlmProductsByIds(e){return this.hass.callWS({type:"shopping_list_manager/products/get_by_ids",product_ids:e})}async getSlmProductSuggestions(e=20){return this.hass.callWS({type:"shopping_list_manager/products/suggestions",limit:e})}async searchSlmProducts(e,t=5){return this.hass.callWS({type:"shopping_list_manager/products/search",query:e,limit:t})}async getGlobalTimers(){return this.hass.callWS({type:"recipe_manager/global_timers/get"})}async addGlobalTimer(e){return this.hass.callWS({type:"recipe_manager/global_timers/add",...e})}async updateGlobalTimer(e,t){return this.hass.callWS({type:"recipe_manager/global_timers/update",timer_id:e,...t})}async deleteGlobalTimer(e){return this.hass.callWS({type:"recipe_manager/global_timers/delete",timer_id:e})}async importRecipeKeeper(e){return this.hass.callWS({type:"recipe_manager/import/recipe_keeper",html_content:e})}async uploadRecipeImage(e,t){return this.hass.callWS({type:"recipe_manager/recipes/upload_image",recipe_id:e,image_data:t})}}const u=["de","es","fr","it","nl","pt"],m=["de","en","es","fr","it","nl","pt"],{getLocale:g,setLocale:f}=e({sourceLocale:"en",targetLocales:u,loadLocale:e=>import(`./locales/${e}.js`)});async function b(e){const t=m.includes(e)?e:"en";t!==g()&&await f(t)}const v=new Set,_=new Set;let x=null;function y(){return"undefined"!=typeof navigator&&"wakeLock"in navigator}function w(){const e=!!x;_.forEach(t=>t(e))}async function k(){if(y()&&!x&&("undefined"==typeof document||"visible"===document.visibilityState))try{x=await navigator.wakeLock.request("screen"),x.addEventListener("release",()=>{x=null,w()}),w()}catch(e){console.warn("[RM] Wake Lock request failed:",e)}}async function $(){v.size>0?await k():await async function(){if(x){try{await x.release()}catch{}x=null,w()}}()}async function S(e){v.add(e),await $()}async function z(e){v.delete(e),await $()}"undefined"!=typeof document&&document.addEventListener("visibilitychange",()=>{"visible"===document.visibilityState&&v.size>0&&k()});class I extends t{static properties={recipes:{type:Array},allRecipes:{type:Array},tags:{type:Array},searchQuery:{type:String},activeTag:{type:String},columns:{type:Number},showFavourites:{type:Boolean},hideSidebar:{type:Boolean},scrollPos:{type:Number},recentRecipes:{type:Array},recentCount:{type:Number},_filterMode:{type:String},_starFilter:{type:Number},_sortByRating:{type:Boolean},_showRatingMenu:{type:Boolean},_selectedCourses:{type:Object},_selectedCategories:{type:Object},_selectedCollections:{type:Object},filterPreset:{type:Object}};constructor(){super(),this.recipes=[],this.allRecipes=[],this.tags=[],this.searchQuery="",this.activeTag=null,this.columns=3,this.showFavourites=!0,this.hideSidebar=!1,this.scrollPos=0,this.recentRecipes=[],this.recentCount=12,this._filterMode="all",this._starFilter=0,this._sortByRating=!1,this._showRatingMenu=!1,this._selectedCourses=new Set,this._selectedCategories=new Set,this._selectedCollections=new Set,this._lastScrollPos=0,this._hasRestoredScroll=!1,this.filterPreset=null}_toggleChip(e,t){const i="courses"===e?"_selectedCourses":"categories"===e?"_selectedCategories":"_selectedCollections",r=new Set(this[i]);r.has(t)?r.delete(t):r.add(t),this[i]=r}updated(e){if(e.has("filterPreset")&&this.filterPreset){const{filterMode:e,selectedValues:t}=this.filterPreset;this._filterMode=e,this._selectedCourses=new Set,this._selectedCategories=new Set,this._selectedCollections=new Set,"courses"===e&&(this._selectedCourses=new Set(t)),"categories"===e&&(this._selectedCategories=new Set(t)),"collections"===e&&(this._selectedCollections=new Set(t))}e.has("scrollPos")&&(this._hasRestoredScroll=!1),null==this.scrollPos||this._hasRestoredScroll||(this._hasRestoredScroll=!0,this.updateComplete.then(()=>{requestAnimationFrame(()=>{const e=this.shadowRoot?.querySelector(".grid-scroll");e&&(e.scrollTop=this.scrollPos)})}))}_handleSearchInput(e){this.dispatchEvent(new CustomEvent("rm-search",{detail:{query:e.target.value},bubbles:!0,composed:!0}))}_handleClearSearch(){this.dispatchEvent(new CustomEvent("rm-search",{detail:{query:""},bubbles:!0,composed:!0}))}_handleTagClick(e){this.dispatchEvent(new CustomEvent("rm-tag-filter",{detail:{tag:e},bubbles:!0,composed:!0}))}_handleOpenRecipe(e){this.dispatchEvent(new CustomEvent("rm-open-recipe",{detail:{recipe:e},bubbles:!0,composed:!0}))}_handleToggleFavourite(e,t){e.stopPropagation(),this.dispatchEvent(new CustomEvent("rm-toggle-favourite",{detail:{recipeId:t.id},bubbles:!0,composed:!0}))}_recipeMatchesTag(e,t){return!t||(e.tags?.includes(t)||e.courses?.includes(t)||e.categories?.includes(t)||e.collections?.includes(t))}_recipeMatchesSearch(e,t){const i=(t||"").trim().toLowerCase();return!i||(e.name?.toLowerCase().includes(i)||e.description?.toLowerCase().includes(i)||e.tags?.some(e=>e.toLowerCase().includes(i)))}_formatTime(e){if(!e)return null;if(e<60)return`${e}m`;const t=Math.floor(e/60),i=e%60;return i?`${t}h ${i}m`:`${t}h`}_getFilteredList(){const e=this._selectedCourses.size>0,t=this._selectedCategories.size>0,i=this._selectedCollections.size>0,r=e||t||i;let a;switch(a=r?this.allRecipes.filter(r=>{const a=!e||(r.courses||[]).some(e=>this._selectedCourses.has(e)),n=!t||(r.categories||[]).some(e=>this._selectedCategories.has(e)),s=!i||(r.collections||[]).some(e=>this._selectedCollections.has(e));return a&&n&&s&&this._recipeMatchesSearch(r,this.searchQuery)}):this.recipes,this._filterMode){case"favourites":a=this.allRecipes.filter(e=>e.is_favourite).filter(e=>!r||a.some(t=>t.id===e.id));break;case"recent":a=this.recentRecipes.slice(0,this.recentCount).filter(e=>!r||a.some(t=>t.id===e.id))}return this._starFilter>0&&(a=a.filter(e=>(e.rating||0)>=this._starFilter)),this._sortByRating&&(a=[...a].sort((e,t)=>(t.rating||0)-(e.rating||0))),a}get _allCourses(){const e=new Set;return this.allRecipes.forEach(t=>(t.courses||[]).forEach(t=>e.add(t))),[...e].sort()}get _coursecounts(){const e={};return this.allRecipes.forEach(t=>(t.courses||[]).forEach(t=>{e[t]=(e[t]||0)+1})),e}get _allCategories(){const e=new Set;return this.allRecipes.forEach(t=>(t.categories||[]).forEach(t=>e.add(t))),[...e].sort()}get _categorycounts(){const e={};return this.allRecipes.forEach(t=>(t.categories||[]).forEach(t=>{e[t]=(e[t]||0)+1})),e}get _allCollections(){const e=new Set;return this.allRecipes.forEach(t=>(t.collections||[]).forEach(t=>e.add(t))),[...e].sort()}get _collectioncounts(){const e={};return this.allRecipes.forEach(t=>(t.collections||[]).forEach(t=>{e[t]=(e[t]||0)+1})),e}_renderStars(e){const t=e||0;return i`
       <div class="card-stars">
         ${[1,2,3,4,5].map(e=>i`<span class="card-star ${e<=t?"filled":""}">${e<=t?"★":"☆"}</span>`)}
       </div>
@@ -48,16 +48,16 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
         ${[0,1,2,3,4,5].map(e=>i`
           <button class="rating-menu-item ${this._starFilter===e?"active":""}"
             @click=${()=>{this._starFilter=e,this._showRatingMenu=!1}}>
-            ${r(0===e?"All ratings":n`${"★".repeat(e)}${"☆".repeat(5-e)} ${e}+`)}
+            ${r(0===e?"All ratings":a`${"★".repeat(e)}${"☆".repeat(5-e)} ${e}+`)}
           </button>
         `)}
         <div class="rating-menu-section" style="margin-top:6px">${r("Sort")}</div>
         <button class="rating-menu-item ${this._sortByRating?"active":""}"
           @click=${()=>{this._sortByRating=!this._sortByRating,this._showRatingMenu=!1}}>
-          ${r(n`${this._sortByRating?"✓ ":""}Sort by rating`)}
+          ${r(a`${this._sortByRating?"✓ ":""}Sort by rating`)}
         </button>
       </div>
-    `}render(){const e=this._getFilteredList(),t="all"===this._filterMode&&this.showFavourites&&!this.activeTag&&!this.searchQuery&&!this._starFilter&&!this._sortByRating,a=t?e.filter(e=>e.is_favourite):[],s=t&&a.length?e.filter(e=>!e.is_favourite):e,o=`grid-template-columns: var(--rm-grid-columns, repeat(${this.columns}, minmax(0, 1fr)));`,l=this._starFilter>0||this._sortByRating;return i`
+    `}render(){const e=this._getFilteredList(),t="all"===this._filterMode&&this.showFavourites&&!this.activeTag&&!this.searchQuery&&!this._starFilter&&!this._sortByRating,n=t?e.filter(e=>e.is_favourite):[],s=t&&n.length?e.filter(e=>!e.is_favourite):e,o=`grid-template-columns: var(--rm-grid-columns, repeat(${this.columns}, minmax(0, 1fr)));`,l=this._starFilter>0||this._sortByRating;return i`
       <div class="grid-container" @click=${()=>{this._showRatingMenu&&(this._showRatingMenu=!1)}}>
         <!-- Search bar — only shown on narrow (sidebar-less) view -->
         ${this.hideSidebar?"":i`
@@ -84,14 +84,14 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
         ${this.hideSidebar?i`
           <div class="filter-tabs-row">
             <div class="filter-tabs">
-              ${[["all","mdi:view-grid",r("All"),null],["courses","mdi:silverware-fork-knife",r("Courses"),"_selectedCourses"],["categories","mdi:tag-multiple-outline",r("Categories"),"_selectedCategories"],["collections","mdi:folder-multiple-outline",r("Collections"),"_selectedCollections"],["favourites","mdi:heart-outline",r("Favourites"),null],["recent","mdi:history",r("Recent"),null]].map(([e,t,r,n])=>i`
+              ${[["all","mdi:view-grid",r("All"),null],["courses","mdi:silverware-fork-knife",r("Courses"),"_selectedCourses"],["categories","mdi:tag-multiple-outline",r("Categories"),"_selectedCategories"],["collections","mdi:folder-multiple-outline",r("Collections"),"_selectedCollections"],["favourites","mdi:heart-outline",r("Favourites"),null],["recent","mdi:history",r("Recent"),null]].map(([e,t,r,a])=>i`
                 <button
                   class="filter-tab ${this._filterMode===e?"active":""}"
                   @click=${()=>{this._filterMode=e,"all"===e&&(this._selectedCourses=new Set,this._selectedCategories=new Set,this._selectedCollections=new Set)}}
                 >
                   <ha-icon icon="${t}"></ha-icon>
                   <span>${r}</span>
-                  ${n&&this[n]?.size>0?i`<span class="tab-badge"></span>`:""}
+                  ${a&&this[a]?.size>0?i`<span class="tab-badge"></span>`:""}
                 </button>
               `)}
             </div>
@@ -163,7 +163,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
         <!-- Active filter hint -->
         ${l?i`
           <div class="active-filter-bar">
-            ${this._starFilter>0?i`<span>${r(n`⭐ ${this._starFilter}+ stars`)}</span>`:""}
+            ${this._starFilter>0?i`<span>${r(a`⭐ ${this._starFilter}+ stars`)}</span>`:""}
             ${this._sortByRating?i`<span>${r("Sorted by rating")}</span>`:""}
             <button class="clear-filter-btn" @click=${()=>{this._starFilter=0,this._sortByRating=!1}}>
               <ha-icon icon="mdi:close"></ha-icon> ${r("Clear")}
@@ -176,13 +176,13 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
           ${0===e.length?i`
             <div class="empty-state">
               <ha-icon icon="mdi:pot-steam-outline"></ha-icon>
-              <p>${this.searchQuery||this.activeTag?r("No matching recipes"):this._starFilter>0?r(n`No recipes with ${this._starFilter}+ stars`):"favourites"===this._filterMode?r("No favourites yet — heart a recipe!"):"recent"===this._filterMode?r("No recently viewed recipes yet."):r("No recipes yet — add one!")}</p>
+              <p>${this.searchQuery||this.activeTag?r("No matching recipes"):this._starFilter>0?r(a`No recipes with ${this._starFilter}+ stars`):"favourites"===this._filterMode?r("No favourites yet — heart a recipe!"):"recent"===this._filterMode?r("No recently viewed recipes yet."):r("No recipes yet — add one!")}</p>
             </div>
           `:i`
-            ${t&&a.length?i`
+            ${t&&n.length?i`
               <div class="section-label">${r("Favourites")}</div>
               <div class="recipe-grid" style=${o}>
-                ${a.map(e=>this._renderRecipeCard(e))}
+                ${n.map(e=>this._renderRecipeCard(e))}
               </div>
               ${s.length?i`<div class="section-label">${r("All Recipes")}</div>`:""}
             `:""}
@@ -193,7 +193,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
           `}
         </div>
       </div>
-    `}static styles=a`
+    `}static styles=n`
     :host { display: block; height: 100%; position: relative; }
 
     .grid-container {
@@ -219,7 +219,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
     .search-icon { color: var(--rm-text-secondary, #8e8e93); --mdc-icon-size: 18px; }
     .search-input {
       flex: 1; background: none; border: none; outline: none;
-      color: var(--rm-text, #e5e5ea); font-size: 14px; padding: 9px 0;
+      color: var(--rm-text, #e5e5ea); font-size: calc(14px * var(--rm-font-scale, 1)); padding: 9px 0;
     }
     .search-input::placeholder { color: var(--rm-text-secondary, #8e8e93); }
     .clear-btn {
@@ -250,7 +250,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
     .filter-tab {
       display: flex; align-items: center; gap: 5px;
       background: none; border: none; border-radius: 8px;
-      padding: 6px 12px; font-size: 13px; font-weight: 500;
+      padding: 6px 12px; font-size: calc(13px * var(--rm-font-scale, 1)); font-weight: 500;
       color: var(--rm-text-secondary, #8e8e93);
       cursor: pointer; white-space: nowrap;
       transition: background 0.12s, color 0.12s;
@@ -302,14 +302,14 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       padding: 4px 0;
     }
     .rating-menu-section {
-      font-size: 10px; font-weight: 700;
+      font-size: calc(10px * var(--rm-font-scale, 1)); font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.08em;
       color: var(--rm-text-muted); padding: 8px 14px 4px;
     }
     .rating-menu-item {
       display: block; width: 100%;
       background: none; border: none; text-align: left;
-      padding: 8px 14px; font-size: 13px; cursor: pointer;
+      padding: 8px 14px; font-size: calc(13px * var(--rm-font-scale, 1)); cursor: pointer;
       color: var(--rm-text-secondary); transition: background 0.12s;
     }
     .rating-menu-item:hover { background: var(--rm-accent-soft); color: var(--rm-text); }
@@ -319,14 +319,14 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
     .active-filter-bar {
       display: flex; align-items: center; gap: 8px;
       padding: 4px 14px;
-      font-size: 12px; color: var(--rm-accent);
+      font-size: calc(12px * var(--rm-font-scale, 1)); color: var(--rm-accent);
       background: var(--rm-accent-soft);
       flex-shrink: 0;
     }
     .clear-filter-btn {
       margin-left: auto; background: none; border: none;
       display: flex; align-items: center; gap: 3px;
-      color: var(--rm-text-secondary); font-size: 12px; cursor: pointer;
+      color: var(--rm-text-secondary); font-size: calc(12px * var(--rm-font-scale, 1)); cursor: pointer;
     }
     .clear-filter-btn ha-icon { --mdc-icon-size: 14px; }
 
@@ -345,7 +345,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       display: inline-flex; align-items: center; gap: 5px;
       background: var(--rm-bg-elevated); border: 1px solid var(--rm-border);
       border-radius: 20px; color: var(--rm-text-secondary);
-      font-size: 12px; padding: 4px 8px 4px 12px; cursor: pointer;
+      font-size: calc(12px * var(--rm-font-scale, 1)); padding: 4px 8px 4px 12px; cursor: pointer;
       white-space: nowrap; transition: all 0.15s;
     }
     .sub-chip.active {
@@ -354,7 +354,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
     .sub-chip-count {
       display: inline-flex; align-items: center; justify-content: center;
       background: var(--rm-accent); color: #fff;
-      border-radius: 10px; font-size: 10px; font-weight: 700;
+      border-radius: 10px; font-size: calc(10px * var(--rm-font-scale, 1)); font-weight: 700;
       padding: 1px 5px; min-width: 16px; line-height: 1.4;
     }
 
@@ -367,7 +367,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
     .tag-btn {
       background: var(--rm-bg-elevated); border: 1px solid var(--rm-border);
       border-radius: 20px; color: var(--rm-text-secondary);
-      font-size: 12px; padding: 4px 10px; cursor: pointer;
+      font-size: calc(12px * var(--rm-font-scale, 1)); padding: 4px 10px; cursor: pointer;
       white-space: nowrap; transition: all 0.15s;
     }
     .tag-btn.active {
@@ -383,7 +383,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
     }
 
     .section-label {
-      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      font-size: calc(11px * var(--rm-font-scale, 1)); font-weight: 600; text-transform: uppercase;
       letter-spacing: 0.08em; color: var(--rm-text-secondary);
       margin: 8px 0 6px;
     }
@@ -431,7 +431,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
 
     .recipe-info { padding: 8px 10px 10px; }
     .recipe-name {
-      margin: 0 0 4px; font-size: 14px; font-weight: 600;
+      margin: 0 0 4px; font-size: calc(14px * var(--rm-font-scale, 1)); font-weight: 600;
       color: var(--rm-text); overflow: hidden; text-overflow: ellipsis;
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
     }
@@ -441,7 +441,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       display: flex; gap: 1px; margin-bottom: 5px;
     }
     .card-star {
-      font-size: 14px; line-height: 1;
+      font-size: calc(14px * var(--rm-font-scale, 1)); line-height: 1;
       color: var(--rm-border, rgba(200,150,0,0.25));
       -webkit-text-stroke: 1px rgba(200,150,0,0.5);
     }
@@ -453,7 +453,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
     .recipe-meta { display: flex; flex-wrap: wrap; gap: 4px; }
     .meta-chip {
       display: inline-flex; align-items: center; gap: 3px;
-      font-size: 11px; color: var(--rm-text-secondary);
+      font-size: calc(11px * var(--rm-font-scale, 1)); color: var(--rm-text-secondary);
       background: rgba(128,128,128,0.08); border-radius: 6px; padding: 2px 6px;
     }
     .meta-chip ha-icon { --mdc-icon-size: 12px; }
@@ -466,7 +466,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       color: var(--rm-text-secondary); text-align: center;
     }
     .empty-state ha-icon { --mdc-icon-size: 56px; opacity: 0.4; }
-    .empty-state p { margin: 0; font-size: 15px; }
+    .empty-state p { margin: 0; font-size: calc(15px * var(--rm-font-scale, 1)); }
   `}try{customElements.define("rm-recipe-grid",I)}catch{}
 /**
  * @license
@@ -477,7 +477,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */class A extends C{constructor(e){if(super(e),this.it=s,e.type!==T)throw Error(this.constructor.directiveName+"() can only be used in child bindings")}render(e){if(e===s||null==e)return this._t=void 0,this.it=e;if(e===o)return e;if("string"!=typeof e)throw Error(this.constructor.directiveName+"() called with a non-string value");if(e===this.it)return this._t;this.it=e;const t=[e];return t.raw=t,this._t={_$litType$:this.constructor.resultType,strings:t,values:[]}}}A.directiveName="unsafeHTML",A.resultType=1;const R=(e=>(...t)=>({_$litDirective$:e,values:t}))(A),E={"½":"1/2","⅓":"1/3","⅔":"2/3","¼":"1/4","¾":"3/4","⅕":"1/5","⅖":"2/5","⅗":"3/5","⅘":"4/5","⅙":"1/6","⅚":"5/6","⅛":"1/8","⅜":"3/8","⅝":"5/8","⅞":"7/8"};function D(e){let t;if(e=e.trim(),t=/^(\d+) (\d+)\/(\d+)$/.exec(e)){const e=+t[3];return e?+t[1]+ +t[2]/e:null}if(t=/^(\d+)\/(\d+)$/.exec(e)){const e=+t[2];return e?+t[1]/e:null}return/^(\d+([.,]\d+)?|[.,]\d+)$/.test(e)?parseFloat(e.replace(",",".")):null}function F(e){if(null==e)return null;const t=String(e);if(!t.trim())return null;const i=function(e){let t=String(e).trim();return t=t.replace(/[–—−]/g,"-"),t=t.replace(/([0-9])?([½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞])/g,(e,t,i)=>(t?`${t} `:"")+E[i]),t.replace(/\s+/g," ")}(t),r=D(i),n={comma:/\d,\d|^,/.test(i),dot:/\d\.\d|^\./.test(i)};if(null!==r)return{values:[r],...n};const a=i.split(/\s*(?:-|\bbis\b|\bto\b)\s*/i);if(2===a.length){const e=D(a[0]),t=D(a[1]);if(null!==e&&null!==t)return{values:[e,t],...n}}return null}function L(e,t=!1){if(!isFinite(e))return"";let i;return i=Math.abs(e-Math.round(e))<1e-6||e>=100?String(Math.round(e)):e>=10?e.toFixed(1).replace(/\.0$/,""):e.toFixed(2).replace(/0+$/,"").replace(/\.$/,""),t?i.replace(".",","):i}function P(e,t){if(!e)return e;if(1===t)return e;const i=F(e);if(!i)return e;const r=function(e){if(e.comma)return!0;if(e.dot)return!1;const t="undefined"!=typeof navigator&&navigator.language||"";return/^(de|fr|es|it|nl|pt)/i.test(t)}(i);return i.values.map(e=>L(e*t,r)).join("-")}function M(e){const t=F(e);return t?t.values.reduce((e,t)=>e+t,0)/t.values.length:null}const O={g:["g",1],gr:["g",1],gramm:["g",1],kg:["g",1e3],oz:["g",28.3495],lb:["g",453.592],lbs:["g",453.592],ml:["ml",1],cl:["ml",10],dl:["ml",100],l:["ml",1e3],liter:["ml",1e3],"fl oz":["ml",29.5735],cup:["ml",250],cups:["ml",250]};function B(e,t){if((e=Math.round(e))>=1e4){const i="ml"===t?"l":"kg",r=e/1e3;return`${(Math.round(100*r)/100).toString().replace(".",",")} ${i}`}return`${Math.round(e)} ${t}`}const j="recipe-detail";function N(e){return(t=e,t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")).replace(/\*\*\*(.+?)\*\*\*/g,"<strong><em>$1</em></strong>").replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\*(.+?)\*/g,"<em>$1</em>").replace(/_(.+?)_/g,"<em>$1</em>").replace(/`(.+?)`/g,"<code>$1</code>").replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');var t}function U(e){if(!e)return"";const t=e.split("\n"),i=[];let r=null;const n=()=>{r&&(i.push(`</${r}>`),r=null)};for(const e of t){const t=e.match(/^###\s+(.+)/);if(t){n(),i.push(`<h3>${N(t[1])}</h3>`);continue}const a=e.match(/^##\s+(.+)/);if(a){n(),i.push(`<h2>${N(a[1])}</h2>`);continue}const s=e.match(/^#\s+(.+)/);if(s){n(),i.push(`<h1>${N(s[1])}</h1>`);continue}const o=e.match(/^[-*]\s+(.+)/);if(o){"ul"!==r&&(n(),i.push("<ul>"),r="ul"),i.push(`<li>${N(o[1])}</li>`);continue}const l=e.match(/^\d+\.\s+(.+)/);if(l){"ol"!==r&&(n(),i.push("<ol>"),r="ol"),i.push(`<li>${N(l[1])}</li>`);continue}e.match(/^---+$/)?(n(),i.push("<hr>")):(n(),""===e.trim()?i.push('<p class="md-gap"></p>'):i.push(`<p>${N(e)}</p>`))}return n(),i.join("")}const W=[{key:"calories",label:r("Calories"),unit:"kcal",bold:!0},{key:"fat",label:r("Total Fat"),unit:"g"},{key:"saturated_fat",label:r("Saturated Fat"),unit:"g",indent:!0},{key:"cholesterol",label:r("Cholesterol"),unit:"mg"},{key:"sodium",label:r("Sodium"),unit:"mg"},{key:"carbohydrates",label:r("Total Carbohydrate"),unit:"g"},{key:"fiber",label:r("Dietary Fiber"),unit:"g",indent:!0},{key:"sugar",label:r("Total Sugars"),unit:"g",indent:!0},{key:"protein",label:r("Protein"),unit:"g"}],Z=/(\d+\s*(?:hours?|hrs?)\s*(?:and\s*)?\d*\s*(?:minutes?|mins?)?|\d+\s*(?:minutes?|mins?|seconds?|secs?|hours?|hrs?))/gi;function H(e){const t=e.toLowerCase();let i=0;const r=t.match(/(\d+)\s*h(?:ours?|rs?)?/);r&&(i+=3600*parseInt(r[1]));const n=t.match(/(\d+)\s*m(?:in(?:utes?)?)?(?!\s*l)/);n&&(i+=60*parseInt(n[1]));const a=t.match(/(\d+)\s*s(?:ec(?:onds?)?)?/);if(a&&(i+=parseInt(a[1])),!i){const e=t.match(/^(\d+)$/);e&&(i=60*parseInt(e[1]))}return i||0}const q={calories:{label:r("Calories"),val:2e3,unit:"kcal"},fat:{label:r("Total Fat"),val:65,unit:"g"},saturated_fat:{label:r("Saturated Fat"),val:20,unit:"g"},cholesterol:{label:r("Cholesterol"),val:300,unit:"mg"},sodium:{label:r("Sodium"),val:2300,unit:"mg"},carbohydrates:{label:r("Total Carbohydrate"),val:300,unit:"g"},fiber:{label:r("Dietary Fiber"),val:28,unit:"g"},sugar:{label:r("Added Sugars"),val:50,unit:"g"},protein:{label:r("Protein"),val:50,unit:"g"}},V={oz:{factor:28.3495,to:"g",toFull:"g"},lb:{factor:453.592,to:"g",toFull:"g",thresholdKg:500},cup:{factor:250,to:"ml",toFull:"ml"},cups:{factor:250,to:"ml",toFull:"ml"},"fl oz":{factor:29.5735,to:"ml",toFull:"ml"},pt:{factor:473.176,to:"ml",toFull:"ml"},qt:{factor:946.353,to:"ml",toFull:"ml"}};class G extends t{static properties={recipe:{type:Object},api:{type:Object},shoppingLists:{type:Array},slmAvailable:{type:Boolean},settings:{type:Object},wide:{type:Boolean},_editing:{type:Boolean},_editData:{type:Object},_servingMult:{type:Number},_editingTotal:{type:Boolean},_confirmSaveMult:{type:Boolean},_savingMult:{type:Boolean},_activeTab:{type:String},_showShoppingPicker:{type:Boolean},_selectedListId:{type:String},_checkedIngredients:{type:Object},_shoppingAdding:{type:Boolean},_shoppingResult:{type:String},_shoppingReview:{type:Array},_confirmDelete:{type:Boolean},_downloading:{type:Boolean},_photoUrlInput:{type:String},_addingPhotoUrl:{type:Boolean},_metricMode:{type:Boolean},_wakeActive:{type:Boolean},_completedSteps:{type:Object},_doneIngredients:{type:Object},_editIngInput:{type:String},_editStepInput:{type:String},_nutritionExpanded:{type:Boolean},_dragIngOver:{type:Number},_dragStepOver:{type:Number},_editImageUploading:{type:Boolean},_slideIdx:{type:Number},allTags:{type:Array},allCourses:{type:Array},allCategories:{type:Array},allCollections:{type:Array},_tagPickerField:{type:String},_tagPickerInput:{type:String},_editIngEdit:{type:Object}};constructor(){super(),this.recipe=null,this.api=null,this.shoppingLists=[],this.slmAvailable=!1,this.settings={},this.wide=!1,this._editing=!1,this._editData={},this._servingMult=1,this._editingTotal=!1,this._confirmSaveMult=!1,this._savingMult=!1,this._activeTab="ingredients",this._showShoppingPicker=!1,this._selectedListId="",this._checkedIngredients=null,this._shoppingAdding=!1,this._shoppingResult=null,this._shoppingReview=null,this._confirmDelete=!1,this._downloading=!1,this._photoUrlInput="",this._addingPhotoUrl=!1,this._metricMode="metric"===this.settings?.unitSystem,this._wakeActive=!1,this._completedSteps=new Set,this._doneIngredients=new Set,this._editIngInput="",this._editStepInput="",this._nutritionExpanded=!1,this._dragIngOver=-1,this._dragStepOver=-1,this._dragIngFrom=-1,this._dragStepFrom=-1,this._editImageUploading=!1,this._slideIdx=0,this.allTags=[],this.allCourses=[],this.allCategories=[],this.allCollections=[],this._tagPickerField=null,this._tagPickerInput="",this._editIngEdit=null,this._slideTimer=null,this._slideTouchStartX=null,this._wakeLockTimeout=null,this._wakeLockUnsubscribeFn=null}connectedCallback(){var e;super.connectedCallback(),this._wakeLockUnsubscribeFn=(e=e=>{this._wakeActive=e},_.add(e),()=>_.delete(e))}disconnectedCallback(){super.disconnectedCallback(),this._releaseWakeLock(),this._wakeLockUnsubscribeFn?.(),this._wakeLockUnsubscribeFn=null,this._stopSlideTimer()}async _requestWakeLock(){this._wakeLockTimeout&&(clearTimeout(this._wakeLockTimeout),this._wakeLockTimeout=null),await S(j);const e=this.settings?.wakeLockDuration??60;this._wakeLockTimeout=setTimeout(()=>this._releaseWakeLock(),6e4*e)}async _releaseWakeLock(){this._wakeLockTimeout&&(clearTimeout(this._wakeLockTimeout),this._wakeLockTimeout=null),await z(j)}updated(e){if(e.has("recipe")&&!this.recipe&&(this._servingMult=1,this._editingTotal=!1,this._confirmSaveMult=!1),e.has("recipe")&&this.recipe){const t=e.get("recipe"),i=!t||t.id!==this.recipe.id;this._servingMult=1,this._editingTotal=!1,this._confirmSaveMult=!1,i&&(this._editing=!1,this._confirmDelete=!1,this._shoppingResult=null,this._shoppingReview=null,this._showShoppingPicker=!1,this._checkedIngredients=null,this._photoUrlInput="",this._metricMode="metric"===this.settings?.unitSystem,this._completedSteps=new Set,this._doneIngredients=new Set),this._slideIdx=0,this._startSlideTimer()}e.has("settings")&&this._startSlideTimer(),(e.has("recipe")||e.has("settings"))&&this.recipe&&(this.settings?.keepScreenOn?this._requestWakeLock():this._releaseWakeLock()),e.has("recipe")&&!this.recipe&&this._releaseWakeLock(),e.has("shoppingLists")&&this.shoppingLists.length&&!this._selectedListId&&(this._selectedListId=this.shoppingLists[0]?.id??"")}_formatTime(e){if(!e)return null;if(e<60)return r(n`${e} min`);const t=Math.floor(e/60),i=e%60;return r(i?n`${t}h ${i}m`:n`${t}h`)}_scaleAmount(e){return P(e,this._servingMult)}_baseTotal(){const e=this.recipe,t=function(e){const t=(e||[]).filter(e=>e&&!e.is_heading&&!(e.name||"").startsWith("#"));if(!t.length)return null;let i=0,r=0,n=0,a=0;for(const e of t){const t=O[(e.unit||"").toLowerCase().trim()],s=M(e.amount);if(!t||null===s)continue;const o=s*t[1];i+=o,"g"===t[0]?n+=o:a+=o,r++}return!r||i<=0?null:{total:i,unit:a>n?"ml":"g",share:r/t.length}}(e?.ingredients);if(!t)return null;return!/^\s*(gesamt|total|yield|ergibt|menge)/i.test(e.servings_text||"")&&t.share<.8?null:t}_servesText(){const e=this.recipe,t=this._baseTotal(),i=e.servings_text||"";if(t&&/^\s*gesamt/i.test(i)){return`${i.replace(/\d[\s\S]*$/,"")}${B(t.total*this._servingMult,t.unit)}`}return i||e.servings}_onSaveMultClick(){if(!this._confirmSaveMult)return this._confirmSaveMult=!0,clearTimeout(this._confirmSaveTimer),void(this._confirmSaveTimer=setTimeout(()=>{this._confirmSaveMult=!1},4e3));this._saveScaledRecipe()}_saveScaledRecipe(){const e=this.recipe,t=this._servingMult;if(!e||1===t)return;clearTimeout(this._confirmSaveTimer);const i=this._baseTotal(),r={ingredients:(e.ingredients||[]).map(e=>e.is_heading||e.name?.startsWith("#")||!e.amount?e:{...e,amount:P(e.amount,t)})};if(i&&/^\s*gesamt/i.test(e.servings_text||""))r.servings_text=this._servesText();else{e.servings&&(r.servings=Math.max(1,Math.round(e.servings*t)));const i=/^(\s*)(\d+(?:[.,]\d+)?)(.*)$/.exec(e.servings_text||"");i&&(r.servings_text=`${i[1]}${P(i[2],t)}${i[3]}`)}this._savingMult=!0,this._confirmSaveMult=!1,this.dispatchEvent(new CustomEvent("rm-update-recipe",{detail:{recipeId:e.id,data:r},bubbles:!0,composed:!0})),setTimeout(()=>{this._savingMult=!1},1500)}_startTotalEdit(){this._editingTotal=!0,this.updateComplete.then(()=>{const e=this.shadowRoot?.querySelector(".total-input");e&&(e.focus(),e.select())})}_commitTotal(e){const t=this._baseTotal();if(this._editingTotal=!1,!t)return;const i=F(e.target.value),r=i?i.values[0]:null;if(!r||r<=0)return;const n=r/t.total;this._servingMult=Math.min(100,Math.max(.01,n))}_startEdit(){const e=this.recipe.nutrition||{};this._editData={name:this.recipe.name||"",description:this.recipe.description||"",source_url:this.recipe.source_url||"",servings:this.recipe.servings||"",prep_time:this.recipe.prep_time||"",cook_time:this.recipe.cook_time||"",tags:[...this.recipe.tags||[]],courses:[...this.recipe.courses||[]],categories:[...this.recipe.categories||[]],collections:[...this.recipe.collections||[]],notes:this.recipe.notes||"",rating:this.recipe.rating||0,image_url:this.recipe.image_url||"",photos:[...this.recipe.photos||[]],ingredients:[...this.recipe.ingredients||[]],instructions:[...this.recipe.instructions||[]],cal:e.calories||"",fat:e.fat||"",satf:e.saturated_fat||"",chol:e.cholesterol||"",sod:e.sodium||"",carb:e.carbohydrates||"",fib:e.fiber||"",sug:e.sugar||"",prot:e.protein||""},this._editing=!0}_cancelEdit(){this._editing=!1,this._editData={}}_handleEditField(e,t){this._editData={...this._editData,[e]:t}}_renderListPicker(e,t,a){const s=this._editData[e]||[],o=this._tagPickerField===e,l=(a||[]).filter(e=>!s.includes(e)),c=o?this._tagPickerInput:"";return i`
+ */class A extends C{constructor(e){if(super(e),this.it=s,e.type!==T)throw Error(this.constructor.directiveName+"() can only be used in child bindings")}render(e){if(e===s||null==e)return this._t=void 0,this.it=e;if(e===o)return e;if("string"!=typeof e)throw Error(this.constructor.directiveName+"() called with a non-string value");if(e===this.it)return this._t;this.it=e;const t=[e];return t.raw=t,this._t={_$litType$:this.constructor.resultType,strings:t,values:[]}}}A.directiveName="unsafeHTML",A.resultType=1;const R=(e=>(...t)=>({_$litDirective$:e,values:t}))(A),E={"½":"1/2","⅓":"1/3","⅔":"2/3","¼":"1/4","¾":"3/4","⅕":"1/5","⅖":"2/5","⅗":"3/5","⅘":"4/5","⅙":"1/6","⅚":"5/6","⅛":"1/8","⅜":"3/8","⅝":"5/8","⅞":"7/8"};function D(e){let t;if(e=e.trim(),t=/^(\d+) (\d+)\/(\d+)$/.exec(e)){const e=+t[3];return e?+t[1]+ +t[2]/e:null}if(t=/^(\d+)\/(\d+)$/.exec(e)){const e=+t[2];return e?+t[1]/e:null}return/^(\d+([.,]\d+)?|[.,]\d+)$/.test(e)?parseFloat(e.replace(",",".")):null}function F(e){if(null==e)return null;const t=String(e);if(!t.trim())return null;const i=function(e){let t=String(e).trim();return t=t.replace(/[–—−]/g,"-"),t=t.replace(/([0-9])?([½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞])/g,(e,t,i)=>(t?`${t} `:"")+E[i]),t.replace(/\s+/g," ")}(t),r=D(i),a={comma:/\d,\d|^,/.test(i),dot:/\d\.\d|^\./.test(i)};if(null!==r)return{values:[r],...a};const n=i.split(/\s*(?:-|\bbis\b|\bto\b)\s*/i);if(2===n.length){const e=D(n[0]),t=D(n[1]);if(null!==e&&null!==t)return{values:[e,t],...a}}return null}function L(e,t=!1){if(!isFinite(e))return"";let i;return i=Math.abs(e-Math.round(e))<1e-6||e>=100?String(Math.round(e)):e>=10?e.toFixed(1).replace(/\.0$/,""):e.toFixed(2).replace(/0+$/,"").replace(/\.$/,""),t?i.replace(".",","):i}function P(e,t){if(!e)return e;if(1===t)return e;const i=F(e);if(!i)return e;const r=function(e){if(e.comma)return!0;if(e.dot)return!1;const t="undefined"!=typeof navigator&&navigator.language||"";return/^(de|fr|es|it|nl|pt)/i.test(t)}(i);return i.values.map(e=>L(e*t,r)).join("-")}function M(e){const t=F(e);return t?t.values.reduce((e,t)=>e+t,0)/t.values.length:null}const O={g:["g",1],gr:["g",1],gramm:["g",1],kg:["g",1e3],oz:["g",28.3495],lb:["g",453.592],lbs:["g",453.592],ml:["ml",1],cl:["ml",10],dl:["ml",100],l:["ml",1e3],liter:["ml",1e3],"fl oz":["ml",29.5735],cup:["ml",250],cups:["ml",250]};function B(e,t){if((e=Math.round(e))>=1e4){const i="ml"===t?"l":"kg",r=e/1e3;return`${(Math.round(100*r)/100).toString().replace(".",",")} ${i}`}return`${Math.round(e)} ${t}`}const j="recipe-detail";function N(e){return(t=e,t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")).replace(/\*\*\*(.+?)\*\*\*/g,"<strong><em>$1</em></strong>").replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\*(.+?)\*/g,"<em>$1</em>").replace(/_(.+?)_/g,"<em>$1</em>").replace(/`(.+?)`/g,"<code>$1</code>").replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');var t}function U(e){if(!e)return"";const t=e.split("\n"),i=[];let r=null;const a=()=>{r&&(i.push(`</${r}>`),r=null)};for(const e of t){const t=e.match(/^###\s+(.+)/);if(t){a(),i.push(`<h3>${N(t[1])}</h3>`);continue}const n=e.match(/^##\s+(.+)/);if(n){a(),i.push(`<h2>${N(n[1])}</h2>`);continue}const s=e.match(/^#\s+(.+)/);if(s){a(),i.push(`<h1>${N(s[1])}</h1>`);continue}const o=e.match(/^[-*]\s+(.+)/);if(o){"ul"!==r&&(a(),i.push("<ul>"),r="ul"),i.push(`<li>${N(o[1])}</li>`);continue}const l=e.match(/^\d+\.\s+(.+)/);if(l){"ol"!==r&&(a(),i.push("<ol>"),r="ol"),i.push(`<li>${N(l[1])}</li>`);continue}e.match(/^---+$/)?(a(),i.push("<hr>")):(a(),""===e.trim()?i.push('<p class="md-gap"></p>'):i.push(`<p>${N(e)}</p>`))}return a(),i.join("")}const W=[{key:"calories",label:r("Calories"),unit:"kcal",bold:!0},{key:"fat",label:r("Total Fat"),unit:"g"},{key:"saturated_fat",label:r("Saturated Fat"),unit:"g",indent:!0},{key:"cholesterol",label:r("Cholesterol"),unit:"mg"},{key:"sodium",label:r("Sodium"),unit:"mg"},{key:"carbohydrates",label:r("Total Carbohydrate"),unit:"g"},{key:"fiber",label:r("Dietary Fiber"),unit:"g",indent:!0},{key:"sugar",label:r("Total Sugars"),unit:"g",indent:!0},{key:"protein",label:r("Protein"),unit:"g"}],Z=/(\d+\s*(?:hours?|hrs?)\s*(?:and\s*)?\d*\s*(?:minutes?|mins?)?|\d+\s*(?:minutes?|mins?|seconds?|secs?|hours?|hrs?))/gi;function H(e){const t=e.toLowerCase();let i=0;const r=t.match(/(\d+)\s*h(?:ours?|rs?)?/);r&&(i+=3600*parseInt(r[1]));const a=t.match(/(\d+)\s*m(?:in(?:utes?)?)?(?!\s*l)/);a&&(i+=60*parseInt(a[1]));const n=t.match(/(\d+)\s*s(?:ec(?:onds?)?)?/);if(n&&(i+=parseInt(n[1])),!i){const e=t.match(/^(\d+)$/);e&&(i=60*parseInt(e[1]))}return i||0}const q={calories:{label:r("Calories"),val:2e3,unit:"kcal"},fat:{label:r("Total Fat"),val:65,unit:"g"},saturated_fat:{label:r("Saturated Fat"),val:20,unit:"g"},cholesterol:{label:r("Cholesterol"),val:300,unit:"mg"},sodium:{label:r("Sodium"),val:2300,unit:"mg"},carbohydrates:{label:r("Total Carbohydrate"),val:300,unit:"g"},fiber:{label:r("Dietary Fiber"),val:28,unit:"g"},sugar:{label:r("Added Sugars"),val:50,unit:"g"},protein:{label:r("Protein"),val:50,unit:"g"}},V={oz:{factor:28.3495,to:"g",toFull:"g"},lb:{factor:453.592,to:"g",toFull:"g",thresholdKg:500},cup:{factor:250,to:"ml",toFull:"ml"},cups:{factor:250,to:"ml",toFull:"ml"},"fl oz":{factor:29.5735,to:"ml",toFull:"ml"},pt:{factor:473.176,to:"ml",toFull:"ml"},qt:{factor:946.353,to:"ml",toFull:"ml"}};class G extends t{static properties={recipe:{type:Object},api:{type:Object},shoppingLists:{type:Array},slmAvailable:{type:Boolean},settings:{type:Object},wide:{type:Boolean},_editing:{type:Boolean},_editData:{type:Object},_servingMult:{type:Number},_editingTotal:{type:Boolean},_confirmSaveMult:{type:Boolean},_savingMult:{type:Boolean},_activeTab:{type:String},_showShoppingPicker:{type:Boolean},_selectedListId:{type:String},_checkedIngredients:{type:Object},_shoppingAdding:{type:Boolean},_shoppingResult:{type:String},_shoppingReview:{type:Array},_confirmDelete:{type:Boolean},_downloading:{type:Boolean},_photoUrlInput:{type:String},_addingPhotoUrl:{type:Boolean},_metricMode:{type:Boolean},_wakeActive:{type:Boolean},_completedSteps:{type:Object},_doneIngredients:{type:Object},_editIngInput:{type:String},_editStepInput:{type:String},_nutritionExpanded:{type:Boolean},_dragIngOver:{type:Number},_dragStepOver:{type:Number},_editImageUploading:{type:Boolean},_slideIdx:{type:Number},allTags:{type:Array},allCourses:{type:Array},allCategories:{type:Array},allCollections:{type:Array},_tagPickerField:{type:String},_tagPickerInput:{type:String},_editIngEdit:{type:Object}};constructor(){super(),this.recipe=null,this.api=null,this.shoppingLists=[],this.slmAvailable=!1,this.settings={},this.wide=!1,this._editing=!1,this._editData={},this._servingMult=1,this._editingTotal=!1,this._confirmSaveMult=!1,this._savingMult=!1,this._activeTab="ingredients",this._showShoppingPicker=!1,this._selectedListId="",this._checkedIngredients=null,this._shoppingAdding=!1,this._shoppingResult=null,this._shoppingReview=null,this._confirmDelete=!1,this._downloading=!1,this._photoUrlInput="",this._addingPhotoUrl=!1,this._metricMode="metric"===this.settings?.unitSystem,this._wakeActive=!1,this._completedSteps=new Set,this._doneIngredients=new Set,this._editIngInput="",this._editStepInput="",this._nutritionExpanded=!1,this._dragIngOver=-1,this._dragStepOver=-1,this._dragIngFrom=-1,this._dragStepFrom=-1,this._editImageUploading=!1,this._slideIdx=0,this.allTags=[],this.allCourses=[],this.allCategories=[],this.allCollections=[],this._tagPickerField=null,this._tagPickerInput="",this._editIngEdit=null,this._slideTimer=null,this._slideTouchStartX=null,this._wakeLockTimeout=null,this._wakeLockUnsubscribeFn=null}connectedCallback(){var e;super.connectedCallback(),this._wakeLockUnsubscribeFn=(e=e=>{this._wakeActive=e},_.add(e),()=>_.delete(e))}disconnectedCallback(){super.disconnectedCallback(),this._releaseWakeLock(),this._wakeLockUnsubscribeFn?.(),this._wakeLockUnsubscribeFn=null,this._stopSlideTimer()}async _requestWakeLock(){this._wakeLockTimeout&&(clearTimeout(this._wakeLockTimeout),this._wakeLockTimeout=null),await S(j);const e=this.settings?.wakeLockDuration??60;this._wakeLockTimeout=setTimeout(()=>this._releaseWakeLock(),6e4*e)}async _releaseWakeLock(){this._wakeLockTimeout&&(clearTimeout(this._wakeLockTimeout),this._wakeLockTimeout=null),await z(j)}updated(e){if(e.has("recipe")&&!this.recipe&&(this._servingMult=1,this._editingTotal=!1,this._confirmSaveMult=!1),e.has("recipe")&&this.recipe){const t=e.get("recipe"),i=!t||t.id!==this.recipe.id;this._servingMult=1,this._editingTotal=!1,this._confirmSaveMult=!1,i&&(this._editing=!1,this._confirmDelete=!1,this._shoppingResult=null,this._shoppingReview=null,this._showShoppingPicker=!1,this._checkedIngredients=null,this._photoUrlInput="",this._metricMode="metric"===this.settings?.unitSystem,this._completedSteps=new Set,this._doneIngredients=new Set),this._slideIdx=0,this._startSlideTimer()}e.has("settings")&&this._startSlideTimer(),(e.has("recipe")||e.has("settings"))&&this.recipe&&(this.settings?.keepScreenOn?this._requestWakeLock():this._releaseWakeLock()),e.has("recipe")&&!this.recipe&&this._releaseWakeLock(),e.has("shoppingLists")&&this.shoppingLists.length&&!this._selectedListId&&(this._selectedListId=this.shoppingLists[0]?.id??"")}_formatTime(e){if(!e)return null;if(e<60)return r(a`${e} min`);const t=Math.floor(e/60),i=e%60;return r(i?a`${t}h ${i}m`:a`${t}h`)}_scaleAmount(e){return P(e,this._servingMult)}_baseTotal(){const e=this.recipe,t=function(e){const t=(e||[]).filter(e=>e&&!e.is_heading&&!(e.name||"").startsWith("#"));if(!t.length)return null;let i=0,r=0,a=0,n=0;for(const e of t){const t=O[(e.unit||"").toLowerCase().trim()],s=M(e.amount);if(!t||null===s)continue;const o=s*t[1];i+=o,"g"===t[0]?a+=o:n+=o,r++}return!r||i<=0?null:{total:i,unit:n>a?"ml":"g",share:r/t.length}}(e?.ingredients);if(!t)return null;return!/^\s*(gesamt|total|yield|ergibt|menge)/i.test(e.servings_text||"")&&t.share<.8?null:t}_servesText(){const e=this.recipe,t=this._baseTotal(),i=e.servings_text||"";if(t&&/^\s*gesamt/i.test(i)){return`${i.replace(/\d[\s\S]*$/,"")}${B(t.total*this._servingMult,t.unit)}`}return i||e.servings}_onSaveMultClick(){if(!this._confirmSaveMult)return this._confirmSaveMult=!0,clearTimeout(this._confirmSaveTimer),void(this._confirmSaveTimer=setTimeout(()=>{this._confirmSaveMult=!1},4e3));this._saveScaledRecipe()}_saveScaledRecipe(){const e=this.recipe,t=this._servingMult;if(!e||1===t)return;clearTimeout(this._confirmSaveTimer);const i=this._baseTotal(),r={ingredients:(e.ingredients||[]).map(e=>e.is_heading||e.name?.startsWith("#")||!e.amount?e:{...e,amount:P(e.amount,t)})};if(i&&/^\s*gesamt/i.test(e.servings_text||""))r.servings_text=this._servesText();else{e.servings&&(r.servings=Math.max(1,Math.round(e.servings*t)));const i=/^(\s*)(\d+(?:[.,]\d+)?)(.*)$/.exec(e.servings_text||"");i&&(r.servings_text=`${i[1]}${P(i[2],t)}${i[3]}`)}this._savingMult=!0,this._confirmSaveMult=!1,this.dispatchEvent(new CustomEvent("rm-update-recipe",{detail:{recipeId:e.id,data:r},bubbles:!0,composed:!0})),setTimeout(()=>{this._savingMult=!1},1500)}_startTotalEdit(){this._editingTotal=!0,this.updateComplete.then(()=>{const e=this.shadowRoot?.querySelector(".total-input");e&&(e.focus(),e.select())})}_commitTotal(e){const t=this._baseTotal();if(this._editingTotal=!1,!t)return;const i=F(e.target.value),r=i?i.values[0]:null;if(!r||r<=0)return;const a=r/t.total;this._servingMult=Math.min(100,Math.max(.01,a))}_startEdit(){const e=this.recipe.nutrition||{};this._editData={name:this.recipe.name||"",description:this.recipe.description||"",source_url:this.recipe.source_url||"",servings:this.recipe.servings||"",prep_time:this.recipe.prep_time||"",cook_time:this.recipe.cook_time||"",tags:[...this.recipe.tags||[]],courses:[...this.recipe.courses||[]],categories:[...this.recipe.categories||[]],collections:[...this.recipe.collections||[]],notes:this.recipe.notes||"",rating:this.recipe.rating||0,image_url:this.recipe.image_url||"",photos:[...this.recipe.photos||[]],ingredients:[...this.recipe.ingredients||[]],instructions:[...this.recipe.instructions||[]],cal:e.calories||"",fat:e.fat||"",satf:e.saturated_fat||"",chol:e.cholesterol||"",sod:e.sodium||"",carb:e.carbohydrates||"",fib:e.fiber||"",sug:e.sugar||"",prot:e.protein||""},this._editing=!0}_cancelEdit(){this._editing=!1,this._editData={}}_handleEditField(e,t){this._editData={...this._editData,[e]:t}}_renderListPicker(e,t,n){const s=this._editData[e]||[],o=this._tagPickerField===e,l=(n||[]).filter(e=>!s.includes(e)),c=o?this._tagPickerInput:"";return i`
       <div class="edit-field list-picker-field">
         <label>${t}</label>
         <div class="list-picker-wrap">
@@ -489,7 +489,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
                 <button class="list-chip-remove" @click=${()=>this._toggleListValue(e,t)} title="${r("Remove")}">×</button>
               </span>
             `)}
-            <button class="list-chip-add-btn" @click=${()=>{this._tagPickerField=o?null:e,this._tagPickerInput=""}} title="${r(n`Add ${t.toLowerCase()}`)}">
+            <button class="list-chip-add-btn" @click=${()=>{this._tagPickerField=o?null:e,this._tagPickerInput=""}} title="${r(a`Add ${t.toLowerCase()}`)}">
               <ha-icon icon="mdi:plus"></ha-icon>
             </button>
           </div>
@@ -506,7 +506,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
                 </div>
               `:""}
               <div class="list-picker-new-row">
-                <input class="list-picker-input" type="text" placeholder="${r(n`New ${t.toLowerCase()}…`)}"
+                <input class="list-picker-input" type="text" placeholder="${r(a`New ${t.toLowerCase()}…`)}"
                   .value=${c}
                   @input=${e=>{this._tagPickerInput=e.target.value}}
                   @keydown=${t=>{"Enter"===t.key&&(t.preventDefault(),this._addListValue(e,this._tagPickerInput)),"Escape"===t.key&&(this._tagPickerField=null)}}
@@ -520,7 +520,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
           `:""}
         </div>
       </div>
-    `}_toggleListValue(e,t){const i=this._editData[e]||[],r=i.includes(t)?i.filter(e=>e!==t):[...i,t];this._editData={...this._editData,[e]:r}}_addListValue(e,t){const i=(t||"").trim();if(!i)return;const r=this._editData[e]||[];r.includes(i)||(this._editData={...this._editData,[e]:[...r,i]}),this._tagPickerInput="",this._tagPickerField=null}_startEditIngredient(e){const t=(this._editData.ingredients||[])[e];if(t)if(t.is_heading||t.name?.startsWith("#")){const i=t.name?.startsWith("#")?t.name.slice(1).trim():t.name;this._editIngEdit={idx:e,heading:!0,name:i}}else this._editIngEdit={idx:e,heading:!1,amount:t.amount||"",unit:t.unit||"",name:t.name||""}}_saveEditIngredient(){const e=this._editIngEdit;if(!e)return;const t=[...this._editData.ingredients||[]];e.heading?t[e.idx]={name:`# ${e.name}`,is_heading:!0}:t[e.idx]={amount:e.amount,unit:e.unit,name:e.name},this._editData={...this._editData,ingredients:t},this._editIngEdit=null}_cancelEditIngredient(){this._editIngEdit=null}_editAddIngredient(){const e=this._editIngInput.trim();if(!e)return;let t;if(e.startsWith("#"))t={name:e,is_heading:!0};else{const i=e.split(/\s+/);let r="",n="",a="";i.length>=3&&!isNaN(parseFloat(i[0]))?(r=i[0],n=i[1],a=i.slice(2).join(" ")):2!==i.length||isNaN(parseFloat(i[0]))?a=e:(r=i[0],a=i[1]),t={amount:r,unit:n,name:a}}this._editData={...this._editData,ingredients:[...this._editData.ingredients||[],t]},this._editIngInput=""}_editRemoveIngredient(e){this._editData={...this._editData,ingredients:(this._editData.ingredients||[]).filter((t,i)=>i!==e)}}_editMoveIngredient(e,t){const i=[...this._editData.ingredients||[]],r=e+t;r<0||r>=i.length||([i[e],i[r]]=[i[r],i[e]],this._editData={...this._editData,ingredients:i})}_editMoveStep(e,t){const i=[...this._editData.instructions||[]],r=e+t;r<0||r>=i.length||([i[e],i[r]]=[i[r],i[e]],this._editData={...this._editData,instructions:i})}_editDropIngredient(e,t){if(e===t||e<0||t<0)return;const i=[...this._editData.ingredients||[]],[r]=i.splice(e,1);i.splice(t,0,r),this._editData={...this._editData,ingredients:i},this._dragIngOver=-1,this._dragIngFrom=-1}_editDropStep(e,t){if(e===t||e<0||t<0)return;const i=[...this._editData.instructions||[]],[r]=i.splice(e,1);i.splice(t,0,r),this._editData={...this._editData,instructions:i},this._dragStepOver=-1,this._dragStepFrom=-1}_editAddStep(e){e.trim()&&(this._editData={...this._editData,instructions:[...this._editData.instructions||[],e.trim()]})}_editRemoveStep(e){this._editData={...this._editData,instructions:(this._editData.instructions||[]).filter((t,i)=>i!==e)}}async _editUploadImage(e){if(!e||!this.recipe?.id)return;this._editImageUploading=!0;const t=new FileReader;t.onload=async e=>{const t=e.target.result.split(",")[1];try{const e=await this.api.uploadRecipeImage(this.recipe.id,t),i=e?.image_url||e?.local_url;i&&(this._editData={...this._editData,image_url:this._editData.image_url||i,photos:[...new Set([...this._editData.photos||[],i])]})}catch(e){console.warn("Image upload failed:",e)}finally{this._editImageUploading=!1}},t.readAsDataURL(e)}async _saveEdit(){const e=this._editData,t={},i={cal:"calories",fat:"fat",satf:"saturated_fat",chol:"cholesterol",sod:"sodium",carb:"carbohydrates",fib:"fiber",sug:"sugar",prot:"protein"};let r=!1;for(const[n,a]of Object.entries(i))""!==e[n]&&null!=e[n]&&(t[a]=e[n],r=!0);const n={name:e.name,description:e.description,source_url:e.source_url,image_url:e.image_url||null,servings:parseInt(e.servings)||null,prep_time:parseInt(e.prep_time)||null,cook_time:parseInt(e.cook_time)||null,tags:Array.isArray(e.tags)?e.tags:[],courses:Array.isArray(e.courses)?e.courses:[],categories:Array.isArray(e.categories)?e.categories:[],collections:Array.isArray(e.collections)?e.collections:[],notes:e.notes,rating:e.rating||null,photos:e.photos||[],ingredients:e.ingredients||[],instructions:e.instructions||[],nutrition:r?t:null};this.dispatchEvent(new CustomEvent("rm-update-recipe",{detail:{recipeId:this.recipe.id,data:n},bubbles:!0,composed:!0})),this._editing=!1}_handleToggleFav(){this.dispatchEvent(new CustomEvent("rm-toggle-favourite",{detail:{recipeId:this.recipe.id},bubbles:!0,composed:!0}))}async _handleDownloadImage(){if(this.recipe.image_url){this._downloading=!0;try{const e=await this.api.downloadRecipeImage(this.recipe.id,this.recipe.image_url);e?.local_url&&this.dispatchEvent(new CustomEvent("rm-update-recipe",{detail:{recipeId:this.recipe.id,data:{image_url:e.local_url}},bubbles:!0,composed:!0}))}catch(e){console.warn("Image download failed:",e)}finally{this._downloading=!1}}}_handleDeleteRecipe(){if(!this._confirmDelete)return this._confirmDelete=!0,void setTimeout(()=>{this._confirmDelete=!1},3e3);this.dispatchEvent(new CustomEvent("rm-delete-recipe",{detail:{recipeId:this.recipe.id},bubbles:!0,composed:!0}))}_openShoppingPicker(){this._checkedIngredients=new Set,this._showShoppingPicker=!0}_toggleIngredient(e){const t=new Set(this._checkedIngredients);t.has(e)?t.delete(e):t.add(e),this._checkedIngredients=t}_selectAllIngredients(){const e=this.recipe?.ingredients?.length??0;this._checkedIngredients=new Set([...Array(e).keys()])}_clearAllIngredients(){this._checkedIngredients=new Set}async _handleAddToShopping(){const e=this._checkedIngredients;if(!e?.size)return;const t=(this.recipe.ingredients||[]).filter((t,i)=>e.has(i)&&!this.recipe.ingredients[i]?.is_heading&&!this.recipe.ingredients[i]?.name?.startsWith("#")).map(e=>({...e,amount:this._scaleAmount(e.amount)}));if(!this.slmAvailable||!this._selectedListId)return void await this._dispatchShoppingAdd(t.map(e=>({ing:e,selectedId:null,products:[]})));this._shoppingAdding=!0;const i=await Promise.all(t.map(async e=>{try{const t=await this.api.searchSlmProducts(e.name,4),i=t?.products??[],r=i.find(t=>t.name.toLowerCase()===e.name.toLowerCase());return{ing:e,products:i,selectedId:r?.id??null}}catch{return{ing:e,products:[],selectedId:null}}}));this._shoppingAdding=!1,this._shoppingReview=i}_selectReviewMatch(e,t){this._shoppingReview=this._shoppingReview.map((i,r)=>r===e?{...i,selectedId:t}:i)}async _confirmShoppingReview(){await this._dispatchShoppingAdd(this._shoppingReview)}async _dispatchShoppingAdd(e){const t=e.map(({ing:e,selectedId:t,products:i})=>{const r=i?.find(e=>e.id===t);return{...e,product_id:r?.id??null,product_name:r?.name??null,category_id:r?.category_id??null}});this._shoppingAdding=!0,this._shoppingResult=null,this.dispatchEvent(new CustomEvent("rm-add-to-shopping",{detail:{ingredients:t,listId:this._selectedListId||null,recipeName:this.recipe.name},bubbles:!0,composed:!0})),await new Promise(e=>setTimeout(e,600)),this._shoppingAdding=!1,this._shoppingResult="success",this._shoppingReview=null,this._showShoppingPicker=!1,setTimeout(()=>{this._shoppingResult=null},2500)}_renderShoppingReview(){const e=this._shoppingReview;return e?i`
+    `}_toggleListValue(e,t){const i=this._editData[e]||[],r=i.includes(t)?i.filter(e=>e!==t):[...i,t];this._editData={...this._editData,[e]:r}}_addListValue(e,t){const i=(t||"").trim();if(!i)return;const r=this._editData[e]||[];r.includes(i)||(this._editData={...this._editData,[e]:[...r,i]}),this._tagPickerInput="",this._tagPickerField=null}_startEditIngredient(e){const t=(this._editData.ingredients||[])[e];if(t)if(t.is_heading||t.name?.startsWith("#")){const i=t.name?.startsWith("#")?t.name.slice(1).trim():t.name;this._editIngEdit={idx:e,heading:!0,name:i}}else this._editIngEdit={idx:e,heading:!1,amount:t.amount||"",unit:t.unit||"",name:t.name||""}}_saveEditIngredient(){const e=this._editIngEdit;if(!e)return;const t=[...this._editData.ingredients||[]];e.heading?t[e.idx]={name:`# ${e.name}`,is_heading:!0}:t[e.idx]={amount:e.amount,unit:e.unit,name:e.name},this._editData={...this._editData,ingredients:t},this._editIngEdit=null}_cancelEditIngredient(){this._editIngEdit=null}_editAddIngredient(){const e=this._editIngInput.trim();if(!e)return;let t;if(e.startsWith("#"))t={name:e,is_heading:!0};else{const i=e.split(/\s+/);let r="",a="",n="";i.length>=3&&!isNaN(parseFloat(i[0]))?(r=i[0],a=i[1],n=i.slice(2).join(" ")):2!==i.length||isNaN(parseFloat(i[0]))?n=e:(r=i[0],n=i[1]),t={amount:r,unit:a,name:n}}this._editData={...this._editData,ingredients:[...this._editData.ingredients||[],t]},this._editIngInput=""}_editRemoveIngredient(e){this._editData={...this._editData,ingredients:(this._editData.ingredients||[]).filter((t,i)=>i!==e)}}_editMoveIngredient(e,t){const i=[...this._editData.ingredients||[]],r=e+t;r<0||r>=i.length||([i[e],i[r]]=[i[r],i[e]],this._editData={...this._editData,ingredients:i})}_editMoveStep(e,t){const i=[...this._editData.instructions||[]],r=e+t;r<0||r>=i.length||([i[e],i[r]]=[i[r],i[e]],this._editData={...this._editData,instructions:i})}_editDropIngredient(e,t){if(e===t||e<0||t<0)return;const i=[...this._editData.ingredients||[]],[r]=i.splice(e,1);i.splice(t,0,r),this._editData={...this._editData,ingredients:i},this._dragIngOver=-1,this._dragIngFrom=-1}_editDropStep(e,t){if(e===t||e<0||t<0)return;const i=[...this._editData.instructions||[]],[r]=i.splice(e,1);i.splice(t,0,r),this._editData={...this._editData,instructions:i},this._dragStepOver=-1,this._dragStepFrom=-1}_editAddStep(e){e.trim()&&(this._editData={...this._editData,instructions:[...this._editData.instructions||[],e.trim()]})}_editRemoveStep(e){this._editData={...this._editData,instructions:(this._editData.instructions||[]).filter((t,i)=>i!==e)}}async _editUploadImage(e){if(!e||!this.recipe?.id)return;this._editImageUploading=!0;const t=new FileReader;t.onload=async e=>{const t=e.target.result.split(",")[1];try{const e=await this.api.uploadRecipeImage(this.recipe.id,t),i=e?.image_url||e?.local_url;i&&(this._editData={...this._editData,image_url:this._editData.image_url||i,photos:[...new Set([...this._editData.photos||[],i])]})}catch(e){console.warn("Image upload failed:",e)}finally{this._editImageUploading=!1}},t.readAsDataURL(e)}async _saveEdit(){const e=this._editData,t={},i={cal:"calories",fat:"fat",satf:"saturated_fat",chol:"cholesterol",sod:"sodium",carb:"carbohydrates",fib:"fiber",sug:"sugar",prot:"protein"};let r=!1;for(const[a,n]of Object.entries(i))""!==e[a]&&null!=e[a]&&(t[n]=e[a],r=!0);const a={name:e.name,description:e.description,source_url:e.source_url,image_url:e.image_url||null,servings:parseInt(e.servings)||null,prep_time:parseInt(e.prep_time)||null,cook_time:parseInt(e.cook_time)||null,tags:Array.isArray(e.tags)?e.tags:[],courses:Array.isArray(e.courses)?e.courses:[],categories:Array.isArray(e.categories)?e.categories:[],collections:Array.isArray(e.collections)?e.collections:[],notes:e.notes,rating:e.rating||null,photos:e.photos||[],ingredients:e.ingredients||[],instructions:e.instructions||[],nutrition:r?t:null};this.dispatchEvent(new CustomEvent("rm-update-recipe",{detail:{recipeId:this.recipe.id,data:a},bubbles:!0,composed:!0})),this._editing=!1}_handleToggleFav(){this.dispatchEvent(new CustomEvent("rm-toggle-favourite",{detail:{recipeId:this.recipe.id},bubbles:!0,composed:!0}))}async _handleDownloadImage(){if(this.recipe.image_url){this._downloading=!0;try{const e=await this.api.downloadRecipeImage(this.recipe.id,this.recipe.image_url);e?.local_url&&this.dispatchEvent(new CustomEvent("rm-update-recipe",{detail:{recipeId:this.recipe.id,data:{image_url:e.local_url}},bubbles:!0,composed:!0}))}catch(e){console.warn("Image download failed:",e)}finally{this._downloading=!1}}}_handleDeleteRecipe(){if(!this._confirmDelete)return this._confirmDelete=!0,void setTimeout(()=>{this._confirmDelete=!1},3e3);this.dispatchEvent(new CustomEvent("rm-delete-recipe",{detail:{recipeId:this.recipe.id},bubbles:!0,composed:!0}))}_openShoppingPicker(){this._checkedIngredients=new Set,this._showShoppingPicker=!0}_toggleIngredient(e){const t=new Set(this._checkedIngredients);t.has(e)?t.delete(e):t.add(e),this._checkedIngredients=t}_selectAllIngredients(){const e=this.recipe?.ingredients?.length??0;this._checkedIngredients=new Set([...Array(e).keys()])}_clearAllIngredients(){this._checkedIngredients=new Set}async _handleAddToShopping(){const e=this._checkedIngredients;if(!e?.size)return;const t=(this.recipe.ingredients||[]).filter((t,i)=>e.has(i)&&!this.recipe.ingredients[i]?.is_heading&&!this.recipe.ingredients[i]?.name?.startsWith("#")).map(e=>({...e,amount:this._scaleAmount(e.amount)}));if(!this.slmAvailable||!this._selectedListId)return void await this._dispatchShoppingAdd(t.map(e=>({ing:e,selectedId:null,products:[]})));this._shoppingAdding=!0;const i=await Promise.all(t.map(async e=>{try{const t=await this.api.searchSlmProducts(e.name,4),i=t?.products??[],r=i.find(t=>t.name.toLowerCase()===e.name.toLowerCase());return{ing:e,products:i,selectedId:r?.id??null}}catch{return{ing:e,products:[],selectedId:null}}}));this._shoppingAdding=!1,this._shoppingReview=i}_selectReviewMatch(e,t){this._shoppingReview=this._shoppingReview.map((i,r)=>r===e?{...i,selectedId:t}:i)}async _confirmShoppingReview(){await this._dispatchShoppingAdd(this._shoppingReview)}async _dispatchShoppingAdd(e){const t=e.map(({ing:e,selectedId:t,products:i})=>{const r=i?.find(e=>e.id===t);return{...e,product_id:r?.id??null,product_name:r?.name??null,category_id:r?.category_id??null}});this._shoppingAdding=!0,this._shoppingResult=null,this.dispatchEvent(new CustomEvent("rm-add-to-shopping",{detail:{ingredients:t,listId:this._selectedListId||null,recipeName:this.recipe.name},bubbles:!0,composed:!0})),await new Promise(e=>setTimeout(e,600)),this._shoppingAdding=!1,this._shoppingResult="success",this._shoppingReview=null,this._showShoppingPicker=!1,setTimeout(()=>{this._shoppingResult=null},2500)}_renderShoppingReview(){const e=this._shoppingReview;return e?i`
       <div class="shopping-review-panel">
         <div class="review-title">${r("Match Items to Products")}</div>
         <div class="review-list">
@@ -550,20 +550,20 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
           <button class="action-btn primary"
             ?disabled=${this._shoppingAdding}
             @click=${this._confirmShoppingReview}>
-            ${this._shoppingAdding?i`<ha-circular-progress active size="tiny"></ha-circular-progress>`:r(n`Confirm & Add ${e.length}`)}
+            ${this._shoppingAdding?i`<ha-circular-progress active size="tiny"></ha-circular-progress>`:r(a`Confirm & Add ${e.length}`)}
           </button>
         </div>
       </div>
-    `:i``}_handleQuickRate(e){const t=this.recipe.rating===e?null:e;this.dispatchEvent(new CustomEvent("rm-update-recipe",{detail:{recipeId:this.recipe.id,data:{rating:t}},bubbles:!0,composed:!0}))}_handleShowPlanner(){this.dispatchEvent(new CustomEvent("rm-show-planner",{bubbles:!0,composed:!0}))}_handleChipNav(e,t){this.dispatchEvent(new CustomEvent("rm-chip-nav",{detail:{filterMode:e,value:t},bubbles:!0,composed:!0}))}_fireTimer(e,t){const i=this.recipe?.name,a=i?r(n`${i} — ${t}`):t;this.dispatchEvent(new CustomEvent("rm-start-timer",{detail:{seconds:e,label:a},bubbles:!0,composed:!0}))}async _handleAddPhotoUrl(){const e=this._photoUrlInput.trim();if(e){this._addingPhotoUrl=!0;try{const t=this.recipe.photos||[],i={photos:[...t,e]};this.recipe.image_url||(i.image_url=e),this.dispatchEvent(new CustomEvent("rm-update-recipe",{detail:{recipeId:this.recipe.id,data:i},bubbles:!0,composed:!0})),this._photoUrlInput=""}finally{this._addingPhotoUrl=!1}}}_handleCameraCapture(e){const t=e.target.files?.[0];if(!t)return;const i=new FileReader;i.onload=async e=>{const t=e.target.result.split(",")[1];try{await this.api.uploadRecipeImage(this.recipe.id,t)}catch(e){console.warn("Camera upload failed:",e)}},i.readAsDataURL(t)}_setMainPhoto(e){this.dispatchEvent(new CustomEvent("rm-update-recipe",{detail:{recipeId:this.recipe.id,data:{image_url:e}},bubbles:!0,composed:!0}))}_removePhoto(e){const t=(this.recipe.photos||[]).filter(t=>t!==e),i={photos:t};this.recipe.image_url===e&&(i.image_url=t[0]||null),this.dispatchEvent(new CustomEvent("rm-update-recipe",{detail:{recipeId:this.recipe.id,data:i},bubbles:!0,composed:!0}))}_getSlideImages(){const e=this.recipe;if(!e)return[];const t=[e.image_url,...e.photos||[]].filter(Boolean);return[...new Set(t)]}_prevSlide(){const e=this._getSlideImages();e.length<2||(this._slideIdx=(this._slideIdx-1+e.length)%e.length,this._startSlideTimer())}_nextSlide(){const e=this._getSlideImages();e.length<2||(this._slideIdx=(this._slideIdx+1)%e.length,this._startSlideTimer())}_startSlideTimer(){this._stopSlideTimer();const e=this.settings?.slideshowInterval??5;if(e<=0)return;this._getSlideImages().length<2||(this._slideTimer=setInterval(()=>{this._slideIdx=(this._slideIdx+1)%this._getSlideImages().length},1e3*e))}_stopSlideTimer(){this._slideTimer&&(clearInterval(this._slideTimer),this._slideTimer=null)}_slideTouchStart(e){this._slideTouchStartX=e.touches[0]?.clientX??null}_slideTouchEnd(e){if(null==this._slideTouchStartX)return;const t=(e.changedTouches[0]?.clientX??0)-this._slideTouchStartX;this._slideTouchStartX=null,Math.abs(t)<50||(t<0?this._nextSlide():this._prevSlide())}_renderSlideshow(e){const t=this._getSlideImages(),n=Math.min(this._slideIdx,t.length-1),a=t.length>1,s=t[n]||null;return i`
+    `:i``}_handleQuickRate(e){const t=this.recipe.rating===e?null:e;this.dispatchEvent(new CustomEvent("rm-update-recipe",{detail:{recipeId:this.recipe.id,data:{rating:t}},bubbles:!0,composed:!0}))}_handleShowPlanner(){this.dispatchEvent(new CustomEvent("rm-show-planner",{bubbles:!0,composed:!0}))}_handleChipNav(e,t){this.dispatchEvent(new CustomEvent("rm-chip-nav",{detail:{filterMode:e,value:t},bubbles:!0,composed:!0}))}_fireTimer(e,t){const i=this.recipe?.name,n=i?r(a`${i} — ${t}`):t;this.dispatchEvent(new CustomEvent("rm-start-timer",{detail:{seconds:e,label:n},bubbles:!0,composed:!0}))}async _handleAddPhotoUrl(){const e=this._photoUrlInput.trim();if(e){this._addingPhotoUrl=!0;try{const t=this.recipe.photos||[],i={photos:[...t,e]};this.recipe.image_url||(i.image_url=e),this.dispatchEvent(new CustomEvent("rm-update-recipe",{detail:{recipeId:this.recipe.id,data:i},bubbles:!0,composed:!0})),this._photoUrlInput=""}finally{this._addingPhotoUrl=!1}}}_handleCameraCapture(e){const t=e.target.files?.[0];if(!t)return;const i=new FileReader;i.onload=async e=>{const t=e.target.result.split(",")[1];try{await this.api.uploadRecipeImage(this.recipe.id,t)}catch(e){console.warn("Camera upload failed:",e)}},i.readAsDataURL(t)}_setMainPhoto(e){this.dispatchEvent(new CustomEvent("rm-update-recipe",{detail:{recipeId:this.recipe.id,data:{image_url:e}},bubbles:!0,composed:!0}))}_removePhoto(e){const t=(this.recipe.photos||[]).filter(t=>t!==e),i={photos:t};this.recipe.image_url===e&&(i.image_url=t[0]||null),this.dispatchEvent(new CustomEvent("rm-update-recipe",{detail:{recipeId:this.recipe.id,data:i},bubbles:!0,composed:!0}))}_getSlideImages(){const e=this.recipe;if(!e)return[];const t=[e.image_url,...e.photos||[]].filter(Boolean);return[...new Set(t)]}_prevSlide(){const e=this._getSlideImages();e.length<2||(this._slideIdx=(this._slideIdx-1+e.length)%e.length,this._startSlideTimer())}_nextSlide(){const e=this._getSlideImages();e.length<2||(this._slideIdx=(this._slideIdx+1)%e.length,this._startSlideTimer())}_startSlideTimer(){this._stopSlideTimer();const e=this.settings?.slideshowInterval??5;if(e<=0)return;this._getSlideImages().length<2||(this._slideTimer=setInterval(()=>{this._slideIdx=(this._slideIdx+1)%this._getSlideImages().length},1e3*e))}_stopSlideTimer(){this._slideTimer&&(clearInterval(this._slideTimer),this._slideTimer=null)}_slideTouchStart(e){this._slideTouchStartX=e.touches[0]?.clientX??null}_slideTouchEnd(e){if(null==this._slideTouchStartX)return;const t=(e.changedTouches[0]?.clientX??0)-this._slideTouchStartX;this._slideTouchStartX=null,Math.abs(t)<50||(t<0?this._nextSlide():this._prevSlide())}_renderSlideshow(e){const t=this._getSlideImages(),a=Math.min(this._slideIdx,t.length-1),n=t.length>1,s=t[a]||null;return i`
       <div class="wide-image-square"
-        @touchstart=${a?this._slideTouchStart:null}
-        @touchend=${a?this._slideTouchEnd:null}>
+        @touchstart=${n?this._slideTouchStart:null}
+        @touchend=${n?this._slideTouchEnd:null}>
         ${s?i`<img src="${s}" alt="${e.name}" />`:i`
           <div class="hero-placeholder">
             <ha-icon icon="mdi:food"></ha-icon>
           </div>
         `}
-        ${a?i`
+        ${n?i`
           <button class="slide-btn slide-prev" @click=${this._prevSlide} title="${r("Previous")}">
             <ha-icon icon="mdi:chevron-left"></ha-icon>
           </button>
@@ -571,7 +571,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
             <ha-icon icon="mdi:chevron-right"></ha-icon>
           </button>
           <div class="slide-dots">
-            ${t.map((e,t)=>i`<span class="slide-dot ${t===n?"active":""}"></span>`)}
+            ${t.map((e,t)=>i`<span class="slide-dot ${t===a?"active":""}"></span>`)}
           </div>
         `:""}
       </div>
@@ -580,25 +580,25 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
         <span class="chip-group-label">${e}:</span>
         ${t.map(e=>i`<span class="chip ${r}">${e}</span>`)}
       </div>
-    `:""}_renderChipGroups(e){const t=e.courses||[],a=e.categories||[],s=e.collections||[];return t.length||a.length||s.length?i`
+    `:""}_renderChipGroups(e){const t=e.courses||[],n=e.categories||[],s=e.collections||[];return t.length||n.length||s.length?i`
       <div class="chips-area">
         ${t.length?i`
           <div class="chip-group-row">
             <span class="chip chip-label">${r("Course:")}</span>
-            ${t.map(e=>i`<button class="chip chip-course chip-nav" @click=${()=>this._handleChipNav("courses",e)} title="${r(n`Filter by course: ${e}`)}">${e}</button>`)}
+            ${t.map(e=>i`<button class="chip chip-course chip-nav" @click=${()=>this._handleChipNav("courses",e)} title="${r(a`Filter by course: ${e}`)}">${e}</button>`)}
           </div>`:""}
-        ${a.length?i`
+        ${n.length?i`
           <div class="chip-group-row">
             <span class="chip chip-label">${r("Category:")}</span>
-            ${a.map(e=>i`<button class="chip chip-category chip-nav" @click=${()=>this._handleChipNav("categories",e)} title="${r(n`Filter by category: ${e}`)}">${e}</button>`)}
+            ${n.map(e=>i`<button class="chip chip-category chip-nav" @click=${()=>this._handleChipNav("categories",e)} title="${r(a`Filter by category: ${e}`)}">${e}</button>`)}
           </div>`:""}
         ${s.length?i`
           <div class="chip-group-row">
             <span class="chip chip-label">${r("Collection:")}</span>
-            ${s.map(e=>i`<button class="chip chip-collection chip-nav" @click=${()=>this._handleChipNav("collections",e)} title="${r(n`Filter by collection: ${e}`)}">${e}</button>`)}
+            ${s.map(e=>i`<button class="chip chip-collection chip-nav" @click=${()=>this._handleChipNav("collections",e)} title="${r(a`Filter by collection: ${e}`)}">${e}</button>`)}
           </div>`:""}
       </div>
-    `:""}_renderMetaRow(e){if(!(e.servings||e.prep_time||e.cook_time||e.total_time))return"";const t=e.total_time||(e.prep_time||0)+(e.cook_time||0)||null,r=(e.prep_time||0)+(e.cook_time||0),n=t&&t!==r;return i`
+    `:""}_renderMetaRow(e){if(!(e.servings||e.prep_time||e.cook_time||e.total_time))return"";const t=e.total_time||(e.prep_time||0)+(e.cook_time||0)||null,r=(e.prep_time||0)+(e.cook_time||0),a=t&&t!==r;return i`
       <div class="meta-chips">
         ${e.servings?i`
           <span class="meta-chip-icon">
@@ -618,7 +618,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
             ${this._formatTime(e.cook_time)}
           </span>
         `:""}
-        ${n?i`
+        ${a?i`
           <span class="meta-chip-icon">
             <ha-icon icon="mdi:clock-outline"></ha-icon>
             ${this._formatTime(t)}
@@ -655,14 +655,14 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
           <span>${r("Edit")}</span>
         </button>
       </div>
-    `}_renderScaler(){const e=this.recipe,t=this._baseTotal();if(!e?.servings&&!t)return"";const n=Math.round(100*this._servingMult)/100;return i`
+    `}_renderScaler(){const e=this.recipe,t=this._baseTotal();if(!e?.servings&&!t)return"";const a=Math.round(100*this._servingMult)/100;return i`
       <div class="scaler-row">
         <ha-icon class="scaler-icon" icon="mdi:silverware-fork-knife"></ha-icon>
         <div class="scaler-ctrl">
           <button class="scaler-btn" @click=${()=>{this._servingMult>.25&&(this._servingMult=Math.round(4*(this._servingMult-.25))/4)}}>
             <ha-icon icon="mdi:minus"></ha-icon>
           </button>
-          <span class="scaler-val">×${L(n,!1)}</span>
+          <span class="scaler-val">×${L(a,!1)}</span>
           <button class="scaler-btn" @click=${()=>{this._servingMult=Math.round(4*(this._servingMult+.25))/4}}>
             <ha-icon icon="mdi:plus"></ha-icon>
           </button>
@@ -682,7 +682,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
             <ha-icon icon="mdi:pencil-outline"></ha-icon>
           </button>
         `:""}
-        ${1!==n?i`
+        ${1!==a?i`
           <button class="save-mult-btn ${this._confirmSaveMult?"confirm":""}"
             ?disabled=${this._savingMult}
             @click=${()=>this._onSaveMultClick()}>
@@ -708,7 +708,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
             ${r("Screen lock unavailable")}
           </span>
         </div>
-      `:""}render(){if(!this.recipe)return i``;const e=this.recipe;return this.wide?this._renderWide(e):this._renderNarrow(e)}_renderWide(e){const t=this._groupIngredients(e.ingredients),a=this._showShoppingPicker,s=this._checkedIngredients,o=s?.size??0;return i`
+      `:""}render(){if(!this.recipe)return i``;const e=this.recipe;return this.wide?this._renderWide(e):this._renderNarrow(e)}_renderWide(e){const t=this._groupIngredients(e.ingredients),n=this._showShoppingPicker,s=this._checkedIngredients,o=s?.size??0;return i`
       <div class="detail-container wide">
         <!--
           CSS grid: 2 cols (1fr 2fr) × auto rows
@@ -748,16 +748,16 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
               ${"success"===this._shoppingResult?i`
                 <span class="ing-shop-success"><ha-icon icon="mdi:check-circle-outline"></ha-icon></span>
               `:i`
-                <button class="ing-shop-btn ${a?"active":""}"
-                  @click=${a?()=>{this._showShoppingPicker=!1}:this._openShoppingPicker}
-                  title="${r(a?"Cancel":"Add to shopping list")}">
-                  <ha-icon icon="${a?"mdi:close":"mdi:cart-plus"}"></ha-icon>
+                <button class="ing-shop-btn ${n?"active":""}"
+                  @click=${n?()=>{this._showShoppingPicker=!1}:this._openShoppingPicker}
+                  title="${r(n?"Cancel":"Add to shopping list")}">
+                  <ha-icon icon="${n?"mdi:close":"mdi:cart-plus"}"></ha-icon>
                 </button>
               `}
             </div>
 
             <!-- shopping picker / review (shown inline when picking) -->
-            ${a?this._shoppingReview?i`
+            ${n?this._shoppingReview?i`
               <div class="wide-section-card">${this._renderShoppingReview()}</div>
             `:i`
               <div class="wide-section-card shopping-picker-panel">
@@ -778,7 +778,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
                   <button class="action-btn primary"
                     ?disabled=${this._shoppingAdding||!o}
                     @click=${this._handleAddToShopping}>
-                    ${this._shoppingAdding?i`<ha-circular-progress active size="tiny"></ha-circular-progress>`:r(o?n`Add (${o})`:"Add")}
+                    ${this._shoppingAdding?i`<ha-circular-progress active size="tiny"></ha-circular-progress>`:r(o?a`Add (${o})`:"Add")}
                   </button>
                 </div>
               </div>
@@ -789,17 +789,17 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
                 ${t.header?i`<div class="wide-section-title">${t.header}</div>`:""}
                 ${t.items.length?i`
                   <ul class="ingredient-list">
-                    ${t.items.map(t=>{const r=(e.ingredients||[]).indexOf(t),{amount:n,unit:o}=this._getDisplayAmount(t);return i`
-                        <li class="ingredient-item ${a?"selectable":"cookable"} ${!a&&this._doneIngredients.has(r)?"done":""}"
-                          @click=${a?()=>this._toggleIngredient(r):()=>this._toggleIngredientDone(r)}>
-                          ${a?i`
+                    ${t.items.map(t=>{const r=(e.ingredients||[]).indexOf(t),{amount:a,unit:o}=this._getDisplayAmount(t);return i`
+                        <li class="ingredient-item ${n?"selectable":"cookable"} ${!n&&this._doneIngredients.has(r)?"done":""}"
+                          @click=${n?()=>this._toggleIngredient(r):()=>this._toggleIngredientDone(r)}>
+                          ${n?i`
                             <span class="ing-check ${s?.has(r)?"checked":""}">
                               ${s?.has(r)?i`<ha-icon icon="mdi:check"></ha-icon>`:""}
                             </span>
                           `:""}
-                          <span class="ing-amount">${n} ${o}</span>
+                          <span class="ing-amount">${a} ${o}</span>
                           <span class="ing-name">${t.name}${t.notes?i` <em class="ing-notes">(${t.notes})</em>`:""}</span>
-                          ${!a&&this._doneIngredients.has(r)?i`<ha-icon class="ing-done-icon" icon="mdi:check-circle"></ha-icon>`:""}
+                          ${!n&&this._doneIngredients.has(r)?i`<ha-icon class="ing-done-icon" icon="mdi:check-circle"></ha-icon>`:""}
                         </li>
                       `})}
                   </ul>
@@ -816,12 +816,12 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
           <div class="wide-dir-col">
             <div class="wide-dir-spacer"></div>
             ${this._renderWakeLock()}
-            ${(e.instructions||[]).length?this._directionItems(e).map(e=>{if("heading"===e.type)return i`<div class="dir-divider">${e.label}</div>`;const t=e.text,n=e.i,a=this._completedSteps.has(n);return i`
-                <div class="wide-section-card wide-step-card ${a?"step-done":""}" @click=${()=>this._toggleStepComplete(n)}>
-                  <span class="step-num ${a?"done":""}"
-                    @click=${e=>{e.stopPropagation(),this._toggleStepComplete(n)}}
-                    title="${r(a?"Mark incomplete":"Mark complete")}"
-                  >${a?i`<ha-icon icon="mdi:check"></ha-icon>`:e.num}</span>
+            ${(e.instructions||[]).length?this._directionItems(e).map(e=>{if("heading"===e.type)return i`<div class="dir-divider">${e.label}</div>`;const t=e.text,a=e.i,n=this._completedSteps.has(a);return i`
+                <div class="wide-section-card wide-step-card ${n?"step-done":""}" @click=${()=>this._toggleStepComplete(a)}>
+                  <span class="step-num ${n?"done":""}"
+                    @click=${e=>{e.stopPropagation(),this._toggleStepComplete(a)}}
+                    title="${r(n?"Mark incomplete":"Mark complete")}"
+                  >${n?i`<ha-icon icon="mdi:check"></ha-icon>`:e.num}</span>
                   <span class="step-text">${this._renderStepWithTimers(t)}</span>
                 </div>
               `}):i`<p class="empty-tab">${r("No directions listed.")}</p>`}
@@ -931,7 +931,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
         <!-- Edit panel (inline overlay) -->
         ${this._editing?this._renderEditPanel():""}
       </div>
-    `}_getDisplayAmount(e){if(this._metricMode){const t=function(e,t){if(!e||!t)return null;const i=M(e);if(null===i||isNaN(i))return null;const r=t.toLowerCase().trim(),n=V[r];if(!n)return null;let a=i*n.factor,s=n.to;"lb"===r&&a>=500&&(a/=1e3,s="kg"),"ml"===s&&a>=1e3&&(a/=1e3,s="L");const o=a>=10?Math.round(a):Math.round(10*a)/10;return{amount:String(o),unit:s}}(this._scaleAmount(e.amount),e.unit);if(t)return t}return{amount:this._scaleAmount(e.amount)||"",unit:e.unit||""}}_groupIngredients(e){const t=[];let i={header:null,items:[]};for(const r of e||[])if(r.is_heading||r.name?.startsWith("#")){(i.items.length>0||null!==i.header)&&t.push(i);i={header:(r.name?.startsWith("#")?r.name.slice(1).trim():r.name)||"",items:[]}}else i.items.push(r);return(i.items.length>0||null!==i.header)&&t.push(i),t.length?t:[{header:null,items:e||[]}]}_renderIngredients(e){const t=this._showShoppingPicker,a=this._checkedIngredients,s=a?.size??0,o=(e.ingredients||[]).some(e=>e.unit&&V[e.unit.toLowerCase().trim()]);return i`
+    `}_getDisplayAmount(e){if(this._metricMode){const t=function(e,t){if(!e||!t)return null;const i=M(e);if(null===i||isNaN(i))return null;const r=t.toLowerCase().trim(),a=V[r];if(!a)return null;let n=i*a.factor,s=a.to;"lb"===r&&n>=500&&(n/=1e3,s="kg"),"ml"===s&&n>=1e3&&(n/=1e3,s="L");const o=n>=10?Math.round(n):Math.round(10*n)/10;return{amount:String(o),unit:s}}(this._scaleAmount(e.amount),e.unit);if(t)return t}return{amount:this._scaleAmount(e.amount)||"",unit:e.unit||""}}_groupIngredients(e){const t=[];let i={header:null,items:[]};for(const r of e||[])if(r.is_heading||r.name?.startsWith("#")){(i.items.length>0||null!==i.header)&&t.push(i);i={header:(r.name?.startsWith("#")?r.name.slice(1).trim():r.name)||"",items:[]}}else i.items.push(r);return(i.items.length>0||null!==i.header)&&t.push(i),t.length?t:[{header:null,items:e||[]}]}_renderIngredients(e){const t=this._showShoppingPicker,n=this._checkedIngredients,s=n?.size??0,o=(e.ingredients||[]).some(e=>e.unit&&V[e.unit.toLowerCase().trim()]);return i`
       ${this.settings?.showUnitConversion&&o?i`
         <div class="metric-toggle-row">
           <button class="metric-btn ${this._metricMode?"active":""}"
@@ -944,15 +944,15 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
 
       ${e.ingredients?.length?i`
         <ul class="ingredient-list">
-          ${e.ingredients.map((e,r)=>{if(e.is_heading||e.name?.startsWith("#")){const t=e.name?.startsWith("#")?e.name.slice(1).trim():e.name;return i`<li class="ing-heading">${t}</li>`}const{amount:n,unit:s}=this._getDisplayAmount(e);return i`
+          ${e.ingredients.map((e,r)=>{if(e.is_heading||e.name?.startsWith("#")){const t=e.name?.startsWith("#")?e.name.slice(1).trim():e.name;return i`<li class="ing-heading">${t}</li>`}const{amount:a,unit:s}=this._getDisplayAmount(e);return i`
               <li class="ingredient-item ${t?"selectable":"cookable"} ${!t&&this._doneIngredients.has(r)?"done":""}"
                 @click=${t?()=>this._toggleIngredient(r):()=>this._toggleIngredientDone(r)}>
                 ${t?i`
-                  <span class="ing-check ${a?.has(r)?"checked":""}">
-                    ${a?.has(r)?i`<ha-icon icon="mdi:check"></ha-icon>`:""}
+                  <span class="ing-check ${n?.has(r)?"checked":""}">
+                    ${n?.has(r)?i`<ha-icon icon="mdi:check"></ha-icon>`:""}
                   </span>
                 `:""}
-                <span class="ing-amount">${n} ${s}</span>
+                <span class="ing-amount">${a} ${s}</span>
                 <span class="ing-name">${e.name}${e.notes?i` <em class="ing-notes">(${e.notes})</em>`:""}</span>
                 ${!t&&this._doneIngredients.has(r)?i`<ha-icon class="ing-done-icon" icon="mdi:check-circle"></ha-icon>`:""}
               </li>
@@ -988,7 +988,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
               <button class="action-btn primary"
                 ?disabled=${this._shoppingAdding||!s}
                 @click=${this._handleAddToShopping}>
-                ${this._shoppingAdding?i`<ha-circular-progress active size="tiny"></ha-circular-progress>`:r(s?n`Add (${s})`:"Add")}
+                ${this._shoppingAdding?i`<ha-circular-progress active size="tiny"></ha-circular-progress>`:r(s?a`Add (${s})`:"Add")}
               </button>
             </div>
           </div>
@@ -999,14 +999,14 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
           </button>
         `}
       </div>
-    `}_toggleIngredientDone(e){const t=new Set(this._doneIngredients);t.has(e)?t.delete(e):t.add(e),this._doneIngredients=t}_toggleStepComplete(e){const t=new Set(this._completedSteps);t.has(e)?t.delete(e):t.add(e),this._completedSteps=t}_directionItems(e){const t=[];(e.ingredients||[]).forEach((e,i)=>{e.is_heading||e.name?.startsWith("#")?t.push([]):t.length&&t[t.length-1].push({ing:e,idx:i})});const i=[];let r=0,n=0;return(e.instructions||[]).forEach((e,a)=>{"string"==typeof e&&e.trimStart().startsWith("#")?(i.push({type:"heading",label:e.replace(/^\s*#+\s*/,""),ings:t[r]||[],i:a}),r++):(n++,i.push({type:"step",text:e,num:n,i:a}))}),i}_renderDirIngredients(e){return e?.length?i`
+    `}_toggleIngredientDone(e){const t=new Set(this._doneIngredients);t.has(e)?t.delete(e):t.add(e),this._doneIngredients=t}_toggleStepComplete(e){const t=new Set(this._completedSteps);t.has(e)?t.delete(e):t.add(e),this._completedSteps=t}_directionItems(e){const t=[];(e.ingredients||[]).forEach((e,i)=>{e.is_heading||e.name?.startsWith("#")?t.push([]):t.length&&t[t.length-1].push({ing:e,idx:i})});const i=[];let r=0,a=0;return(e.instructions||[]).forEach((e,n)=>{"string"==typeof e&&e.trimStart().startsWith("#")?(i.push({type:"heading",label:e.replace(/^\s*#+\s*/,""),ings:t[r]||[],i:n}),r++):(a++,i.push({type:"step",text:e,num:a,i:n}))}),i}_renderDirIngredients(e){return e?.length?i`
       <ul class="ingredient-list dir-ings">
-        ${e.map(({ing:e,idx:t})=>{const{amount:r,unit:n}=this._getDisplayAmount(e),a=this._doneIngredients.has(t);return i`
-            <li class="ingredient-item cookable ${a?"done":""}"
+        ${e.map(({ing:e,idx:t})=>{const{amount:r,unit:a}=this._getDisplayAmount(e),n=this._doneIngredients.has(t);return i`
+            <li class="ingredient-item cookable ${n?"done":""}"
               @click=${e=>{e.stopPropagation(),this._toggleIngredientDone(t)}}>
-              <span class="ing-amount">${r} ${n}</span>
+              <span class="ing-amount">${r} ${a}</span>
               <span class="ing-name">${e.name}${e.notes?i` <em class="ing-notes">(${e.notes})</em>`:""}</span>
-              ${a?i`<ha-icon class="ing-done-icon" icon="mdi:check-circle"></ha-icon>`:""}
+              ${n?i`<ha-icon class="ing-done-icon" icon="mdi:check-circle"></ha-icon>`:""}
             </li>
           `})}
       </ul>
@@ -1016,28 +1016,28 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
               <li class="dir-heading-item">
                 <div class="dir-heading">${e.label}</div>
                 ${this._renderDirIngredients(e.ings)}
-              </li>`;const t=e.text,n=e.i,a=this._completedSteps.has(n);return i`
-            <li class="step-item ${a?"step-done":""}" @click=${()=>this._toggleStepComplete(n)}>
-              <span class="step-num ${a?"done":""}"
-                @click=${e=>{e.stopPropagation(),this._toggleStepComplete(n)}}
-                title="${r(a?"Mark incomplete":"Mark complete")}"
-              >${a?i`<ha-icon icon="mdi:check"></ha-icon>`:e.num}</span>
+              </li>`;const t=e.text,a=e.i,n=this._completedSteps.has(a);return i`
+            <li class="step-item ${n?"step-done":""}" @click=${()=>this._toggleStepComplete(a)}>
+              <span class="step-num ${n?"done":""}"
+                @click=${e=>{e.stopPropagation(),this._toggleStepComplete(a)}}
+                title="${r(n?"Mark incomplete":"Mark complete")}"
+              >${n?i`<ha-icon icon="mdi:check"></ha-icon>`:e.num}</span>
               <span class="step-text">${this._renderStepWithTimers(t)}</span>
             </li>
           `})}
       </ol>
-    `:i`<p class="empty-tab">${r("No directions listed.")}</p>`}_renderStepWithTimers(e){const t=[];let a,s=0;for(Z.lastIndex=0;null!==(a=Z.exec(e));){a.index>s&&t.push(e.slice(s,a.index));const o=a[0],l=H(o);l>0?t.push(i`<button class="time-chip" @click=${e=>{e.stopPropagation(),this._fireTimer(l,o)}} title="${r(n`Start timer for ${o}`)}">
+    `:i`<p class="empty-tab">${r("No directions listed.")}</p>`}_renderStepWithTimers(e){const t=[];let n,s=0;for(Z.lastIndex=0;null!==(n=Z.exec(e));){n.index>s&&t.push(e.slice(s,n.index));const o=n[0],l=H(o);l>0?t.push(i`<button class="time-chip" @click=${e=>{e.stopPropagation(),this._fireTimer(l,o)}} title="${r(a`Start timer for ${o}`)}">
           <ha-icon icon="mdi:timer-outline"></ha-icon>${o}
-        </button>`):t.push(o),s=a.index+a[0].length}return s<e.length&&t.push(e.slice(s)),t}_renderNotes(e){return i`
+        </button>`):t.push(o),s=n.index+n[0].length}return s<e.length&&t.push(e.slice(s)),t}_renderNotes(e){return i`
       ${e.notes?i`<div class="notes-text md-content">${R(U(e.notes))}</div>`:i`<p class="empty-tab">${r("No notes.")}</p>`}
     `}_renderNutrition(e){const t=e.nutrition||{};if(!W.some(e=>null!=t[e.key]&&""!==t[e.key]))return i`
         <div class="empty-tab">
           <p>${r("No nutrition info. Add it via the edit panel.")}</p>
         </div>
-      `;const a=e.servings?r(n`Per serving (${e.servings_text||e.servings})`):r("Per serving");return i`
+      `;const n=e.servings?r(a`Per serving (${e.servings_text||e.servings})`):r("Per serving");return i`
       <div class="nutrition-panel">
         <div class="nutr-header">${r("Nutrition Facts")}</div>
-        <div class="nutr-sub">${a}</div>
+        <div class="nutr-sub">${n}</div>
         <div class="nutr-divider thick"></div>
         ${W.map(e=>{const r=t[e.key];return null==r||""===r?"":i`
             <div class="nutr-row ${e.bold?"nutr-bold":""} ${e.indent?"nutr-indent":""}">
@@ -1047,10 +1047,10 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
             <div class="nutr-divider"></div>
           `})}
       </div>
-    `}_renderNutritionRing(e){const t=e?.nutrition||{},a=parseFloat(t.calories)||0,s=parseFloat(t.fat)||0,o=parseFloat(t.carbohydrates)||0,l=parseFloat(t.protein)||0,c=9*s,d=4*o,p=4*l,h=c+d+p;if(!(h>0||a>0))return i`
+    `}_renderNutritionRing(e){const t=e?.nutrition||{},n=parseFloat(t.calories)||0,s=parseFloat(t.fat)||0,o=parseFloat(t.carbohydrates)||0,l=parseFloat(t.protein)||0,c=9*s,d=4*o,p=4*l,h=c+d+p;if(!(h>0||n>0))return i`
         <div class="nutr-card">
           <p class="empty-tab" style="margin:0;padding:8px 0;text-align:center">${r("No nutritional information available.")}</p>
-        </div>`;const u=[{label:r("Carbs"),val:o,cal:d,color:"#f59e0b"},{label:r("Total fat"),val:s,cal:c,color:"#3b82f6"},{label:r("Protein"),val:l,cal:p,color:"#22c55e"}],m=50,g=50,f=2*Math.PI*42,b=7+4*f/360,v=h>0?Math.max(0,d/h*f-b):0,_=h>0?Math.max(0,c/h*f-b):0,x=h>0?Math.max(0,p/h*f-b):0,y=(h>0?d/h*360:0)-90,w=y+(h>0?c/h*360:0),k=a>0?Math.round(a):h>0?Math.round(h):null,$=Object.entries(q).filter(([e])=>parseFloat(t[e])>0).map(([e,i])=>{const r=parseFloat(t[e]),n=Math.min(Math.round(r/i.val*100),999);return{key:e,label:i.label,val:r,unit:i.unit,pct:n}});return i`
+        </div>`;const u=[{label:r("Carbs"),val:o,cal:d,color:"#f59e0b"},{label:r("Total fat"),val:s,cal:c,color:"#3b82f6"},{label:r("Protein"),val:l,cal:p,color:"#22c55e"}],m=50,g=50,f=2*Math.PI*42,b=7+4*f/360,v=h>0?Math.max(0,d/h*f-b):0,_=h>0?Math.max(0,c/h*f-b):0,x=h>0?Math.max(0,p/h*f-b):0,y=(h>0?d/h*360:0)-90,w=y+(h>0?c/h*360:0),k=n>0?Math.round(n):h>0?Math.round(h):null,$=Object.entries(q).filter(([e])=>parseFloat(t[e])>0).map(([e,i])=>{const r=parseFloat(t[e]),a=Math.min(Math.round(r/i.val*100),999);return{key:e,label:i.label,val:r,unit:i.unit,pct:a}});return i`
       <div class="nutr-card">
         <!-- Top row: donut ring + macro columns -->
         <div class="nutr-top">
@@ -1099,7 +1099,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
 
         ${e?.servings?i`
           <div class="nutr-serving-note">
-            ${e.servings_text?r(n`Per ${e.servings_text}`):r(n`Per ${e.servings} serving${1!==e.servings?"s":""}`)}
+            ${e.servings_text?r(a`Per ${e.servings_text}`):r(a`Per ${e.servings} serving${1!==e.servings?"s":""}`)}
           </div>
         `:""}
 
@@ -1126,14 +1126,14 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
           `:""}
         `:""}
       </div>
-    `}_renderPhotos(e){const t=e.photos||[],n=e.image_url,a=n?[n,...t.filter(e=>e!==n)]:t;return i`
+    `}_renderPhotos(e){const t=e.photos||[],a=e.image_url,n=a?[a,...t.filter(e=>e!==a)]:t;return i`
       <div class="photos-tab">
-        ${a.length?i`
+        ${n.length?i`
           <div class="photos-grid">
-            ${a.map(e=>i`
-              <div class="photo-item ${e===n?"main-photo":""}">
+            ${n.map(e=>i`
+              <div class="photo-item ${e===a?"main-photo":""}">
                 <img src="${e}" alt="${r("Recipe photo")}" loading="lazy" />
-                ${e===n?i`<span class="photo-badge">${r("Main")}</span>`:i`
+                ${e===a?i`<span class="photo-badge">${r("Main")}</span>`:i`
                   <button class="photo-action set-main" @click=${()=>this._setMainPhoto(e)} title="${r("Set as main photo")}">
                     <ha-icon icon="mdi:star-outline"></ha-icon>
                   </button>
@@ -1248,10 +1248,10 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
             ${this._renderField(r("Notes"),"notes","textarea")}
 
             <!-- Ingredients editor -->
-            <div class="edit-section-label">${r(n`Ingredients (${(e.ingredients||[]).length})`)}</div>
+            <div class="edit-section-label">${r(a`Ingredients (${(e.ingredients||[]).length})`)}</div>
             ${(e.ingredients||[]).length?i`
               <ul class="edit-ing-list">
-                ${(e.ingredients||[]).map((t,n)=>{const a=this._editIngEdit?.idx===n,s=t.is_heading||t.name?.startsWith("#");if(a){const e=this._editIngEdit;return i`
+                ${(e.ingredients||[]).map((t,a)=>{const n=this._editIngEdit?.idx===a,s=t.is_heading||t.name?.startsWith("#");if(n){const e=this._editIngEdit;return i`
                       <li class="edit-ing-inline-edit ${s?"edit-ing-heading":""}">
                         ${e.heading?i`
                           <input class="ing-inline-input ing-inline-name" type="text" placeholder="${r("Section header")}"
@@ -1286,26 +1286,26 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
                     `}return i`
                     <li
                       draggable="true"
-                      class="${s?"edit-ing-heading":""} ${this._dragIngOver===n?"drag-over":""}"
-                      @dragstart=${e=>{this._dragIngFrom=n,e.dataTransfer.effectAllowed="move",e.dataTransfer.setData("text/plain",String(n))}}
-                      @dragover=${e=>{e.preventDefault(),e.dataTransfer.dropEffect="move",this._dragIngOver!==n&&(this._dragIngOver=n)}}
-                      @dragleave=${()=>{this._dragIngOver===n&&(this._dragIngOver=-1)}}
-                      @drop=${e=>{e.preventDefault(),this._editDropIngredient(this._dragIngFrom,n)}}
+                      class="${s?"edit-ing-heading":""} ${this._dragIngOver===a?"drag-over":""}"
+                      @dragstart=${e=>{this._dragIngFrom=a,e.dataTransfer.effectAllowed="move",e.dataTransfer.setData("text/plain",String(a))}}
+                      @dragover=${e=>{e.preventDefault(),e.dataTransfer.dropEffect="move",this._dragIngOver!==a&&(this._dragIngOver=a)}}
+                      @dragleave=${()=>{this._dragIngOver===a&&(this._dragIngOver=-1)}}
+                      @drop=${e=>{e.preventDefault(),this._editDropIngredient(this._dragIngFrom,a)}}
                       @dragend=${()=>{this._dragIngOver=-1,this._dragIngFrom=-1}}
                     >
                       <ha-icon icon="mdi:drag-vertical" class="drag-handle"></ha-icon>
-                      <span class="edit-ing-text" @click=${()=>this._startEditIngredient(n)} title="${r("Click to edit")}">
+                      <span class="edit-ing-text" @click=${()=>this._startEditIngredient(a)} title="${r("Click to edit")}">
                         ${s?i`<strong>${t.name?.startsWith("#")?t.name.slice(1).trim():t.name}</strong>`:i`${t.amount?`${t.amount}${t.unit?" "+t.unit:""} `:""}${t.name}`}
                       </span>
                       <div class="edit-reorder-btns">
-                        <button class="edit-move-btn" ?disabled=${0===n} @click=${()=>this._editMoveIngredient(n,-1)} title="${r("Move up")}">
+                        <button class="edit-move-btn" ?disabled=${0===a} @click=${()=>this._editMoveIngredient(a,-1)} title="${r("Move up")}">
                           <ha-icon icon="mdi:chevron-up"></ha-icon>
                         </button>
-                        <button class="edit-move-btn" ?disabled=${n===e.ingredients.length-1} @click=${()=>this._editMoveIngredient(n,1)} title="${r("Move down")}">
+                        <button class="edit-move-btn" ?disabled=${a===e.ingredients.length-1} @click=${()=>this._editMoveIngredient(a,1)} title="${r("Move down")}">
                           <ha-icon icon="mdi:chevron-down"></ha-icon>
                         </button>
                       </div>
-                      <button class="edit-remove-btn" @click=${()=>this._editRemoveIngredient(n)}>
+                      <button class="edit-remove-btn" @click=${()=>this._editRemoveIngredient(a)}>
                         <ha-icon icon="mdi:close"></ha-icon>
                       </button>
                     </li>
@@ -1324,30 +1324,30 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
             </div>
 
             <!-- Instructions editor -->
-            <div class="edit-section-label">${r(n`Directions (${(e.instructions||[]).length} steps)`)}</div>
+            <div class="edit-section-label">${r(a`Directions (${(e.instructions||[]).length} steps)`)}</div>
             ${(e.instructions||[]).length?i`
               <ol class="edit-steps-list">
-                ${(e.instructions||[]).map((t,n)=>i`
+                ${(e.instructions||[]).map((t,a)=>i`
                   <li
                     draggable="true"
-                    class="${this._dragStepOver===n?"drag-over":""}"
-                    @dragstart=${e=>{this._dragStepFrom=n,e.dataTransfer.effectAllowed="move",e.dataTransfer.setData("text/plain",String(n))}}
-                    @dragover=${e=>{e.preventDefault(),e.dataTransfer.dropEffect="move",this._dragStepOver!==n&&(this._dragStepOver=n)}}
-                    @dragleave=${()=>{this._dragStepOver===n&&(this._dragStepOver=-1)}}
-                    @drop=${e=>{e.preventDefault(),this._editDropStep(this._dragStepFrom,n)}}
+                    class="${this._dragStepOver===a?"drag-over":""}"
+                    @dragstart=${e=>{this._dragStepFrom=a,e.dataTransfer.effectAllowed="move",e.dataTransfer.setData("text/plain",String(a))}}
+                    @dragover=${e=>{e.preventDefault(),e.dataTransfer.dropEffect="move",this._dragStepOver!==a&&(this._dragStepOver=a)}}
+                    @dragleave=${()=>{this._dragStepOver===a&&(this._dragStepOver=-1)}}
+                    @drop=${e=>{e.preventDefault(),this._editDropStep(this._dragStepFrom,a)}}
                     @dragend=${()=>{this._dragStepOver=-1,this._dragStepFrom=-1}}
                   >
                     <ha-icon icon="mdi:drag-vertical" class="drag-handle"></ha-icon>
                     <span class="edit-ing-text">${t}</span>
                     <div class="edit-reorder-btns">
-                      <button class="edit-move-btn" ?disabled=${0===n} @click=${()=>this._editMoveStep(n,-1)} title="${r("Move up")}">
+                      <button class="edit-move-btn" ?disabled=${0===a} @click=${()=>this._editMoveStep(a,-1)} title="${r("Move up")}">
                         <ha-icon icon="mdi:chevron-up"></ha-icon>
                       </button>
-                      <button class="edit-move-btn" ?disabled=${n===e.instructions.length-1} @click=${()=>this._editMoveStep(n,1)} title="${r("Move down")}">
+                      <button class="edit-move-btn" ?disabled=${a===e.instructions.length-1} @click=${()=>this._editMoveStep(a,1)} title="${r("Move down")}">
                         <ha-icon icon="mdi:chevron-down"></ha-icon>
                       </button>
                     </div>
-                    <button class="edit-remove-btn" @click=${()=>this._editRemoveStep(n)}>
+                    <button class="edit-remove-btn" @click=${()=>this._editRemoveStep(a)}>
                       <ha-icon icon="mdi:close"></ha-icon>
                     </button>
                   </li>
@@ -1397,11 +1397,11 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
           </div>
         </div>
       </div>
-    `}_renderField(e,t,r){const n=this._editData[t]??"";return"textarea"===r?i`
+    `}_renderField(e,t,r){const a=this._editData[t]??"";return"textarea"===r?i`
         <div class="edit-field">
           <label>${e}</label>
           <textarea
-            .value=${n}
+            .value=${a}
             @input=${e=>this._handleEditField(t,e.target.value)}
             rows="3"
           ></textarea>
@@ -1411,11 +1411,11 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
         <label>${e}</label>
         <input
           type="${r}"
-          .value=${String(n)}
+          .value=${String(a)}
           @input=${e=>this._handleEditField(t,e.target.value)}
         />
       </div>
-    `}static styles=a`
+    `}static styles=n`
     :host { display: block; height: 100%; }
 
     .detail-container {
@@ -1453,21 +1453,21 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       scrollbar-width: thin; scrollbar-color: var(--rm-border) transparent;
     }
     .notes-section { margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--rm-border); }
-    .notes-section h3 { margin: 0 0 8px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--rm-text-secondary); }
+    .notes-section h3 { margin: 0 0 8px; font-size: calc(13px * var(--rm-font-scale, 1)); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--rm-text-secondary); }
 
     /* Recipe title */
     .recipe-title {
-      margin: 0 0 6px; font-size: 20px; font-weight: 700;
+      margin: 0 0 6px; font-size: calc(20px * var(--rm-font-scale, 1)); font-weight: 700;
       color: var(--rm-text); line-height: 1.2;
     }
-    .recipe-title.wide-centered { text-align: center; font-size: 22px; }
+    .recipe-title.wide-centered { text-align: center; font-size: calc(22px * var(--rm-font-scale, 1)); }
     .detail-desc.wide-centered { text-align: center; }
     .detail-right-header .quick-rating { justify-content: center; }
     .detail-right-header .action-btns-row { justify-content: center; }
 
     /* Quick rating */
     .quick-rating { display: flex; gap: 2px; margin: 0 0 8px; }
-    .qr-star { font-size: 20px; cursor: pointer; color: var(--rm-border); -webkit-text-stroke: 1px rgba(200,150,0,0.4); transition: color 0.15s; }
+    .qr-star { font-size: calc(20px * var(--rm-font-scale, 1)); cursor: pointer; color: var(--rm-border); -webkit-text-stroke: 1px rgba(200,150,0,0.4); transition: color 0.15s; }
     .qr-star.filled { color: #f5a623; -webkit-text-stroke: 1px #c47f0a; }
     .qr-star:hover { color: #f5a623; }
 
@@ -1478,7 +1478,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
     .action-icon-btn {
       display: flex; flex-direction: column; align-items: center; gap: 5px;
       background: none; border: none; cursor: pointer;
-      color: var(--rm-text-secondary); font-size: 10px; font-weight: 600;
+      color: var(--rm-text-secondary); font-size: calc(10px * var(--rm-font-scale, 1)); font-weight: 600;
       transition: color 0.15s; text-decoration: none; width: 56px;
     }
     .action-icon-btn .btn-icon {
@@ -1500,7 +1500,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
     .meta-chip-icon {
       display: inline-flex; align-items: center; gap: 6px;
       background: var(--rm-bg-elevated); border: 1px solid var(--rm-border);
-      border-radius: 20px; padding: 5px 12px; font-size: 12px;
+      border-radius: 20px; padding: 5px 12px; font-size: calc(12px * var(--rm-font-scale, 1));
       color: var(--rm-text-secondary); font-weight: 600;
     }
     .meta-chip-icon ha-icon { --mdc-icon-size: 14px; }
@@ -1576,7 +1576,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
     .detail-head { margin-bottom: 12px; }
     .detail-desc {
       margin: 0 0 8px;
-      font-size: 14px;
+      font-size: calc(14px * var(--rm-font-scale, 1));
       color: var(--rm-text-secondary, #8e8e93);
       line-height: 1.5;
     }
@@ -1596,8 +1596,8 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       padding: 6px 12px;
       min-width: 60px;
     }
-    .meta-label { font-size: 10px; color: var(--rm-text-secondary, #8e8e93); text-transform: uppercase; letter-spacing: 0.05em; }
-    .meta-val { font-size: 14px; font-weight: 600; color: var(--rm-text, #e5e5ea); }
+    .meta-label { font-size: calc(10px * var(--rm-font-scale, 1)); color: var(--rm-text-secondary, #8e8e93); text-transform: uppercase; letter-spacing: 0.05em; }
+    .meta-val { font-size: calc(14px * var(--rm-font-scale, 1)); font-weight: 600; color: var(--rm-text, #e5e5ea); }
 
     .tags-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
     .tag-chip {
@@ -1605,7 +1605,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       color: var(--rm-accent, #ff6b35);
       border-radius: 20px;
       padding: 3px 10px;
-      font-size: 12px;
+      font-size: calc(12px * var(--rm-font-scale, 1));
     }
 
     /* Chip groups (courses, categories, collections) */
@@ -1617,7 +1617,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       margin-top: 5px;
     }
     .chip-group-label {
-      font-size: 11px;
+      font-size: calc(11px * var(--rm-font-scale, 1));
       color: var(--rm-text-secondary, #8e8e93);
       font-weight: 600;
       text-transform: uppercase;
@@ -1626,7 +1626,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
     .chip {
       border-radius: 20px;
       padding: 3px 10px;
-      font-size: 12px;
+      font-size: calc(12px * var(--rm-font-scale, 1));
       border: none;
       cursor: default;
     }
@@ -1659,28 +1659,28 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       display: inline-flex; align-items: center; gap: 6px;
       background: var(--rm-accent-soft); color: var(--rm-accent);
       border: 1px solid var(--rm-accent); border-radius: 16px;
-      padding: 4px 10px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+      padding: 4px 10px; font-size: calc(13px * var(--rm-font-scale, 1)); font-weight: 600; cursor: pointer; font-family: inherit;
     }
     .total-chip ha-icon { --mdc-icon-size: 14px; }
     .save-mult-btn {
       display: inline-flex; align-items: center; gap: 6px;
       background: transparent; color: var(--rm-text, inherit);
       border: 1px solid var(--rm-border, rgba(255,255,255,0.3)); border-radius: 16px;
-      padding: 4px 10px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+      padding: 4px 10px; font-size: calc(13px * var(--rm-font-scale, 1)); font-weight: 600; cursor: pointer; font-family: inherit;
     }
     .save-mult-btn.confirm { background: var(--rm-accent); color: #fff; border-color: var(--rm-accent); }
     .save-mult-btn ha-icon { --mdc-icon-size: 14px; }
     .save-mult-btn[disabled] { opacity: 0.5; cursor: default; }
     .total-edit { display: inline-flex; align-items: center; gap: 4px; }
     .total-input {
-      width: 72px; padding: 4px 8px; font-size: 14px; font-family: inherit;
+      width: 72px; padding: 4px 8px; font-size: calc(14px * var(--rm-font-scale, 1)); font-family: inherit;
       background: var(--rm-surface, transparent); color: var(--rm-text, inherit);
       border: 1px solid var(--rm-accent); border-radius: 8px;
     }
-    .total-unit { font-size: 13px; color: var(--rm-text-secondary); }
+    .total-unit { font-size: calc(13px * var(--rm-font-scale, 1)); color: var(--rm-text-secondary); }
     .scaler-row { flex-wrap: wrap; }
     .scaler-val {
-      font-size: 13px; font-weight: 600; color: var(--rm-text);
+      font-size: calc(13px * var(--rm-font-scale, 1)); font-weight: 600; color: var(--rm-text);
       min-width: 34px; height: 34px; text-align: center;
       display: flex; align-items: center; justify-content: center;
       background: var(--rm-bg-elevated); border: 1px solid var(--rm-border);
@@ -1703,7 +1703,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       border-bottom: 2px solid transparent;
       padding: 11px 14px;
       cursor: pointer;
-      font-size: 14px;
+      font-size: calc(14px * var(--rm-font-scale, 1));
       font-weight: 600;
       color: var(--rm-text-secondary, #8e8e93);
       transition: color 0.15s, border-color 0.15s;
@@ -1724,7 +1724,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       display: inline-flex; align-items: center; gap: 5px;
       background: none; border: 1px solid var(--rm-border);
       border-radius: 20px; padding: 4px 12px;
-      font-size: 12px; cursor: pointer;
+      font-size: calc(12px * var(--rm-font-scale, 1)); cursor: pointer;
       color: var(--rm-text-secondary);
       transition: all 0.15s;
     }
@@ -1737,7 +1737,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       display: inline-flex; align-items: center; gap: 5px;
       border: 1px dashed var(--rm-border);
       border-radius: 20px; padding: 4px 12px;
-      font-size: 12px; color: var(--rm-text-muted); opacity: 0.8;
+      font-size: calc(12px * var(--rm-font-scale, 1)); color: var(--rm-text-muted); opacity: 0.8;
     }
     .wakelock-unsupported ha-icon { --mdc-icon-size: 14px; }
 
@@ -1751,7 +1751,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       display: inline-flex; align-items: center; gap: 5px;
       background: none; border: 1px solid var(--rm-border);
       border-radius: 20px; padding: 4px 12px;
-      font-size: 12px; cursor: pointer;
+      font-size: calc(12px * var(--rm-font-scale, 1)); cursor: pointer;
       color: var(--rm-text-secondary);
       transition: all 0.15s;
     }
@@ -1764,7 +1764,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
     /* Ingredient section heading */
     .ing-heading {
       list-style: none;
-      font-size: 11px; font-weight: 700;
+      font-size: calc(11px * var(--rm-font-scale, 1)); font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.08em;
       color: var(--rm-accent); padding: 10px 0 4px;
       margin-top: 6px;
@@ -1781,14 +1781,14 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
     }
     .ingredient-item:last-child { border-bottom: none; }
     .ing-amount {
-      font-size: 14px;
+      font-size: calc(14px * var(--rm-font-scale, 1));
       font-weight: 700;
       color: var(--rm-accent, #ff6b35);
       min-width: 70px;
       flex-shrink: 0;
     }
-    .ing-name { font-size: 15px; color: var(--rm-text, #e5e5ea); }
-    .ing-notes { font-size: 13px; color: var(--rm-text-secondary, #8e8e93); font-style: italic; }
+    .ing-name { font-size: calc(15px * var(--rm-font-scale, 1)); color: var(--rm-text, #e5e5ea); }
+    .ing-notes { font-size: calc(13px * var(--rm-font-scale, 1)); color: var(--rm-text-secondary, #8e8e93); font-style: italic; }
 
     /* Tick off ingredients while cooking */
     .ingredient-item.cookable { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -1843,11 +1843,11 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       color: var(--rm-text-secondary, #8e8e93);
       padding: 4px 10px;
       cursor: pointer;
-      font-size: 12px;
+      font-size: calc(12px * var(--rm-font-scale, 1));
     }
     .picker-sel-btn:hover { background: var(--rm-accent-soft); color: var(--rm-text); }
     .picker-btns { display: flex; gap: 8px; justify-content: flex-end; }
-    .shopping-note { font-size: 12px; color: var(--rm-text-secondary, #8e8e93); }
+    .shopping-note { font-size: calc(12px * var(--rm-font-scale, 1)); color: var(--rm-text-secondary, #8e8e93); }
     .list-select {
       flex: 1;
       background: var(--rm-bg-elevated, #2c2c2e);
@@ -1855,7 +1855,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       border-radius: 8px;
       color: var(--rm-text, #e5e5ea);
       padding: 8px 10px;
-      font-size: 14px;
+      font-size: calc(14px * var(--rm-font-scale, 1));
       min-width: 120px;
     }
     .shopping-success {
@@ -1863,7 +1863,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       align-items: center;
       gap: 8px;
       color: var(--success-color, #4caf50);
-      font-size: 14px;
+      font-size: calc(14px * var(--rm-font-scale, 1));
       padding: 8px 0;
     }
     .shopping-success ha-icon { --mdc-icon-size: 20px; }
@@ -1878,12 +1878,12 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
     }
     .dir-heading-item { margin: 4px 0 14px; }
     .dir-heading {
-      font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      font-size: calc(12px * var(--rm-font-scale, 1)); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
       color: var(--rm-accent, #ff6b35); margin-bottom: 6px;
     }
     .dir-ings { margin: 0 0 6px; }
     .dir-divider {
-      font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      font-size: calc(12px * var(--rm-font-scale, 1)); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
       color: var(--rm-accent, #ff6b35); margin: 10px 4px 0;
     }
     .step-num {
@@ -1895,7 +1895,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 13px;
+      font-size: calc(13px * var(--rm-font-scale, 1));
       font-weight: 700;
       color: #fff;
       cursor: pointer;
@@ -1915,7 +1915,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       text-decoration-color: var(--rm-border);
     }
     .step-item, .wide-step-card { cursor: pointer; -webkit-tap-highlight-color: transparent; }
-    .step-text { font-size: 15px; color: var(--rm-text, #e5e5ea); line-height: 1.7; transition: opacity 0.2s; }
+    .step-text { font-size: calc(15px * var(--rm-font-scale, 1)); color: var(--rm-text, #e5e5ea); line-height: 1.7; transition: opacity 0.2s; }
 
     /* Timer chip in directions */
     .time-chip {
@@ -1927,7 +1927,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       border: 1px solid var(--rm-accent, #ff6b35);
       border-radius: 12px;
       padding: 1px 7px;
-      font-size: 12px;
+      font-size: calc(12px * var(--rm-font-scale, 1));
       font-weight: 600;
       cursor: pointer;
       transition: background 0.15s;
@@ -1937,13 +1937,13 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
     .time-chip:hover { background: var(--rm-accent, #ff6b35); color: #fff; }
 
     /* Notes */
-    .notes-text { font-size: 14px; color: var(--rm-text, #e5e5ea); line-height: 1.6; }
+    .notes-text { font-size: calc(14px * var(--rm-font-scale, 1)); color: var(--rm-text, #e5e5ea); line-height: 1.6; }
     .empty-tab {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 8px;
-      font-size: 14px;
+      font-size: calc(14px * var(--rm-font-scale, 1));
       color: var(--rm-text-secondary, #8e8e93);
       text-align: center;
       padding: 20px 0;
@@ -1961,14 +1961,14 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       margin: 0 auto;
     }
     .nutr-header {
-      font-size: 28px;
+      font-size: calc(28px * var(--rm-font-scale, 1));
       font-weight: 900;
       color: var(--rm-text, #e5e5ea);
       line-height: 1;
       margin-bottom: 2px;
     }
     .nutr-sub {
-      font-size: 11px;
+      font-size: calc(11px * var(--rm-font-scale, 1));
       color: var(--rm-text-secondary, #8e8e93);
       margin-bottom: 6px;
     }
@@ -1979,13 +1979,13 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       justify-content: space-between;
       align-items: baseline;
       padding: 2px 0;
-      font-size: 13px;
+      font-size: calc(13px * var(--rm-font-scale, 1));
       color: var(--rm-text, #e5e5ea);
     }
-    .nutr-bold { font-weight: 700; font-size: 15px; }
-    .nutr-indent { padding-left: 14px; font-size: 12px; }
+    .nutr-bold { font-weight: 700; font-size: calc(15px * var(--rm-font-scale, 1)); }
+    .nutr-indent { padding-left: 14px; font-size: calc(12px * var(--rm-font-scale, 1)); }
     .nutr-val { font-weight: 600; white-space: nowrap; }
-    .nutr-val em { font-style: normal; font-size: 11px; color: var(--rm-text-secondary, #8e8e93); }
+    .nutr-val em { font-style: normal; font-size: calc(11px * var(--rm-font-scale, 1)); color: var(--rm-text-secondary, #8e8e93); }
 
     /* Nutrition card */
     .nutr-card { display: flex; flex-direction: column; gap: 10px; }
@@ -1993,22 +1993,22 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
     .nutr-ring-wrap { flex-shrink: 0; width: 90px; height: 90px; }
     .nutr-macro-cols { display: flex; gap: 10px; flex: 1; justify-content: space-around; }
     .nutr-macro-col { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-    .nutr-mcol-num { font-size: 17px; font-weight: 700; line-height: 1; }
-    .nutr-mcol-label { font-size: 11px; color: var(--rm-text-secondary); font-weight: 500; }
-    .nutr-mcol-pct { font-size: 10px; font-weight: 600; }
+    .nutr-mcol-num { font-size: calc(17px * var(--rm-font-scale, 1)); font-weight: 700; line-height: 1; }
+    .nutr-mcol-label { font-size: calc(11px * var(--rm-font-scale, 1)); color: var(--rm-text-secondary); font-weight: 500; }
+    .nutr-mcol-pct { font-size: calc(10px * var(--rm-font-scale, 1)); font-weight: 600; }
     .nutr-serving-note {
-      font-size: 11px; color: var(--rm-text-muted); text-align: center; margin-top: -4px;
+      font-size: calc(11px * var(--rm-font-scale, 1)); color: var(--rm-text-muted); text-align: center; margin-top: -4px;
     }
     /* Daily RDA expandable */
     .nutr-rda-toggle {
       display: flex; align-items: center; gap: 6px;
       background: none; border: none; border-top: 1px solid var(--rm-border);
-      padding: 10px 0 0; cursor: pointer; color: var(--rm-text); font-size: 13px; font-weight: 600;
+      padding: 10px 0 0; cursor: pointer; color: var(--rm-text); font-size: calc(13px * var(--rm-font-scale, 1)); font-weight: 600;
       width: 100%; text-align: left;
     }
     .nutr-rda-title { flex: 1; }
     .nutr-rda-count {
-      font-size: 12px; font-weight: 700; color: var(--rm-text-secondary);
+      font-size: calc(12px * var(--rm-font-scale, 1)); font-weight: 700; color: var(--rm-text-secondary);
       background: var(--rm-bg-elevated); border: 1px solid var(--rm-border);
       border-radius: 10px; padding: 1px 7px;
     }
@@ -2020,7 +2020,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       grid-template-rows: auto 4px;
       column-gap: 8px;
       row-gap: 4px;
-      font-size: 12px;
+      font-size: calc(12px * var(--rm-font-scale, 1));
     }
     .nutr-rda-label { color: var(--rm-text-secondary); grid-column: 1; grid-row: 1; }
     .nutr-rda-val { color: var(--rm-text); font-weight: 600; grid-column: 2; grid-row: 1; white-space: nowrap; }
@@ -2051,7 +2051,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       left: 4px;
       background: var(--rm-accent, #ff6b35);
       color: #fff;
-      font-size: 10px;
+      font-size: calc(10px * var(--rm-font-scale, 1));
       font-weight: 700;
       padding: 2px 6px;
       border-radius: 4px;
@@ -2084,7 +2084,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       border-top: 1px solid var(--rm-border, rgba(255,255,255,0.08));
     }
     .photo-add-label {
-      font-size: 12px;
+      font-size: calc(12px * var(--rm-font-scale, 1));
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.06em;
@@ -2098,7 +2098,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       border-radius: 8px;
       color: var(--rm-text, #e5e5ea);
       padding: 8px 10px;
-      font-size: 13px;
+      font-size: calc(13px * var(--rm-font-scale, 1));
     }
     .photo-url-input:focus { outline: none; border-color: var(--rm-accent, #ff6b35); }
     .camera-btns {
@@ -2118,7 +2118,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       color: var(--rm-text, #e5e5ea);
       padding: 16px 8px;
       cursor: pointer;
-      font-size: 12px;
+      font-size: calc(12px * var(--rm-font-scale, 1));
       text-align: center;
       transition: background 0.15s, border-color 0.15s;
     }
@@ -2134,7 +2134,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       color: var(--rm-text, #e5e5ea);
       padding: 8px 14px;
       cursor: pointer;
-      font-size: 14px;
+      font-size: calc(14px * var(--rm-font-scale, 1));
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -2177,7 +2177,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       padding: 14px 16px;
       border-bottom: 1px solid var(--rm-border, rgba(255,255,255,0.08));
       font-weight: 600;
-      font-size: 16px;
+      font-size: calc(16px * var(--rm-font-scale, 1));
       color: var(--rm-text, #e5e5ea);
       flex-shrink: 0;
     }
@@ -2190,7 +2190,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       gap: 12px;
     }
     .edit-section-label {
-      font-size: 11px;
+      font-size: calc(11px * var(--rm-font-scale, 1));
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.08em;
@@ -2201,14 +2201,14 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
     }
     .edit-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
     .edit-field { display: flex; flex-direction: column; gap: 4px; }
-    .edit-field label { font-size: 11px; color: var(--rm-text-secondary, #8e8e93); text-transform: uppercase; letter-spacing: 0.05em; }
+    .edit-field label { font-size: calc(11px * var(--rm-font-scale, 1)); color: var(--rm-text-secondary, #8e8e93); text-transform: uppercase; letter-spacing: 0.05em; }
     .edit-field input, .edit-field textarea {
       background: var(--rm-bg-elevated, #2c2c2e);
       border: 1px solid var(--rm-border, rgba(255,255,255,0.12));
       border-radius: 8px;
       color: var(--rm-text, #e5e5ea);
       padding: 8px 10px;
-      font-size: 14px;
+      font-size: calc(14px * var(--rm-font-scale, 1));
       font-family: inherit;
       resize: vertical;
     }
@@ -2249,7 +2249,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       padding: 4px 0;
     }
     .edit-star {
-      font-size: 32px;
+      font-size: calc(32px * var(--rm-font-scale, 1));
       color: var(--rm-border, rgba(255,255,255,0.3));
       cursor: pointer;
       transition: color 0.12s;
@@ -2276,7 +2276,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
     .edit-ing-list li, .edit-steps-list li {
       display: flex; align-items: flex-start; gap: 8px;
       padding: 5px 0; border-bottom: 1px solid var(--rm-border, rgba(255,255,255,0.06));
-      font-size: 13px; color: var(--rm-text, #e5e5ea);
+      font-size: calc(13px * var(--rm-font-scale, 1)); color: var(--rm-text, #e5e5ea);
     }
     .edit-ing-heading { font-weight: 700; color: var(--rm-accent) !important; }
     .edit-ing-text { flex: 1; line-height: 1.4; }
@@ -2307,14 +2307,14 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       flex: 1; background: var(--rm-bg-elevated, #232833);
       border: 1px solid var(--rm-border, rgba(255,255,255,0.12));
       border-radius: 8px; color: var(--rm-text, #e5e5ea);
-      padding: 7px 10px; font-size: 13px; font-family: inherit; resize: none;
+      padding: 7px 10px; font-size: calc(13px * var(--rm-font-scale, 1)); font-family: inherit; resize: none;
     }
     .edit-add-row input:focus, .edit-add-row textarea:focus {
       outline: none; border-color: var(--rm-accent, #9fa8da);
     }
     .edit-add-btn {
       background: var(--rm-accent, #9fa8da); border: none; border-radius: 8px;
-      color: #fff; padding: 7px 12px; cursor: pointer; font-size: 13px;
+      color: #fff; padding: 7px 12px; cursor: pointer; font-size: calc(13px * var(--rm-font-scale, 1));
       white-space: nowrap; flex-shrink: 0;
     }
 
@@ -2421,12 +2421,12 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       align-items: center;
     }
     .wide-title {
-      margin: 0 0 4px; font-size: 22px; font-weight: 700;
+      margin: 0 0 4px; font-size: calc(22px * var(--rm-font-scale, 1)); font-weight: 700;
       color: var(--rm-text); line-height: 1.2; text-align: center;
     }
     .wide-desc {
       text-align: center; margin: 6px 0;
-      font-size: 13px; color: var(--rm-text-secondary); line-height: 1.5;
+      font-size: calc(13px * var(--rm-font-scale, 1)); color: var(--rm-text-secondary); line-height: 1.5;
     }
     .wide-info-card .quick-rating { justify-content: center; margin-bottom: 6px; }
     .wide-info-card .action-btns-row { justify-content: center; flex-wrap: wrap; width: 100%; }
@@ -2484,7 +2484,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       border-radius: 10px; padding: 12px;
     }
     .review-title {
-      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      font-size: calc(11px * var(--rm-font-scale, 1)); font-weight: 600; text-transform: uppercase;
       letter-spacing: 0.05em; color: var(--rm-text-secondary, #8e8e93);
     }
     .review-list {
@@ -2501,7 +2501,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       padding: 4px 10px; border-radius: 999px;
       border: 1.5px solid var(--rm-border, rgba(255,255,255,0.12));
       background: none; cursor: pointer;
-      font-size: 12px; color: var(--rm-text, #e5e5ea);
+      font-size: calc(12px * var(--rm-font-scale, 1)); color: var(--rm-text, #e5e5ea);
       font-family: inherit; transition: all 0.15s; white-space: nowrap;
     }
     .review-chip ha-icon { --mdc-icon-size: 13px; }
@@ -2521,7 +2521,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
       padding: 12px 14px;
     }
     .wide-section-title {
-      font-size: 14px; font-weight: 700; color: var(--rm-text);
+      font-size: calc(14px * var(--rm-font-scale, 1)); font-weight: 700; color: var(--rm-text);
       margin-bottom: 10px; padding-bottom: 6px;
       border-bottom: 1px solid var(--rm-border);
     }
@@ -2541,17 +2541,17 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
     }
 
     /* ── Markdown content ─────────────────────────────── */
-    .md-content { font-size: 14px; line-height: 1.65; }
+    .md-content { font-size: calc(14px * var(--rm-font-scale, 1)); line-height: 1.65; }
     .md-content p { margin: 0 0 6px; }
     .md-content p.md-gap { margin: 0 0 10px; }
-    .md-content h1 { font-size: 18px; font-weight: 700; margin: 10px 0 4px; }
-    .md-content h2 { font-size: 16px; font-weight: 700; margin: 8px 0 4px; }
-    .md-content h3 { font-size: 14px; font-weight: 700; margin: 6px 0 3px; }
+    .md-content h1 { font-size: calc(18px * var(--rm-font-scale, 1)); font-weight: 700; margin: 10px 0 4px; }
+    .md-content h2 { font-size: calc(16px * var(--rm-font-scale, 1)); font-weight: 700; margin: 8px 0 4px; }
+    .md-content h3 { font-size: calc(14px * var(--rm-font-scale, 1)); font-weight: 700; margin: 6px 0 3px; }
     .md-content ul, .md-content ol { padding-left: 20px; margin: 4px 0 8px; }
     .md-content li { margin: 2px 0; }
     .md-content strong { font-weight: 700; }
     .md-content em { font-style: italic; }
-    .md-content code { font-family: monospace; font-size: 12px; background: var(--rm-bg-elevated); padding: 1px 4px; border-radius: 3px; }
+    .md-content code { font-family: monospace; font-size: calc(12px * var(--rm-font-scale, 1)); background: var(--rm-bg-elevated); padding: 1px 4px; border-radius: 3px; }
     .md-content a { color: var(--rm-accent); text-decoration: none; }
     .md-content a:hover { text-decoration: underline; }
     .md-content hr { border: none; border-top: 1px solid var(--rm-border); margin: 8px 0; }
@@ -2562,7 +2562,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
     .list-picker-chips { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; min-height: 28px; }
     .list-chip {
       display: inline-flex; align-items: center; gap: 3px;
-      padding: 3px 8px; border-radius: 14px; font-size: 12px;
+      padding: 3px 8px; border-radius: 14px; font-size: calc(12px * var(--rm-font-scale, 1));
       border: 1px solid var(--rm-border); background: var(--rm-bg-elevated);
       color: var(--rm-text); cursor: default; transition: all 0.12s;
     }
@@ -2571,7 +2571,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
     .list-chip.available:hover { border-color: var(--rm-accent); color: var(--rm-accent); background: var(--rm-accent-soft); }
     .list-chip-remove {
       background: none; border: none; padding: 0 0 0 2px; cursor: pointer;
-      color: inherit; font-size: 14px; line-height: 1; opacity: 0.7;
+      color: inherit; font-size: calc(14px * var(--rm-font-scale, 1)); line-height: 1; opacity: 0.7;
     }
     .list-chip-remove:hover { opacity: 1; }
     .list-chip-add-btn {
@@ -2590,13 +2590,13 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
     .list-picker-new-row { display: flex; gap: 6px; }
     .list-picker-input {
       flex: 1; background: var(--rm-bg-surface, var(--rm-bg)); border: 1px solid var(--rm-border);
-      border-radius: 7px; color: var(--rm-text); padding: 5px 9px; font-size: 13px;
+      border-radius: 7px; color: var(--rm-text); padding: 5px 9px; font-size: calc(13px * var(--rm-font-scale, 1));
       font-family: inherit; min-width: 0;
     }
     .list-picker-input:focus { outline: none; border-color: var(--rm-accent); }
     .list-picker-new-btn {
       padding: 5px 12px; border-radius: 7px; border: 1px solid var(--rm-accent);
-      background: var(--rm-accent); color: #fff; cursor: pointer; font-size: 13px; font-family: inherit;
+      background: var(--rm-accent); color: #fff; cursor: pointer; font-size: calc(13px * var(--rm-font-scale, 1)); font-family: inherit;
     }
     .list-picker-new-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
@@ -2608,7 +2608,7 @@ import{c as e,i as t,b as i,m as r,s as n,a,A as s,E as o}from"./chunks/runtime-
     }
     .ing-inline-input {
       background: var(--rm-bg-elevated); border: 1px solid var(--rm-accent);
-      border-radius: 6px; color: var(--rm-text); padding: 4px 6px; font-size: 13px;
+      border-radius: 6px; color: var(--rm-text); padding: 4px 6px; font-size: calc(13px * var(--rm-font-scale, 1));
       font-family: inherit; min-width: 0;
     }
     .ing-inline-input:focus { outline: none; }
@@ -2635,7 +2635,7 @@ Dual licenced under the MIT license or GPLv3. See https://raw.github.com/Stuk/js
 
 JSZip uses the library pako released under the MIT license :
 https://github.com/nodeca/pako/blob/main/LICENSE
-*/Y.exports=function e(t,i,r){function n(s,o){if(!i[s]){if(!t[s]){if(!o&&X)return X(s);if(a)return a(s,!0);var l=new Error("Cannot find module '"+s+"'");throw l.code="MODULE_NOT_FOUND",l}var c=i[s]={exports:{}};t[s][0].call(c.exports,function(e){return n(t[s][1][e]||e)},c,c.exports,e,t,i,r)}return i[s].exports}for(var a=X,s=0;s<r.length;s++)n(r[s]);return n}({1:[function(e,t,i){var r=e("./utils"),n=e("./support"),a="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";i.encode=function(e){for(var t,i,n,s,o,l,c,d=[],p=0,h=e.length,u=h,m="string"!==r.getTypeOf(e);p<e.length;)u=h-p,n=m?(t=e[p++],i=p<h?e[p++]:0,p<h?e[p++]:0):(t=e.charCodeAt(p++),i=p<h?e.charCodeAt(p++):0,p<h?e.charCodeAt(p++):0),s=t>>2,o=(3&t)<<4|i>>4,l=1<u?(15&i)<<2|n>>6:64,c=2<u?63&n:64,d.push(a.charAt(s)+a.charAt(o)+a.charAt(l)+a.charAt(c));return d.join("")},i.decode=function(e){var t,i,r,s,o,l,c=0,d=0,p="data:";if(e.substr(0,p.length)===p)throw new Error("Invalid base64 input, it looks like a data url.");var h,u=3*(e=e.replace(/[^A-Za-z0-9+/=]/g,"")).length/4;if(e.charAt(e.length-1)===a.charAt(64)&&u--,e.charAt(e.length-2)===a.charAt(64)&&u--,u%1!=0)throw new Error("Invalid base64 input, bad content length.");for(h=n.uint8array?new Uint8Array(0|u):new Array(0|u);c<e.length;)t=a.indexOf(e.charAt(c++))<<2|(s=a.indexOf(e.charAt(c++)))>>4,i=(15&s)<<4|(o=a.indexOf(e.charAt(c++)))>>2,r=(3&o)<<6|(l=a.indexOf(e.charAt(c++))),h[d++]=t,64!==o&&(h[d++]=i),64!==l&&(h[d++]=r);return h}},{"./support":30,"./utils":32}],2:[function(e,t,i){var r=e("./external"),n=e("./stream/DataWorker"),a=e("./stream/Crc32Probe"),s=e("./stream/DataLengthProbe");function o(e,t,i,r,n){this.compressedSize=e,this.uncompressedSize=t,this.crc32=i,this.compression=r,this.compressedContent=n}o.prototype={getContentWorker:function(){var e=new n(r.Promise.resolve(this.compressedContent)).pipe(this.compression.uncompressWorker()).pipe(new s("data_length")),t=this;return e.on("end",function(){if(this.streamInfo.data_length!==t.uncompressedSize)throw new Error("Bug : uncompressed data size mismatch")}),e},getCompressedWorker:function(){return new n(r.Promise.resolve(this.compressedContent)).withStreamInfo("compressedSize",this.compressedSize).withStreamInfo("uncompressedSize",this.uncompressedSize).withStreamInfo("crc32",this.crc32).withStreamInfo("compression",this.compression)}},o.createWorkerFrom=function(e,t,i){return e.pipe(new a).pipe(new s("uncompressedSize")).pipe(t.compressWorker(i)).pipe(new s("compressedSize")).withStreamInfo("compression",t)},t.exports=o},{"./external":6,"./stream/Crc32Probe":25,"./stream/DataLengthProbe":26,"./stream/DataWorker":27}],3:[function(e,t,i){var r=e("./stream/GenericWorker");i.STORE={magic:"\0\0",compressWorker:function(){return new r("STORE compression")},uncompressWorker:function(){return new r("STORE decompression")}},i.DEFLATE=e("./flate")},{"./flate":7,"./stream/GenericWorker":28}],4:[function(e,t,i){var r=e("./utils"),n=function(){for(var e,t=[],i=0;i<256;i++){e=i;for(var r=0;r<8;r++)e=1&e?3988292384^e>>>1:e>>>1;t[i]=e}return t}();t.exports=function(e,t){return void 0!==e&&e.length?"string"!==r.getTypeOf(e)?function(e,t,i,r){var a=n,s=r+i;e^=-1;for(var o=r;o<s;o++)e=e>>>8^a[255&(e^t[o])];return-1^e}(0|t,e,e.length,0):function(e,t,i,r){var a=n,s=r+i;e^=-1;for(var o=r;o<s;o++)e=e>>>8^a[255&(e^t.charCodeAt(o))];return-1^e}(0|t,e,e.length,0):0}},{"./utils":32}],5:[function(e,t,i){i.base64=!1,i.binary=!1,i.dir=!1,i.createFolders=!0,i.date=null,i.compression=null,i.compressionOptions=null,i.comment=null,i.unixPermissions=null,i.dosPermissions=null},{}],6:[function(e,t,i){var r=null;r="undefined"!=typeof Promise?Promise:e("lie"),t.exports={Promise:r}},{lie:37}],7:[function(e,t,i){var r="undefined"!=typeof Uint8Array&&"undefined"!=typeof Uint16Array&&"undefined"!=typeof Uint32Array,n=e("pako"),a=e("./utils"),s=e("./stream/GenericWorker"),o=r?"uint8array":"array";function l(e,t){s.call(this,"FlateWorker/"+e),this._pako=null,this._pakoAction=e,this._pakoOptions=t,this.meta={}}i.magic="\b\0",a.inherits(l,s),l.prototype.processChunk=function(e){this.meta=e.meta,null===this._pako&&this._createPako(),this._pako.push(a.transformTo(o,e.data),!1)},l.prototype.flush=function(){s.prototype.flush.call(this),null===this._pako&&this._createPako(),this._pako.push([],!0)},l.prototype.cleanUp=function(){s.prototype.cleanUp.call(this),this._pako=null},l.prototype._createPako=function(){this._pako=new n[this._pakoAction]({raw:!0,level:this._pakoOptions.level||-1});var e=this;this._pako.onData=function(t){e.push({data:t,meta:e.meta})}},i.compressWorker=function(e){return new l("Deflate",e)},i.uncompressWorker=function(){return new l("Inflate",{})}},{"./stream/GenericWorker":28,"./utils":32,pako:38}],8:[function(e,t,i){function r(e,t){var i,r="";for(i=0;i<t;i++)r+=String.fromCharCode(255&e),e>>>=8;return r}function n(e,t,i,n,s,d){var p,h,u=e.file,m=e.compression,g=d!==o.utf8encode,f=a.transformTo("string",d(u.name)),b=a.transformTo("string",o.utf8encode(u.name)),v=u.comment,_=a.transformTo("string",d(v)),x=a.transformTo("string",o.utf8encode(v)),y=b.length!==u.name.length,w=x.length!==v.length,k="",$="",S="",z=u.dir,I=u.date,T={crc32:0,compressedSize:0,uncompressedSize:0};t&&!i||(T.crc32=e.crc32,T.compressedSize=e.compressedSize,T.uncompressedSize=e.uncompressedSize);var C=0;t&&(C|=8),g||!y&&!w||(C|=2048);var A=0,R=0;z&&(A|=16),"UNIX"===s?(R=798,A|=function(e,t){var i=e;return e||(i=t?16893:33204),(65535&i)<<16}(u.unixPermissions,z)):(R=20,A|=function(e){return 63&(e||0)}(u.dosPermissions)),p=I.getUTCHours(),p<<=6,p|=I.getUTCMinutes(),p<<=5,p|=I.getUTCSeconds()/2,h=I.getUTCFullYear()-1980,h<<=4,h|=I.getUTCMonth()+1,h<<=5,h|=I.getUTCDate(),y&&($=r(1,1)+r(l(f),4)+b,k+="up"+r($.length,2)+$),w&&(S=r(1,1)+r(l(_),4)+x,k+="uc"+r(S.length,2)+S);var E="";return E+="\n\0",E+=r(C,2),E+=m.magic,E+=r(p,2),E+=r(h,2),E+=r(T.crc32,4),E+=r(T.compressedSize,4),E+=r(T.uncompressedSize,4),E+=r(f.length,2),E+=r(k.length,2),{fileRecord:c.LOCAL_FILE_HEADER+E+f+k,dirRecord:c.CENTRAL_FILE_HEADER+r(R,2)+E+r(_.length,2)+"\0\0\0\0"+r(A,4)+r(n,4)+f+k+_}}var a=e("../utils"),s=e("../stream/GenericWorker"),o=e("../utf8"),l=e("../crc32"),c=e("../signature");function d(e,t,i,r){s.call(this,"ZipFileWorker"),this.bytesWritten=0,this.zipComment=t,this.zipPlatform=i,this.encodeFileName=r,this.streamFiles=e,this.accumulate=!1,this.contentBuffer=[],this.dirRecords=[],this.currentSourceOffset=0,this.entriesCount=0,this.currentFile=null,this._sources=[]}a.inherits(d,s),d.prototype.push=function(e){var t=e.meta.percent||0,i=this.entriesCount,r=this._sources.length;this.accumulate?this.contentBuffer.push(e):(this.bytesWritten+=e.data.length,s.prototype.push.call(this,{data:e.data,meta:{currentFile:this.currentFile,percent:i?(t+100*(i-r-1))/i:100}}))},d.prototype.openedSource=function(e){this.currentSourceOffset=this.bytesWritten,this.currentFile=e.file.name;var t=this.streamFiles&&!e.file.dir;if(t){var i=n(e,t,!1,this.currentSourceOffset,this.zipPlatform,this.encodeFileName);this.push({data:i.fileRecord,meta:{percent:0}})}else this.accumulate=!0},d.prototype.closedSource=function(e){this.accumulate=!1;var t=this.streamFiles&&!e.file.dir,i=n(e,t,!0,this.currentSourceOffset,this.zipPlatform,this.encodeFileName);if(this.dirRecords.push(i.dirRecord),t)this.push({data:function(e){return c.DATA_DESCRIPTOR+r(e.crc32,4)+r(e.compressedSize,4)+r(e.uncompressedSize,4)}(e),meta:{percent:100}});else for(this.push({data:i.fileRecord,meta:{percent:0}});this.contentBuffer.length;)this.push(this.contentBuffer.shift());this.currentFile=null},d.prototype.flush=function(){for(var e=this.bytesWritten,t=0;t<this.dirRecords.length;t++)this.push({data:this.dirRecords[t],meta:{percent:100}});var i=this.bytesWritten-e,n=function(e,t,i,n,s){var o=a.transformTo("string",s(n));return c.CENTRAL_DIRECTORY_END+"\0\0\0\0"+r(e,2)+r(e,2)+r(t,4)+r(i,4)+r(o.length,2)+o}(this.dirRecords.length,i,e,this.zipComment,this.encodeFileName);this.push({data:n,meta:{percent:100}})},d.prototype.prepareNextSource=function(){this.previous=this._sources.shift(),this.openedSource(this.previous.streamInfo),this.isPaused?this.previous.pause():this.previous.resume()},d.prototype.registerPrevious=function(e){this._sources.push(e);var t=this;return e.on("data",function(e){t.processChunk(e)}),e.on("end",function(){t.closedSource(t.previous.streamInfo),t._sources.length?t.prepareNextSource():t.end()}),e.on("error",function(e){t.error(e)}),this},d.prototype.resume=function(){return!!s.prototype.resume.call(this)&&(!this.previous&&this._sources.length?(this.prepareNextSource(),!0):this.previous||this._sources.length||this.generatedError?void 0:(this.end(),!0))},d.prototype.error=function(e){var t=this._sources;if(!s.prototype.error.call(this,e))return!1;for(var i=0;i<t.length;i++)try{t[i].error(e)}catch(e){}return!0},d.prototype.lock=function(){s.prototype.lock.call(this);for(var e=this._sources,t=0;t<e.length;t++)e[t].lock()},t.exports=d},{"../crc32":4,"../signature":23,"../stream/GenericWorker":28,"../utf8":31,"../utils":32}],9:[function(e,t,i){var r=e("../compressions"),n=e("./ZipFileWorker");i.generateWorker=function(e,t,i){var a=new n(t.streamFiles,i,t.platform,t.encodeFileName),s=0;try{e.forEach(function(e,i){s++;var n=function(e,t){var i=e||t,n=r[i];if(!n)throw new Error(i+" is not a valid compression method !");return n}(i.options.compression,t.compression),o=i.options.compressionOptions||t.compressionOptions||{},l=i.dir,c=i.date;i._compressWorker(n,o).withStreamInfo("file",{name:e,dir:l,date:c,comment:i.comment||"",unixPermissions:i.unixPermissions,dosPermissions:i.dosPermissions}).pipe(a)}),a.entriesCount=s}catch(e){a.error(e)}return a}},{"../compressions":3,"./ZipFileWorker":8}],10:[function(e,t,i){function r(){if(!(this instanceof r))return new r;if(arguments.length)throw new Error("The constructor with parameters has been removed in JSZip 3.0, please check the upgrade guide.");this.files=Object.create(null),this.comment=null,this.root="",this.clone=function(){var e=new r;for(var t in this)"function"!=typeof this[t]&&(e[t]=this[t]);return e}}(r.prototype=e("./object")).loadAsync=e("./load"),r.support=e("./support"),r.defaults=e("./defaults"),r.version="3.10.1",r.loadAsync=function(e,t){return(new r).loadAsync(e,t)},r.external=e("./external"),t.exports=r},{"./defaults":5,"./external":6,"./load":11,"./object":15,"./support":30}],11:[function(e,t,i){var r=e("./utils"),n=e("./external"),a=e("./utf8"),s=e("./zipEntries"),o=e("./stream/Crc32Probe"),l=e("./nodejsUtils");function c(e){return new n.Promise(function(t,i){var r=e.decompressed.getContentWorker().pipe(new o);r.on("error",function(e){i(e)}).on("end",function(){r.streamInfo.crc32!==e.decompressed.crc32?i(new Error("Corrupted zip : CRC32 mismatch")):t()}).resume()})}t.exports=function(e,t){var i=this;return t=r.extend(t||{},{base64:!1,checkCRC32:!1,optimizedBinaryString:!1,createFolders:!1,decodeFileName:a.utf8decode}),l.isNode&&l.isStream(e)?n.Promise.reject(new Error("JSZip can't accept a stream when loading a zip file.")):r.prepareContent("the loaded zip file",e,!0,t.optimizedBinaryString,t.base64).then(function(e){var i=new s(t);return i.load(e),i}).then(function(e){var i=[n.Promise.resolve(e)],r=e.files;if(t.checkCRC32)for(var a=0;a<r.length;a++)i.push(c(r[a]));return n.Promise.all(i)}).then(function(e){for(var n=e.shift(),a=n.files,s=0;s<a.length;s++){var o=a[s],l=o.fileNameStr,c=r.resolve(o.fileNameStr);i.file(c,o.decompressed,{binary:!0,optimizedBinaryString:!0,date:o.date,dir:o.dir,comment:o.fileCommentStr.length?o.fileCommentStr:null,unixPermissions:o.unixPermissions,dosPermissions:o.dosPermissions,createFolders:t.createFolders}),o.dir||(i.file(c).unsafeOriginalName=l)}return n.zipComment.length&&(i.comment=n.zipComment),i})}},{"./external":6,"./nodejsUtils":14,"./stream/Crc32Probe":25,"./utf8":31,"./utils":32,"./zipEntries":33}],12:[function(e,t,i){var r=e("../utils"),n=e("../stream/GenericWorker");function a(e,t){n.call(this,"Nodejs stream input adapter for "+e),this._upstreamEnded=!1,this._bindStream(t)}r.inherits(a,n),a.prototype._bindStream=function(e){var t=this;(this._stream=e).pause(),e.on("data",function(e){t.push({data:e,meta:{percent:0}})}).on("error",function(e){t.isPaused?this.generatedError=e:t.error(e)}).on("end",function(){t.isPaused?t._upstreamEnded=!0:t.end()})},a.prototype.pause=function(){return!!n.prototype.pause.call(this)&&(this._stream.pause(),!0)},a.prototype.resume=function(){return!!n.prototype.resume.call(this)&&(this._upstreamEnded?this.end():this._stream.resume(),!0)},t.exports=a},{"../stream/GenericWorker":28,"../utils":32}],13:[function(e,t,i){var r=e("readable-stream").Readable;function n(e,t,i){r.call(this,t),this._helper=e;var n=this;e.on("data",function(e,t){n.push(e)||n._helper.pause(),i&&i(t)}).on("error",function(e){n.emit("error",e)}).on("end",function(){n.push(null)})}e("../utils").inherits(n,r),n.prototype._read=function(){this._helper.resume()},t.exports=n},{"../utils":32,"readable-stream":16}],14:[function(e,t,i){t.exports={isNode:"undefined"!=typeof Buffer,newBufferFrom:function(e,t){if(Buffer.from&&Buffer.from!==Uint8Array.from)return Buffer.from(e,t);if("number"==typeof e)throw new Error('The "data" argument must not be a number');return new Buffer(e,t)},allocBuffer:function(e){if(Buffer.alloc)return Buffer.alloc(e);var t=new Buffer(e);return t.fill(0),t},isBuffer:function(e){return Buffer.isBuffer(e)},isStream:function(e){return e&&"function"==typeof e.on&&"function"==typeof e.pause&&"function"==typeof e.resume}}},{}],15:[function(e,t,i){function r(e,t,i){var r,n=a.getTypeOf(t),o=a.extend(i||{},l);o.date=o.date||new Date,null!==o.compression&&(o.compression=o.compression.toUpperCase()),"string"==typeof o.unixPermissions&&(o.unixPermissions=parseInt(o.unixPermissions,8)),o.unixPermissions&&16384&o.unixPermissions&&(o.dir=!0),o.dosPermissions&&16&o.dosPermissions&&(o.dir=!0),o.dir&&(e=g(e)),o.createFolders&&(r=m(e))&&f.call(this,r,!0);var p="string"===n&&!1===o.binary&&!1===o.base64;i&&void 0!==i.binary||(o.binary=!p),(t instanceof c&&0===t.uncompressedSize||o.dir||!t||0===t.length)&&(o.base64=!1,o.binary=!0,t="",o.compression="STORE",n="string");var b=null;b=t instanceof c||t instanceof s?t:h.isNode&&h.isStream(t)?new u(e,t):a.prepareContent(e,t,o.binary,o.optimizedBinaryString,o.base64);var v=new d(e,b,o);this.files[e]=v}var n=e("./utf8"),a=e("./utils"),s=e("./stream/GenericWorker"),o=e("./stream/StreamHelper"),l=e("./defaults"),c=e("./compressedObject"),d=e("./zipObject"),p=e("./generate"),h=e("./nodejsUtils"),u=e("./nodejs/NodejsStreamInputAdapter"),m=function(e){"/"===e.slice(-1)&&(e=e.substring(0,e.length-1));var t=e.lastIndexOf("/");return 0<t?e.substring(0,t):""},g=function(e){return"/"!==e.slice(-1)&&(e+="/"),e},f=function(e,t){return t=void 0!==t?t:l.createFolders,e=g(e),this.files[e]||r.call(this,e,null,{dir:!0,createFolders:t}),this.files[e]};function b(e){return"[object RegExp]"===Object.prototype.toString.call(e)}var v={load:function(){throw new Error("This method has been removed in JSZip 3.0, please check the upgrade guide.")},forEach:function(e){var t,i,r;for(t in this.files)r=this.files[t],(i=t.slice(this.root.length,t.length))&&t.slice(0,this.root.length)===this.root&&e(i,r)},filter:function(e){var t=[];return this.forEach(function(i,r){e(i,r)&&t.push(r)}),t},file:function(e,t,i){if(1!==arguments.length)return e=this.root+e,r.call(this,e,t,i),this;if(b(e)){var n=e;return this.filter(function(e,t){return!t.dir&&n.test(e)})}var a=this.files[this.root+e];return a&&!a.dir?a:null},folder:function(e){if(!e)return this;if(b(e))return this.filter(function(t,i){return i.dir&&e.test(t)});var t=this.root+e,i=f.call(this,t),r=this.clone();return r.root=i.name,r},remove:function(e){e=this.root+e;var t=this.files[e];if(t||("/"!==e.slice(-1)&&(e+="/"),t=this.files[e]),t&&!t.dir)delete this.files[e];else for(var i=this.filter(function(t,i){return i.name.slice(0,e.length)===e}),r=0;r<i.length;r++)delete this.files[i[r].name];return this},generate:function(){throw new Error("This method has been removed in JSZip 3.0, please check the upgrade guide.")},generateInternalStream:function(e){var t,i={};try{if((i=a.extend(e||{},{streamFiles:!1,compression:"STORE",compressionOptions:null,type:"",platform:"DOS",comment:null,mimeType:"application/zip",encodeFileName:n.utf8encode})).type=i.type.toLowerCase(),i.compression=i.compression.toUpperCase(),"binarystring"===i.type&&(i.type="string"),!i.type)throw new Error("No output type specified.");a.checkSupport(i.type),"darwin"!==i.platform&&"freebsd"!==i.platform&&"linux"!==i.platform&&"sunos"!==i.platform||(i.platform="UNIX"),"win32"===i.platform&&(i.platform="DOS");var r=i.comment||this.comment||"";t=p.generateWorker(this,i,r)}catch(e){(t=new s("error")).error(e)}return new o(t,i.type||"string",i.mimeType)},generateAsync:function(e,t){return this.generateInternalStream(e).accumulate(t)},generateNodeStream:function(e,t){return(e=e||{}).type||(e.type="nodebuffer"),this.generateInternalStream(e).toNodejsStream(t)}};t.exports=v},{"./compressedObject":2,"./defaults":5,"./generate":9,"./nodejs/NodejsStreamInputAdapter":12,"./nodejsUtils":14,"./stream/GenericWorker":28,"./stream/StreamHelper":29,"./utf8":31,"./utils":32,"./zipObject":35}],16:[function(e,t,i){t.exports=e("stream")},{stream:void 0}],17:[function(e,t,i){var r=e("./DataReader");function n(e){r.call(this,e);for(var t=0;t<this.data.length;t++)e[t]=255&e[t]}e("../utils").inherits(n,r),n.prototype.byteAt=function(e){return this.data[this.zero+e]},n.prototype.lastIndexOfSignature=function(e){for(var t=e.charCodeAt(0),i=e.charCodeAt(1),r=e.charCodeAt(2),n=e.charCodeAt(3),a=this.length-4;0<=a;--a)if(this.data[a]===t&&this.data[a+1]===i&&this.data[a+2]===r&&this.data[a+3]===n)return a-this.zero;return-1},n.prototype.readAndCheckSignature=function(e){var t=e.charCodeAt(0),i=e.charCodeAt(1),r=e.charCodeAt(2),n=e.charCodeAt(3),a=this.readData(4);return t===a[0]&&i===a[1]&&r===a[2]&&n===a[3]},n.prototype.readData=function(e){if(this.checkOffset(e),0===e)return[];var t=this.data.slice(this.zero+this.index,this.zero+this.index+e);return this.index+=e,t},t.exports=n},{"../utils":32,"./DataReader":18}],18:[function(e,t,i){var r=e("../utils");function n(e){this.data=e,this.length=e.length,this.index=0,this.zero=0}n.prototype={checkOffset:function(e){this.checkIndex(this.index+e)},checkIndex:function(e){if(this.length<this.zero+e||e<0)throw new Error("End of data reached (data length = "+this.length+", asked index = "+e+"). Corrupted zip ?")},setIndex:function(e){this.checkIndex(e),this.index=e},skip:function(e){this.setIndex(this.index+e)},byteAt:function(){},readInt:function(e){var t,i=0;for(this.checkOffset(e),t=this.index+e-1;t>=this.index;t--)i=(i<<8)+this.byteAt(t);return this.index+=e,i},readString:function(e){return r.transformTo("string",this.readData(e))},readData:function(){},lastIndexOfSignature:function(){},readAndCheckSignature:function(){},readDate:function(){var e=this.readInt(4);return new Date(Date.UTC(1980+(e>>25&127),(e>>21&15)-1,e>>16&31,e>>11&31,e>>5&63,(31&e)<<1))}},t.exports=n},{"../utils":32}],19:[function(e,t,i){var r=e("./Uint8ArrayReader");function n(e){r.call(this,e)}e("../utils").inherits(n,r),n.prototype.readData=function(e){this.checkOffset(e);var t=this.data.slice(this.zero+this.index,this.zero+this.index+e);return this.index+=e,t},t.exports=n},{"../utils":32,"./Uint8ArrayReader":21}],20:[function(e,t,i){var r=e("./DataReader");function n(e){r.call(this,e)}e("../utils").inherits(n,r),n.prototype.byteAt=function(e){return this.data.charCodeAt(this.zero+e)},n.prototype.lastIndexOfSignature=function(e){return this.data.lastIndexOf(e)-this.zero},n.prototype.readAndCheckSignature=function(e){return e===this.readData(4)},n.prototype.readData=function(e){this.checkOffset(e);var t=this.data.slice(this.zero+this.index,this.zero+this.index+e);return this.index+=e,t},t.exports=n},{"../utils":32,"./DataReader":18}],21:[function(e,t,i){var r=e("./ArrayReader");function n(e){r.call(this,e)}e("../utils").inherits(n,r),n.prototype.readData=function(e){if(this.checkOffset(e),0===e)return new Uint8Array(0);var t=this.data.subarray(this.zero+this.index,this.zero+this.index+e);return this.index+=e,t},t.exports=n},{"../utils":32,"./ArrayReader":17}],22:[function(e,t,i){var r=e("../utils"),n=e("../support"),a=e("./ArrayReader"),s=e("./StringReader"),o=e("./NodeBufferReader"),l=e("./Uint8ArrayReader");t.exports=function(e){var t=r.getTypeOf(e);return r.checkSupport(t),"string"!==t||n.uint8array?"nodebuffer"===t?new o(e):n.uint8array?new l(r.transformTo("uint8array",e)):new a(r.transformTo("array",e)):new s(e)}},{"../support":30,"../utils":32,"./ArrayReader":17,"./NodeBufferReader":19,"./StringReader":20,"./Uint8ArrayReader":21}],23:[function(e,t,i){i.LOCAL_FILE_HEADER="PK",i.CENTRAL_FILE_HEADER="PK",i.CENTRAL_DIRECTORY_END="PK",i.ZIP64_CENTRAL_DIRECTORY_LOCATOR="PK",i.ZIP64_CENTRAL_DIRECTORY_END="PK",i.DATA_DESCRIPTOR="PK\b"},{}],24:[function(e,t,i){var r=e("./GenericWorker"),n=e("../utils");function a(e){r.call(this,"ConvertWorker to "+e),this.destType=e}n.inherits(a,r),a.prototype.processChunk=function(e){this.push({data:n.transformTo(this.destType,e.data),meta:e.meta})},t.exports=a},{"../utils":32,"./GenericWorker":28}],25:[function(e,t,i){var r=e("./GenericWorker"),n=e("../crc32");function a(){r.call(this,"Crc32Probe"),this.withStreamInfo("crc32",0)}e("../utils").inherits(a,r),a.prototype.processChunk=function(e){this.streamInfo.crc32=n(e.data,this.streamInfo.crc32||0),this.push(e)},t.exports=a},{"../crc32":4,"../utils":32,"./GenericWorker":28}],26:[function(e,t,i){var r=e("../utils"),n=e("./GenericWorker");function a(e){n.call(this,"DataLengthProbe for "+e),this.propName=e,this.withStreamInfo(e,0)}r.inherits(a,n),a.prototype.processChunk=function(e){if(e){var t=this.streamInfo[this.propName]||0;this.streamInfo[this.propName]=t+e.data.length}n.prototype.processChunk.call(this,e)},t.exports=a},{"../utils":32,"./GenericWorker":28}],27:[function(e,t,i){var r=e("../utils"),n=e("./GenericWorker");function a(e){n.call(this,"DataWorker");var t=this;this.dataIsReady=!1,this.index=0,this.max=0,this.data=null,this.type="",this._tickScheduled=!1,e.then(function(e){t.dataIsReady=!0,t.data=e,t.max=e&&e.length||0,t.type=r.getTypeOf(e),t.isPaused||t._tickAndRepeat()},function(e){t.error(e)})}r.inherits(a,n),a.prototype.cleanUp=function(){n.prototype.cleanUp.call(this),this.data=null},a.prototype.resume=function(){return!!n.prototype.resume.call(this)&&(!this._tickScheduled&&this.dataIsReady&&(this._tickScheduled=!0,r.delay(this._tickAndRepeat,[],this)),!0)},a.prototype._tickAndRepeat=function(){this._tickScheduled=!1,this.isPaused||this.isFinished||(this._tick(),this.isFinished||(r.delay(this._tickAndRepeat,[],this),this._tickScheduled=!0))},a.prototype._tick=function(){if(this.isPaused||this.isFinished)return!1;var e=null,t=Math.min(this.max,this.index+16384);if(this.index>=this.max)return this.end();switch(this.type){case"string":e=this.data.substring(this.index,t);break;case"uint8array":e=this.data.subarray(this.index,t);break;case"array":case"nodebuffer":e=this.data.slice(this.index,t)}return this.index=t,this.push({data:e,meta:{percent:this.max?this.index/this.max*100:0}})},t.exports=a},{"../utils":32,"./GenericWorker":28}],28:[function(e,t,i){function r(e){this.name=e||"default",this.streamInfo={},this.generatedError=null,this.extraStreamInfo={},this.isPaused=!0,this.isFinished=!1,this.isLocked=!1,this._listeners={data:[],end:[],error:[]},this.previous=null}r.prototype={push:function(e){this.emit("data",e)},end:function(){if(this.isFinished)return!1;this.flush();try{this.emit("end"),this.cleanUp(),this.isFinished=!0}catch(e){this.emit("error",e)}return!0},error:function(e){return!this.isFinished&&(this.isPaused?this.generatedError=e:(this.isFinished=!0,this.emit("error",e),this.previous&&this.previous.error(e),this.cleanUp()),!0)},on:function(e,t){return this._listeners[e].push(t),this},cleanUp:function(){this.streamInfo=this.generatedError=this.extraStreamInfo=null,this._listeners=[]},emit:function(e,t){if(this._listeners[e])for(var i=0;i<this._listeners[e].length;i++)this._listeners[e][i].call(this,t)},pipe:function(e){return e.registerPrevious(this)},registerPrevious:function(e){if(this.isLocked)throw new Error("The stream '"+this+"' has already been used.");this.streamInfo=e.streamInfo,this.mergeStreamInfo(),this.previous=e;var t=this;return e.on("data",function(e){t.processChunk(e)}),e.on("end",function(){t.end()}),e.on("error",function(e){t.error(e)}),this},pause:function(){return!this.isPaused&&!this.isFinished&&(this.isPaused=!0,this.previous&&this.previous.pause(),!0)},resume:function(){if(!this.isPaused||this.isFinished)return!1;var e=this.isPaused=!1;return this.generatedError&&(this.error(this.generatedError),e=!0),this.previous&&this.previous.resume(),!e},flush:function(){},processChunk:function(e){this.push(e)},withStreamInfo:function(e,t){return this.extraStreamInfo[e]=t,this.mergeStreamInfo(),this},mergeStreamInfo:function(){for(var e in this.extraStreamInfo)Object.prototype.hasOwnProperty.call(this.extraStreamInfo,e)&&(this.streamInfo[e]=this.extraStreamInfo[e])},lock:function(){if(this.isLocked)throw new Error("The stream '"+this+"' has already been used.");this.isLocked=!0,this.previous&&this.previous.lock()},toString:function(){var e="Worker "+this.name;return this.previous?this.previous+" -> "+e:e}},t.exports=r},{}],29:[function(e,t,i){var r=e("../utils"),n=e("./ConvertWorker"),a=e("./GenericWorker"),s=e("../base64"),o=e("../support"),l=e("../external"),c=null;if(o.nodestream)try{c=e("../nodejs/NodejsStreamOutputAdapter")}catch(e){}function d(e,t){return new l.Promise(function(i,n){var a=[],o=e._internalType,l=e._outputType,c=e._mimeType;e.on("data",function(e,i){a.push(e),t&&t(i)}).on("error",function(e){a=[],n(e)}).on("end",function(){try{var e=function(e,t,i){switch(e){case"blob":return r.newBlob(r.transformTo("arraybuffer",t),i);case"base64":return s.encode(t);default:return r.transformTo(e,t)}}(l,function(e,t){var i,r=0,n=null,a=0;for(i=0;i<t.length;i++)a+=t[i].length;switch(e){case"string":return t.join("");case"array":return Array.prototype.concat.apply([],t);case"uint8array":for(n=new Uint8Array(a),i=0;i<t.length;i++)n.set(t[i],r),r+=t[i].length;return n;case"nodebuffer":return Buffer.concat(t);default:throw new Error("concat : unsupported type '"+e+"'")}}(o,a),c);i(e)}catch(e){n(e)}a=[]}).resume()})}function p(e,t,i){var s=t;switch(t){case"blob":case"arraybuffer":s="uint8array";break;case"base64":s="string"}try{this._internalType=s,this._outputType=t,this._mimeType=i,r.checkSupport(s),this._worker=e.pipe(new n(s)),e.lock()}catch(e){this._worker=new a("error"),this._worker.error(e)}}p.prototype={accumulate:function(e){return d(this,e)},on:function(e,t){var i=this;return"data"===e?this._worker.on(e,function(e){t.call(i,e.data,e.meta)}):this._worker.on(e,function(){r.delay(t,arguments,i)}),this},resume:function(){return r.delay(this._worker.resume,[],this._worker),this},pause:function(){return this._worker.pause(),this},toNodejsStream:function(e){if(r.checkSupport("nodestream"),"nodebuffer"!==this._outputType)throw new Error(this._outputType+" is not supported by this method");return new c(this,{objectMode:"nodebuffer"!==this._outputType},e)}},t.exports=p},{"../base64":1,"../external":6,"../nodejs/NodejsStreamOutputAdapter":13,"../support":30,"../utils":32,"./ConvertWorker":24,"./GenericWorker":28}],30:[function(e,t,i){if(i.base64=!0,i.array=!0,i.string=!0,i.arraybuffer="undefined"!=typeof ArrayBuffer&&"undefined"!=typeof Uint8Array,i.nodebuffer="undefined"!=typeof Buffer,i.uint8array="undefined"!=typeof Uint8Array,"undefined"==typeof ArrayBuffer)i.blob=!1;else{var r=new ArrayBuffer(0);try{i.blob=0===new Blob([r],{type:"application/zip"}).size}catch(e){try{var n=new(self.BlobBuilder||self.WebKitBlobBuilder||self.MozBlobBuilder||self.MSBlobBuilder);n.append(r),i.blob=0===n.getBlob("application/zip").size}catch(e){i.blob=!1}}}try{i.nodestream=!!e("readable-stream").Readable}catch(e){i.nodestream=!1}},{"readable-stream":16}],31:[function(e,t,i){for(var r=e("./utils"),n=e("./support"),a=e("./nodejsUtils"),s=e("./stream/GenericWorker"),o=new Array(256),l=0;l<256;l++)o[l]=252<=l?6:248<=l?5:240<=l?4:224<=l?3:192<=l?2:1;function c(){s.call(this,"utf-8 decode"),this.leftOver=null}function d(){s.call(this,"utf-8 encode")}o[254]=o[254]=1,i.utf8encode=function(e){return n.nodebuffer?a.newBufferFrom(e,"utf-8"):function(e){var t,i,r,a,s,o=e.length,l=0;for(a=0;a<o;a++)55296==(64512&(i=e.charCodeAt(a)))&&a+1<o&&56320==(64512&(r=e.charCodeAt(a+1)))&&(i=65536+(i-55296<<10)+(r-56320),a++),l+=i<128?1:i<2048?2:i<65536?3:4;for(t=n.uint8array?new Uint8Array(l):new Array(l),a=s=0;s<l;a++)55296==(64512&(i=e.charCodeAt(a)))&&a+1<o&&56320==(64512&(r=e.charCodeAt(a+1)))&&(i=65536+(i-55296<<10)+(r-56320),a++),i<128?t[s++]=i:(i<2048?t[s++]=192|i>>>6:(i<65536?t[s++]=224|i>>>12:(t[s++]=240|i>>>18,t[s++]=128|i>>>12&63),t[s++]=128|i>>>6&63),t[s++]=128|63&i);return t}(e)},i.utf8decode=function(e){return n.nodebuffer?r.transformTo("nodebuffer",e).toString("utf-8"):function(e){var t,i,n,a,s=e.length,l=new Array(2*s);for(t=i=0;t<s;)if((n=e[t++])<128)l[i++]=n;else if(4<(a=o[n]))l[i++]=65533,t+=a-1;else{for(n&=2===a?31:3===a?15:7;1<a&&t<s;)n=n<<6|63&e[t++],a--;1<a?l[i++]=65533:n<65536?l[i++]=n:(n-=65536,l[i++]=55296|n>>10&1023,l[i++]=56320|1023&n)}return l.length!==i&&(l.subarray?l=l.subarray(0,i):l.length=i),r.applyFromCharCode(l)}(e=r.transformTo(n.uint8array?"uint8array":"array",e))},r.inherits(c,s),c.prototype.processChunk=function(e){var t=r.transformTo(n.uint8array?"uint8array":"array",e.data);if(this.leftOver&&this.leftOver.length){if(n.uint8array){var a=t;(t=new Uint8Array(a.length+this.leftOver.length)).set(this.leftOver,0),t.set(a,this.leftOver.length)}else t=this.leftOver.concat(t);this.leftOver=null}var s=function(e,t){var i;for((t=t||e.length)>e.length&&(t=e.length),i=t-1;0<=i&&128==(192&e[i]);)i--;return i<0||0===i?t:i+o[e[i]]>t?i:t}(t),l=t;s!==t.length&&(n.uint8array?(l=t.subarray(0,s),this.leftOver=t.subarray(s,t.length)):(l=t.slice(0,s),this.leftOver=t.slice(s,t.length))),this.push({data:i.utf8decode(l),meta:e.meta})},c.prototype.flush=function(){this.leftOver&&this.leftOver.length&&(this.push({data:i.utf8decode(this.leftOver),meta:{}}),this.leftOver=null)},i.Utf8DecodeWorker=c,r.inherits(d,s),d.prototype.processChunk=function(e){this.push({data:i.utf8encode(e.data),meta:e.meta})},i.Utf8EncodeWorker=d},{"./nodejsUtils":14,"./stream/GenericWorker":28,"./support":30,"./utils":32}],32:[function(e,t,i){var r=e("./support"),n=e("./base64"),a=e("./nodejsUtils"),s=e("./external");function o(e){return e}function l(e,t){for(var i=0;i<e.length;++i)t[i]=255&e.charCodeAt(i);return t}e("setimmediate"),i.newBlob=function(e,t){i.checkSupport("blob");try{return new Blob([e],{type:t})}catch(i){try{var r=new(self.BlobBuilder||self.WebKitBlobBuilder||self.MozBlobBuilder||self.MSBlobBuilder);return r.append(e),r.getBlob(t)}catch(e){throw new Error("Bug : can't construct the Blob.")}}};var c={stringifyByChunk:function(e,t,i){var r=[],n=0,a=e.length;if(a<=i)return String.fromCharCode.apply(null,e);for(;n<a;)"array"===t||"nodebuffer"===t?r.push(String.fromCharCode.apply(null,e.slice(n,Math.min(n+i,a)))):r.push(String.fromCharCode.apply(null,e.subarray(n,Math.min(n+i,a)))),n+=i;return r.join("")},stringifyByChar:function(e){for(var t="",i=0;i<e.length;i++)t+=String.fromCharCode(e[i]);return t},applyCanBeUsed:{uint8array:function(){try{return r.uint8array&&1===String.fromCharCode.apply(null,new Uint8Array(1)).length}catch(e){return!1}}(),nodebuffer:function(){try{return r.nodebuffer&&1===String.fromCharCode.apply(null,a.allocBuffer(1)).length}catch(e){return!1}}()}};function d(e){var t=65536,r=i.getTypeOf(e),n=!0;if("uint8array"===r?n=c.applyCanBeUsed.uint8array:"nodebuffer"===r&&(n=c.applyCanBeUsed.nodebuffer),n)for(;1<t;)try{return c.stringifyByChunk(e,r,t)}catch(e){t=Math.floor(t/2)}return c.stringifyByChar(e)}function p(e,t){for(var i=0;i<e.length;i++)t[i]=e[i];return t}i.applyFromCharCode=d;var h={};h.string={string:o,array:function(e){return l(e,new Array(e.length))},arraybuffer:function(e){return h.string.uint8array(e).buffer},uint8array:function(e){return l(e,new Uint8Array(e.length))},nodebuffer:function(e){return l(e,a.allocBuffer(e.length))}},h.array={string:d,array:o,arraybuffer:function(e){return new Uint8Array(e).buffer},uint8array:function(e){return new Uint8Array(e)},nodebuffer:function(e){return a.newBufferFrom(e)}},h.arraybuffer={string:function(e){return d(new Uint8Array(e))},array:function(e){return p(new Uint8Array(e),new Array(e.byteLength))},arraybuffer:o,uint8array:function(e){return new Uint8Array(e)},nodebuffer:function(e){return a.newBufferFrom(new Uint8Array(e))}},h.uint8array={string:d,array:function(e){return p(e,new Array(e.length))},arraybuffer:function(e){return e.buffer},uint8array:o,nodebuffer:function(e){return a.newBufferFrom(e)}},h.nodebuffer={string:d,array:function(e){return p(e,new Array(e.length))},arraybuffer:function(e){return h.nodebuffer.uint8array(e).buffer},uint8array:function(e){return p(e,new Uint8Array(e.length))},nodebuffer:o},i.transformTo=function(e,t){if(t=t||"",!e)return t;i.checkSupport(e);var r=i.getTypeOf(t);return h[r][e](t)},i.resolve=function(e){for(var t=e.split("/"),i=[],r=0;r<t.length;r++){var n=t[r];"."===n||""===n&&0!==r&&r!==t.length-1||(".."===n?i.pop():i.push(n))}return i.join("/")},i.getTypeOf=function(e){return"string"==typeof e?"string":"[object Array]"===Object.prototype.toString.call(e)?"array":r.nodebuffer&&a.isBuffer(e)?"nodebuffer":r.uint8array&&e instanceof Uint8Array?"uint8array":r.arraybuffer&&e instanceof ArrayBuffer?"arraybuffer":void 0},i.checkSupport=function(e){if(!r[e.toLowerCase()])throw new Error(e+" is not supported by this platform")},i.MAX_VALUE_16BITS=65535,i.MAX_VALUE_32BITS=-1,i.pretty=function(e){var t,i,r="";for(i=0;i<(e||"").length;i++)r+="\\x"+((t=e.charCodeAt(i))<16?"0":"")+t.toString(16).toUpperCase();return r},i.delay=function(e,t,i){setImmediate(function(){e.apply(i||null,t||[])})},i.inherits=function(e,t){function i(){}i.prototype=t.prototype,e.prototype=new i},i.extend=function(){var e,t,i={};for(e=0;e<arguments.length;e++)for(t in arguments[e])Object.prototype.hasOwnProperty.call(arguments[e],t)&&void 0===i[t]&&(i[t]=arguments[e][t]);return i},i.prepareContent=function(e,t,a,o,c){return s.Promise.resolve(t).then(function(e){return r.blob&&(e instanceof Blob||-1!==["[object File]","[object Blob]"].indexOf(Object.prototype.toString.call(e)))&&"undefined"!=typeof FileReader?new s.Promise(function(t,i){var r=new FileReader;r.onload=function(e){t(e.target.result)},r.onerror=function(e){i(e.target.error)},r.readAsArrayBuffer(e)}):e}).then(function(t){var d=i.getTypeOf(t);return d?("arraybuffer"===d?t=i.transformTo("uint8array",t):"string"===d&&(c?t=n.decode(t):a&&!0!==o&&(t=function(e){return l(e,r.uint8array?new Uint8Array(e.length):new Array(e.length))}(t))),t):s.Promise.reject(new Error("Can't read the data of '"+e+"'. Is it in a supported JavaScript type (String, Blob, ArrayBuffer, etc) ?"))})}},{"./base64":1,"./external":6,"./nodejsUtils":14,"./support":30,setimmediate:54}],33:[function(e,t,i){var r=e("./reader/readerFor"),n=e("./utils"),a=e("./signature"),s=e("./zipEntry"),o=e("./support");function l(e){this.files=[],this.loadOptions=e}l.prototype={checkSignature:function(e){if(!this.reader.readAndCheckSignature(e)){this.reader.index-=4;var t=this.reader.readString(4);throw new Error("Corrupted zip or bug: unexpected signature ("+n.pretty(t)+", expected "+n.pretty(e)+")")}},isSignature:function(e,t){var i=this.reader.index;this.reader.setIndex(e);var r=this.reader.readString(4)===t;return this.reader.setIndex(i),r},readBlockEndOfCentral:function(){this.diskNumber=this.reader.readInt(2),this.diskWithCentralDirStart=this.reader.readInt(2),this.centralDirRecordsOnThisDisk=this.reader.readInt(2),this.centralDirRecords=this.reader.readInt(2),this.centralDirSize=this.reader.readInt(4),this.centralDirOffset=this.reader.readInt(4),this.zipCommentLength=this.reader.readInt(2);var e=this.reader.readData(this.zipCommentLength),t=o.uint8array?"uint8array":"array",i=n.transformTo(t,e);this.zipComment=this.loadOptions.decodeFileName(i)},readBlockZip64EndOfCentral:function(){this.zip64EndOfCentralSize=this.reader.readInt(8),this.reader.skip(4),this.diskNumber=this.reader.readInt(4),this.diskWithCentralDirStart=this.reader.readInt(4),this.centralDirRecordsOnThisDisk=this.reader.readInt(8),this.centralDirRecords=this.reader.readInt(8),this.centralDirSize=this.reader.readInt(8),this.centralDirOffset=this.reader.readInt(8),this.zip64ExtensibleData={};for(var e,t,i,r=this.zip64EndOfCentralSize-44;0<r;)e=this.reader.readInt(2),t=this.reader.readInt(4),i=this.reader.readData(t),this.zip64ExtensibleData[e]={id:e,length:t,value:i}},readBlockZip64EndOfCentralLocator:function(){if(this.diskWithZip64CentralDirStart=this.reader.readInt(4),this.relativeOffsetEndOfZip64CentralDir=this.reader.readInt(8),this.disksCount=this.reader.readInt(4),1<this.disksCount)throw new Error("Multi-volumes zip are not supported")},readLocalFiles:function(){var e,t;for(e=0;e<this.files.length;e++)t=this.files[e],this.reader.setIndex(t.localHeaderOffset),this.checkSignature(a.LOCAL_FILE_HEADER),t.readLocalPart(this.reader),t.handleUTF8(),t.processAttributes()},readCentralDir:function(){var e;for(this.reader.setIndex(this.centralDirOffset);this.reader.readAndCheckSignature(a.CENTRAL_FILE_HEADER);)(e=new s({zip64:this.zip64},this.loadOptions)).readCentralPart(this.reader),this.files.push(e);if(this.centralDirRecords!==this.files.length&&0!==this.centralDirRecords&&0===this.files.length)throw new Error("Corrupted zip or bug: expected "+this.centralDirRecords+" records in central dir, got "+this.files.length)},readEndOfCentral:function(){var e=this.reader.lastIndexOfSignature(a.CENTRAL_DIRECTORY_END);if(e<0)throw this.isSignature(0,a.LOCAL_FILE_HEADER)?new Error("Corrupted zip: can't find end of central directory"):new Error("Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html");this.reader.setIndex(e);var t=e;if(this.checkSignature(a.CENTRAL_DIRECTORY_END),this.readBlockEndOfCentral(),this.diskNumber===n.MAX_VALUE_16BITS||this.diskWithCentralDirStart===n.MAX_VALUE_16BITS||this.centralDirRecordsOnThisDisk===n.MAX_VALUE_16BITS||this.centralDirRecords===n.MAX_VALUE_16BITS||this.centralDirSize===n.MAX_VALUE_32BITS||this.centralDirOffset===n.MAX_VALUE_32BITS){if(this.zip64=!0,(e=this.reader.lastIndexOfSignature(a.ZIP64_CENTRAL_DIRECTORY_LOCATOR))<0)throw new Error("Corrupted zip: can't find the ZIP64 end of central directory locator");if(this.reader.setIndex(e),this.checkSignature(a.ZIP64_CENTRAL_DIRECTORY_LOCATOR),this.readBlockZip64EndOfCentralLocator(),!this.isSignature(this.relativeOffsetEndOfZip64CentralDir,a.ZIP64_CENTRAL_DIRECTORY_END)&&(this.relativeOffsetEndOfZip64CentralDir=this.reader.lastIndexOfSignature(a.ZIP64_CENTRAL_DIRECTORY_END),this.relativeOffsetEndOfZip64CentralDir<0))throw new Error("Corrupted zip: can't find the ZIP64 end of central directory");this.reader.setIndex(this.relativeOffsetEndOfZip64CentralDir),this.checkSignature(a.ZIP64_CENTRAL_DIRECTORY_END),this.readBlockZip64EndOfCentral()}var i=this.centralDirOffset+this.centralDirSize;this.zip64&&(i+=20,i+=12+this.zip64EndOfCentralSize);var r=t-i;if(0<r)this.isSignature(t,a.CENTRAL_FILE_HEADER)||(this.reader.zero=r);else if(r<0)throw new Error("Corrupted zip: missing "+Math.abs(r)+" bytes.")},prepareReader:function(e){this.reader=r(e)},load:function(e){this.prepareReader(e),this.readEndOfCentral(),this.readCentralDir(),this.readLocalFiles()}},t.exports=l},{"./reader/readerFor":22,"./signature":23,"./support":30,"./utils":32,"./zipEntry":34}],34:[function(e,t,i){var r=e("./reader/readerFor"),n=e("./utils"),a=e("./compressedObject"),s=e("./crc32"),o=e("./utf8"),l=e("./compressions"),c=e("./support");function d(e,t){this.options=e,this.loadOptions=t}d.prototype={isEncrypted:function(){return!(1&~this.bitFlag)},useUTF8:function(){return!(2048&~this.bitFlag)},readLocalPart:function(e){var t,i;if(e.skip(22),this.fileNameLength=e.readInt(2),i=e.readInt(2),this.fileName=e.readData(this.fileNameLength),e.skip(i),-1===this.compressedSize||-1===this.uncompressedSize)throw new Error("Bug or corrupted zip : didn't get enough information from the central directory (compressedSize === -1 || uncompressedSize === -1)");if(null===(t=function(e){for(var t in l)if(Object.prototype.hasOwnProperty.call(l,t)&&l[t].magic===e)return l[t];return null}(this.compressionMethod)))throw new Error("Corrupted zip : compression "+n.pretty(this.compressionMethod)+" unknown (inner file : "+n.transformTo("string",this.fileName)+")");this.decompressed=new a(this.compressedSize,this.uncompressedSize,this.crc32,t,e.readData(this.compressedSize))},readCentralPart:function(e){this.versionMadeBy=e.readInt(2),e.skip(2),this.bitFlag=e.readInt(2),this.compressionMethod=e.readString(2),this.date=e.readDate(),this.crc32=e.readInt(4),this.compressedSize=e.readInt(4),this.uncompressedSize=e.readInt(4);var t=e.readInt(2);if(this.extraFieldsLength=e.readInt(2),this.fileCommentLength=e.readInt(2),this.diskNumberStart=e.readInt(2),this.internalFileAttributes=e.readInt(2),this.externalFileAttributes=e.readInt(4),this.localHeaderOffset=e.readInt(4),this.isEncrypted())throw new Error("Encrypted zip are not supported");e.skip(t),this.readExtraFields(e),this.parseZIP64ExtraField(e),this.fileComment=e.readData(this.fileCommentLength)},processAttributes:function(){this.unixPermissions=null,this.dosPermissions=null;var e=this.versionMadeBy>>8;this.dir=!!(16&this.externalFileAttributes),0==e&&(this.dosPermissions=63&this.externalFileAttributes),3==e&&(this.unixPermissions=this.externalFileAttributes>>16&65535),this.dir||"/"!==this.fileNameStr.slice(-1)||(this.dir=!0)},parseZIP64ExtraField:function(){if(this.extraFields[1]){var e=r(this.extraFields[1].value);this.uncompressedSize===n.MAX_VALUE_32BITS&&(this.uncompressedSize=e.readInt(8)),this.compressedSize===n.MAX_VALUE_32BITS&&(this.compressedSize=e.readInt(8)),this.localHeaderOffset===n.MAX_VALUE_32BITS&&(this.localHeaderOffset=e.readInt(8)),this.diskNumberStart===n.MAX_VALUE_32BITS&&(this.diskNumberStart=e.readInt(4))}},readExtraFields:function(e){var t,i,r,n=e.index+this.extraFieldsLength;for(this.extraFields||(this.extraFields={});e.index+4<n;)t=e.readInt(2),i=e.readInt(2),r=e.readData(i),this.extraFields[t]={id:t,length:i,value:r};e.setIndex(n)},handleUTF8:function(){var e=c.uint8array?"uint8array":"array";if(this.useUTF8())this.fileNameStr=o.utf8decode(this.fileName),this.fileCommentStr=o.utf8decode(this.fileComment);else{var t=this.findExtraFieldUnicodePath();if(null!==t)this.fileNameStr=t;else{var i=n.transformTo(e,this.fileName);this.fileNameStr=this.loadOptions.decodeFileName(i)}var r=this.findExtraFieldUnicodeComment();if(null!==r)this.fileCommentStr=r;else{var a=n.transformTo(e,this.fileComment);this.fileCommentStr=this.loadOptions.decodeFileName(a)}}},findExtraFieldUnicodePath:function(){var e=this.extraFields[28789];if(e){var t=r(e.value);return 1!==t.readInt(1)||s(this.fileName)!==t.readInt(4)?null:o.utf8decode(t.readData(e.length-5))}return null},findExtraFieldUnicodeComment:function(){var e=this.extraFields[25461];if(e){var t=r(e.value);return 1!==t.readInt(1)||s(this.fileComment)!==t.readInt(4)?null:o.utf8decode(t.readData(e.length-5))}return null}},t.exports=d},{"./compressedObject":2,"./compressions":3,"./crc32":4,"./reader/readerFor":22,"./support":30,"./utf8":31,"./utils":32}],35:[function(e,t,i){function r(e,t,i){this.name=e,this.dir=i.dir,this.date=i.date,this.comment=i.comment,this.unixPermissions=i.unixPermissions,this.dosPermissions=i.dosPermissions,this._data=t,this._dataBinary=i.binary,this.options={compression:i.compression,compressionOptions:i.compressionOptions}}var n=e("./stream/StreamHelper"),a=e("./stream/DataWorker"),s=e("./utf8"),o=e("./compressedObject"),l=e("./stream/GenericWorker");r.prototype={internalStream:function(e){var t=null,i="string";try{if(!e)throw new Error("No output type specified.");var r="string"===(i=e.toLowerCase())||"text"===i;"binarystring"!==i&&"text"!==i||(i="string"),t=this._decompressWorker();var a=!this._dataBinary;a&&!r&&(t=t.pipe(new s.Utf8EncodeWorker)),!a&&r&&(t=t.pipe(new s.Utf8DecodeWorker))}catch(e){(t=new l("error")).error(e)}return new n(t,i,"")},async:function(e,t){return this.internalStream(e).accumulate(t)},nodeStream:function(e,t){return this.internalStream(e||"nodebuffer").toNodejsStream(t)},_compressWorker:function(e,t){if(this._data instanceof o&&this._data.compression.magic===e.magic)return this._data.getCompressedWorker();var i=this._decompressWorker();return this._dataBinary||(i=i.pipe(new s.Utf8EncodeWorker)),o.createWorkerFrom(i,e,t)},_decompressWorker:function(){return this._data instanceof o?this._data.getContentWorker():this._data instanceof l?this._data:new a(this._data)}};for(var c=["asText","asBinary","asNodeBuffer","asUint8Array","asArrayBuffer"],d=function(){throw new Error("This method has been removed in JSZip 3.0, please check the upgrade guide.")},p=0;p<c.length;p++)r.prototype[c[p]]=d;t.exports=r},{"./compressedObject":2,"./stream/DataWorker":27,"./stream/GenericWorker":28,"./stream/StreamHelper":29,"./utf8":31}],36:[function(e,t,i){(function(e){var i,r,n=e.MutationObserver||e.WebKitMutationObserver;if(n){var a=0,s=new n(d),o=e.document.createTextNode("");s.observe(o,{characterData:!0}),i=function(){o.data=a=++a%2}}else if(e.setImmediate||void 0===e.MessageChannel)i="document"in e&&"onreadystatechange"in e.document.createElement("script")?function(){var t=e.document.createElement("script");t.onreadystatechange=function(){d(),t.onreadystatechange=null,t.parentNode.removeChild(t),t=null},e.document.documentElement.appendChild(t)}:function(){setTimeout(d,0)};else{var l=new e.MessageChannel;l.port1.onmessage=d,i=function(){l.port2.postMessage(0)}}var c=[];function d(){var e,t;r=!0;for(var i=c.length;i;){for(t=c,c=[],e=-1;++e<i;)t[e]();i=c.length}r=!1}t.exports=function(e){1!==c.push(e)||r||i()}}).call(this,void 0!==Q?Q:"undefined"!=typeof self?self:"undefined"!=typeof window?window:{})},{}],37:[function(e,t,i){var r=e("immediate");function n(){}var a={},s=["REJECTED"],o=["FULFILLED"],l=["PENDING"];function c(e){if("function"!=typeof e)throw new TypeError("resolver must be a function");this.state=l,this.queue=[],this.outcome=void 0,e!==n&&u(this,e)}function d(e,t,i){this.promise=e,"function"==typeof t&&(this.onFulfilled=t,this.callFulfilled=this.otherCallFulfilled),"function"==typeof i&&(this.onRejected=i,this.callRejected=this.otherCallRejected)}function p(e,t,i){r(function(){var r;try{r=t(i)}catch(r){return a.reject(e,r)}r===e?a.reject(e,new TypeError("Cannot resolve promise with itself")):a.resolve(e,r)})}function h(e){var t=e&&e.then;if(e&&("object"==typeof e||"function"==typeof e)&&"function"==typeof t)return function(){t.apply(e,arguments)}}function u(e,t){var i=!1;function r(t){i||(i=!0,a.reject(e,t))}function n(t){i||(i=!0,a.resolve(e,t))}var s=m(function(){t(n,r)});"error"===s.status&&r(s.value)}function m(e,t){var i={};try{i.value=e(t),i.status="success"}catch(e){i.status="error",i.value=e}return i}(t.exports=c).prototype.finally=function(e){if("function"!=typeof e)return this;var t=this.constructor;return this.then(function(i){return t.resolve(e()).then(function(){return i})},function(i){return t.resolve(e()).then(function(){throw i})})},c.prototype.catch=function(e){return this.then(null,e)},c.prototype.then=function(e,t){if("function"!=typeof e&&this.state===o||"function"!=typeof t&&this.state===s)return this;var i=new this.constructor(n);return this.state!==l?p(i,this.state===o?e:t,this.outcome):this.queue.push(new d(i,e,t)),i},d.prototype.callFulfilled=function(e){a.resolve(this.promise,e)},d.prototype.otherCallFulfilled=function(e){p(this.promise,this.onFulfilled,e)},d.prototype.callRejected=function(e){a.reject(this.promise,e)},d.prototype.otherCallRejected=function(e){p(this.promise,this.onRejected,e)},a.resolve=function(e,t){var i=m(h,t);if("error"===i.status)return a.reject(e,i.value);var r=i.value;if(r)u(e,r);else{e.state=o,e.outcome=t;for(var n=-1,s=e.queue.length;++n<s;)e.queue[n].callFulfilled(t)}return e},a.reject=function(e,t){e.state=s,e.outcome=t;for(var i=-1,r=e.queue.length;++i<r;)e.queue[i].callRejected(t);return e},c.resolve=function(e){return e instanceof this?e:a.resolve(new this(n),e)},c.reject=function(e){var t=new this(n);return a.reject(t,e)},c.all=function(e){var t=this;if("[object Array]"!==Object.prototype.toString.call(e))return this.reject(new TypeError("must be an array"));var i=e.length,r=!1;if(!i)return this.resolve([]);for(var s=new Array(i),o=0,l=-1,c=new this(n);++l<i;)d(e[l],l);return c;function d(e,n){t.resolve(e).then(function(e){s[n]=e,++o!==i||r||(r=!0,a.resolve(c,s))},function(e){r||(r=!0,a.reject(c,e))})}},c.race=function(e){var t=this;if("[object Array]"!==Object.prototype.toString.call(e))return this.reject(new TypeError("must be an array"));var i=e.length,r=!1;if(!i)return this.resolve([]);for(var s,o=-1,l=new this(n);++o<i;)s=e[o],t.resolve(s).then(function(e){r||(r=!0,a.resolve(l,e))},function(e){r||(r=!0,a.reject(l,e))});return l}},{immediate:36}],38:[function(e,t,i){var r={};(0,e("./lib/utils/common").assign)(r,e("./lib/deflate"),e("./lib/inflate"),e("./lib/zlib/constants")),t.exports=r},{"./lib/deflate":39,"./lib/inflate":40,"./lib/utils/common":41,"./lib/zlib/constants":44}],39:[function(e,t,i){var r=e("./zlib/deflate"),n=e("./utils/common"),a=e("./utils/strings"),s=e("./zlib/messages"),o=e("./zlib/zstream"),l=Object.prototype.toString,c=0,d=-1,p=0,h=8;function u(e){if(!(this instanceof u))return new u(e);this.options=n.assign({level:d,method:h,chunkSize:16384,windowBits:15,memLevel:8,strategy:p,to:""},e||{});var t=this.options;t.raw&&0<t.windowBits?t.windowBits=-t.windowBits:t.gzip&&0<t.windowBits&&t.windowBits<16&&(t.windowBits+=16),this.err=0,this.msg="",this.ended=!1,this.chunks=[],this.strm=new o,this.strm.avail_out=0;var i=r.deflateInit2(this.strm,t.level,t.method,t.windowBits,t.memLevel,t.strategy);if(i!==c)throw new Error(s[i]);if(t.header&&r.deflateSetHeader(this.strm,t.header),t.dictionary){var m;if(m="string"==typeof t.dictionary?a.string2buf(t.dictionary):"[object ArrayBuffer]"===l.call(t.dictionary)?new Uint8Array(t.dictionary):t.dictionary,(i=r.deflateSetDictionary(this.strm,m))!==c)throw new Error(s[i]);this._dict_set=!0}}function m(e,t){var i=new u(t);if(i.push(e,!0),i.err)throw i.msg||s[i.err];return i.result}u.prototype.push=function(e,t){var i,s,o=this.strm,d=this.options.chunkSize;if(this.ended)return!1;s=t===~~t?t:!0===t?4:0,"string"==typeof e?o.input=a.string2buf(e):"[object ArrayBuffer]"===l.call(e)?o.input=new Uint8Array(e):o.input=e,o.next_in=0,o.avail_in=o.input.length;do{if(0===o.avail_out&&(o.output=new n.Buf8(d),o.next_out=0,o.avail_out=d),1!==(i=r.deflate(o,s))&&i!==c)return this.onEnd(i),!(this.ended=!0);0!==o.avail_out&&(0!==o.avail_in||4!==s&&2!==s)||("string"===this.options.to?this.onData(a.buf2binstring(n.shrinkBuf(o.output,o.next_out))):this.onData(n.shrinkBuf(o.output,o.next_out)))}while((0<o.avail_in||0===o.avail_out)&&1!==i);return 4===s?(i=r.deflateEnd(this.strm),this.onEnd(i),this.ended=!0,i===c):2!==s||(this.onEnd(c),!(o.avail_out=0))},u.prototype.onData=function(e){this.chunks.push(e)},u.prototype.onEnd=function(e){e===c&&("string"===this.options.to?this.result=this.chunks.join(""):this.result=n.flattenChunks(this.chunks)),this.chunks=[],this.err=e,this.msg=this.strm.msg},i.Deflate=u,i.deflate=m,i.deflateRaw=function(e,t){return(t=t||{}).raw=!0,m(e,t)},i.gzip=function(e,t){return(t=t||{}).gzip=!0,m(e,t)}},{"./utils/common":41,"./utils/strings":42,"./zlib/deflate":46,"./zlib/messages":51,"./zlib/zstream":53}],40:[function(e,t,i){var r=e("./zlib/inflate"),n=e("./utils/common"),a=e("./utils/strings"),s=e("./zlib/constants"),o=e("./zlib/messages"),l=e("./zlib/zstream"),c=e("./zlib/gzheader"),d=Object.prototype.toString;function p(e){if(!(this instanceof p))return new p(e);this.options=n.assign({chunkSize:16384,windowBits:0,to:""},e||{});var t=this.options;t.raw&&0<=t.windowBits&&t.windowBits<16&&(t.windowBits=-t.windowBits,0===t.windowBits&&(t.windowBits=-15)),!(0<=t.windowBits&&t.windowBits<16)||e&&e.windowBits||(t.windowBits+=32),15<t.windowBits&&t.windowBits<48&&!(15&t.windowBits)&&(t.windowBits|=15),this.err=0,this.msg="",this.ended=!1,this.chunks=[],this.strm=new l,this.strm.avail_out=0;var i=r.inflateInit2(this.strm,t.windowBits);if(i!==s.Z_OK)throw new Error(o[i]);this.header=new c,r.inflateGetHeader(this.strm,this.header)}function h(e,t){var i=new p(t);if(i.push(e,!0),i.err)throw i.msg||o[i.err];return i.result}p.prototype.push=function(e,t){var i,o,l,c,p,h,u=this.strm,m=this.options.chunkSize,g=this.options.dictionary,f=!1;if(this.ended)return!1;o=t===~~t?t:!0===t?s.Z_FINISH:s.Z_NO_FLUSH,"string"==typeof e?u.input=a.binstring2buf(e):"[object ArrayBuffer]"===d.call(e)?u.input=new Uint8Array(e):u.input=e,u.next_in=0,u.avail_in=u.input.length;do{if(0===u.avail_out&&(u.output=new n.Buf8(m),u.next_out=0,u.avail_out=m),(i=r.inflate(u,s.Z_NO_FLUSH))===s.Z_NEED_DICT&&g&&(h="string"==typeof g?a.string2buf(g):"[object ArrayBuffer]"===d.call(g)?new Uint8Array(g):g,i=r.inflateSetDictionary(this.strm,h)),i===s.Z_BUF_ERROR&&!0===f&&(i=s.Z_OK,f=!1),i!==s.Z_STREAM_END&&i!==s.Z_OK)return this.onEnd(i),!(this.ended=!0);u.next_out&&(0!==u.avail_out&&i!==s.Z_STREAM_END&&(0!==u.avail_in||o!==s.Z_FINISH&&o!==s.Z_SYNC_FLUSH)||("string"===this.options.to?(l=a.utf8border(u.output,u.next_out),c=u.next_out-l,p=a.buf2string(u.output,l),u.next_out=c,u.avail_out=m-c,c&&n.arraySet(u.output,u.output,l,c,0),this.onData(p)):this.onData(n.shrinkBuf(u.output,u.next_out)))),0===u.avail_in&&0===u.avail_out&&(f=!0)}while((0<u.avail_in||0===u.avail_out)&&i!==s.Z_STREAM_END);return i===s.Z_STREAM_END&&(o=s.Z_FINISH),o===s.Z_FINISH?(i=r.inflateEnd(this.strm),this.onEnd(i),this.ended=!0,i===s.Z_OK):o!==s.Z_SYNC_FLUSH||(this.onEnd(s.Z_OK),!(u.avail_out=0))},p.prototype.onData=function(e){this.chunks.push(e)},p.prototype.onEnd=function(e){e===s.Z_OK&&("string"===this.options.to?this.result=this.chunks.join(""):this.result=n.flattenChunks(this.chunks)),this.chunks=[],this.err=e,this.msg=this.strm.msg},i.Inflate=p,i.inflate=h,i.inflateRaw=function(e,t){return(t=t||{}).raw=!0,h(e,t)},i.ungzip=h},{"./utils/common":41,"./utils/strings":42,"./zlib/constants":44,"./zlib/gzheader":47,"./zlib/inflate":49,"./zlib/messages":51,"./zlib/zstream":53}],41:[function(e,t,i){var r="undefined"!=typeof Uint8Array&&"undefined"!=typeof Uint16Array&&"undefined"!=typeof Int32Array;i.assign=function(e){for(var t=Array.prototype.slice.call(arguments,1);t.length;){var i=t.shift();if(i){if("object"!=typeof i)throw new TypeError(i+"must be non-object");for(var r in i)i.hasOwnProperty(r)&&(e[r]=i[r])}}return e},i.shrinkBuf=function(e,t){return e.length===t?e:e.subarray?e.subarray(0,t):(e.length=t,e)};var n={arraySet:function(e,t,i,r,n){if(t.subarray&&e.subarray)e.set(t.subarray(i,i+r),n);else for(var a=0;a<r;a++)e[n+a]=t[i+a]},flattenChunks:function(e){var t,i,r,n,a,s;for(t=r=0,i=e.length;t<i;t++)r+=e[t].length;for(s=new Uint8Array(r),t=n=0,i=e.length;t<i;t++)a=e[t],s.set(a,n),n+=a.length;return s}},a={arraySet:function(e,t,i,r,n){for(var a=0;a<r;a++)e[n+a]=t[i+a]},flattenChunks:function(e){return[].concat.apply([],e)}};i.setTyped=function(e){e?(i.Buf8=Uint8Array,i.Buf16=Uint16Array,i.Buf32=Int32Array,i.assign(i,n)):(i.Buf8=Array,i.Buf16=Array,i.Buf32=Array,i.assign(i,a))},i.setTyped(r)},{}],42:[function(e,t,i){var r=e("./common"),n=!0,a=!0;try{String.fromCharCode.apply(null,[0])}catch(e){n=!1}try{String.fromCharCode.apply(null,new Uint8Array(1))}catch(e){a=!1}for(var s=new r.Buf8(256),o=0;o<256;o++)s[o]=252<=o?6:248<=o?5:240<=o?4:224<=o?3:192<=o?2:1;function l(e,t){if(t<65537&&(e.subarray&&a||!e.subarray&&n))return String.fromCharCode.apply(null,r.shrinkBuf(e,t));for(var i="",s=0;s<t;s++)i+=String.fromCharCode(e[s]);return i}s[254]=s[254]=1,i.string2buf=function(e){var t,i,n,a,s,o=e.length,l=0;for(a=0;a<o;a++)55296==(64512&(i=e.charCodeAt(a)))&&a+1<o&&56320==(64512&(n=e.charCodeAt(a+1)))&&(i=65536+(i-55296<<10)+(n-56320),a++),l+=i<128?1:i<2048?2:i<65536?3:4;for(t=new r.Buf8(l),a=s=0;s<l;a++)55296==(64512&(i=e.charCodeAt(a)))&&a+1<o&&56320==(64512&(n=e.charCodeAt(a+1)))&&(i=65536+(i-55296<<10)+(n-56320),a++),i<128?t[s++]=i:(i<2048?t[s++]=192|i>>>6:(i<65536?t[s++]=224|i>>>12:(t[s++]=240|i>>>18,t[s++]=128|i>>>12&63),t[s++]=128|i>>>6&63),t[s++]=128|63&i);return t},i.buf2binstring=function(e){return l(e,e.length)},i.binstring2buf=function(e){for(var t=new r.Buf8(e.length),i=0,n=t.length;i<n;i++)t[i]=e.charCodeAt(i);return t},i.buf2string=function(e,t){var i,r,n,a,o=t||e.length,c=new Array(2*o);for(i=r=0;i<o;)if((n=e[i++])<128)c[r++]=n;else if(4<(a=s[n]))c[r++]=65533,i+=a-1;else{for(n&=2===a?31:3===a?15:7;1<a&&i<o;)n=n<<6|63&e[i++],a--;1<a?c[r++]=65533:n<65536?c[r++]=n:(n-=65536,c[r++]=55296|n>>10&1023,c[r++]=56320|1023&n)}return l(c,r)},i.utf8border=function(e,t){var i;for((t=t||e.length)>e.length&&(t=e.length),i=t-1;0<=i&&128==(192&e[i]);)i--;return i<0||0===i?t:i+s[e[i]]>t?i:t}},{"./common":41}],43:[function(e,t,i){t.exports=function(e,t,i,r){for(var n=65535&e,a=e>>>16&65535,s=0;0!==i;){for(i-=s=2e3<i?2e3:i;a=a+(n=n+t[r++]|0)|0,--s;);n%=65521,a%=65521}return n|a<<16}},{}],44:[function(e,t,i){t.exports={Z_NO_FLUSH:0,Z_PARTIAL_FLUSH:1,Z_SYNC_FLUSH:2,Z_FULL_FLUSH:3,Z_FINISH:4,Z_BLOCK:5,Z_TREES:6,Z_OK:0,Z_STREAM_END:1,Z_NEED_DICT:2,Z_ERRNO:-1,Z_STREAM_ERROR:-2,Z_DATA_ERROR:-3,Z_BUF_ERROR:-5,Z_NO_COMPRESSION:0,Z_BEST_SPEED:1,Z_BEST_COMPRESSION:9,Z_DEFAULT_COMPRESSION:-1,Z_FILTERED:1,Z_HUFFMAN_ONLY:2,Z_RLE:3,Z_FIXED:4,Z_DEFAULT_STRATEGY:0,Z_BINARY:0,Z_TEXT:1,Z_UNKNOWN:2,Z_DEFLATED:8}},{}],45:[function(e,t,i){var r=function(){for(var e,t=[],i=0;i<256;i++){e=i;for(var r=0;r<8;r++)e=1&e?3988292384^e>>>1:e>>>1;t[i]=e}return t}();t.exports=function(e,t,i,n){var a=r,s=n+i;e^=-1;for(var o=n;o<s;o++)e=e>>>8^a[255&(e^t[o])];return-1^e}},{}],46:[function(e,t,i){var r,n=e("../utils/common"),a=e("./trees"),s=e("./adler32"),o=e("./crc32"),l=e("./messages"),c=0,d=4,p=0,h=-2,u=-1,m=4,g=2,f=8,b=9,v=286,_=30,x=19,y=2*v+1,w=15,k=3,$=258,S=$+k+1,z=42,I=113,T=1,C=2,A=3,R=4;function E(e,t){return e.msg=l[t],t}function D(e){return(e<<1)-(4<e?9:0)}function F(e){for(var t=e.length;0<=--t;)e[t]=0}function L(e){var t=e.state,i=t.pending;i>e.avail_out&&(i=e.avail_out),0!==i&&(n.arraySet(e.output,t.pending_buf,t.pending_out,i,e.next_out),e.next_out+=i,t.pending_out+=i,e.total_out+=i,e.avail_out-=i,t.pending-=i,0===t.pending&&(t.pending_out=0))}function P(e,t){a._tr_flush_block(e,0<=e.block_start?e.block_start:-1,e.strstart-e.block_start,t),e.block_start=e.strstart,L(e.strm)}function M(e,t){e.pending_buf[e.pending++]=t}function O(e,t){e.pending_buf[e.pending++]=t>>>8&255,e.pending_buf[e.pending++]=255&t}function B(e,t){var i,r,n=e.max_chain_length,a=e.strstart,s=e.prev_length,o=e.nice_match,l=e.strstart>e.w_size-S?e.strstart-(e.w_size-S):0,c=e.window,d=e.w_mask,p=e.prev,h=e.strstart+$,u=c[a+s-1],m=c[a+s];e.prev_length>=e.good_match&&(n>>=2),o>e.lookahead&&(o=e.lookahead);do{if(c[(i=t)+s]===m&&c[i+s-1]===u&&c[i]===c[a]&&c[++i]===c[a+1]){a+=2,i++;do{}while(c[++a]===c[++i]&&c[++a]===c[++i]&&c[++a]===c[++i]&&c[++a]===c[++i]&&c[++a]===c[++i]&&c[++a]===c[++i]&&c[++a]===c[++i]&&c[++a]===c[++i]&&a<h);if(r=$-(h-a),a=h-$,s<r){if(e.match_start=t,o<=(s=r))break;u=c[a+s-1],m=c[a+s]}}}while((t=p[t&d])>l&&0!=--n);return s<=e.lookahead?s:e.lookahead}function j(e){var t,i,r,a,l,c,d,p,h,u,m=e.w_size;do{if(a=e.window_size-e.lookahead-e.strstart,e.strstart>=m+(m-S)){for(n.arraySet(e.window,e.window,m,m,0),e.match_start-=m,e.strstart-=m,e.block_start-=m,t=i=e.hash_size;r=e.head[--t],e.head[t]=m<=r?r-m:0,--i;);for(t=i=m;r=e.prev[--t],e.prev[t]=m<=r?r-m:0,--i;);a+=m}if(0===e.strm.avail_in)break;if(c=e.strm,d=e.window,p=e.strstart+e.lookahead,u=void 0,(h=a)<(u=c.avail_in)&&(u=h),i=0===u?0:(c.avail_in-=u,n.arraySet(d,c.input,c.next_in,u,p),1===c.state.wrap?c.adler=s(c.adler,d,u,p):2===c.state.wrap&&(c.adler=o(c.adler,d,u,p)),c.next_in+=u,c.total_in+=u,u),e.lookahead+=i,e.lookahead+e.insert>=k)for(l=e.strstart-e.insert,e.ins_h=e.window[l],e.ins_h=(e.ins_h<<e.hash_shift^e.window[l+1])&e.hash_mask;e.insert&&(e.ins_h=(e.ins_h<<e.hash_shift^e.window[l+k-1])&e.hash_mask,e.prev[l&e.w_mask]=e.head[e.ins_h],e.head[e.ins_h]=l,l++,e.insert--,!(e.lookahead+e.insert<k)););}while(e.lookahead<S&&0!==e.strm.avail_in)}function N(e,t){for(var i,r;;){if(e.lookahead<S){if(j(e),e.lookahead<S&&t===c)return T;if(0===e.lookahead)break}if(i=0,e.lookahead>=k&&(e.ins_h=(e.ins_h<<e.hash_shift^e.window[e.strstart+k-1])&e.hash_mask,i=e.prev[e.strstart&e.w_mask]=e.head[e.ins_h],e.head[e.ins_h]=e.strstart),0!==i&&e.strstart-i<=e.w_size-S&&(e.match_length=B(e,i)),e.match_length>=k)if(r=a._tr_tally(e,e.strstart-e.match_start,e.match_length-k),e.lookahead-=e.match_length,e.match_length<=e.max_lazy_match&&e.lookahead>=k){for(e.match_length--;e.strstart++,e.ins_h=(e.ins_h<<e.hash_shift^e.window[e.strstart+k-1])&e.hash_mask,i=e.prev[e.strstart&e.w_mask]=e.head[e.ins_h],e.head[e.ins_h]=e.strstart,0!=--e.match_length;);e.strstart++}else e.strstart+=e.match_length,e.match_length=0,e.ins_h=e.window[e.strstart],e.ins_h=(e.ins_h<<e.hash_shift^e.window[e.strstart+1])&e.hash_mask;else r=a._tr_tally(e,0,e.window[e.strstart]),e.lookahead--,e.strstart++;if(r&&(P(e,!1),0===e.strm.avail_out))return T}return e.insert=e.strstart<k-1?e.strstart:k-1,t===d?(P(e,!0),0===e.strm.avail_out?A:R):e.last_lit&&(P(e,!1),0===e.strm.avail_out)?T:C}function U(e,t){for(var i,r,n;;){if(e.lookahead<S){if(j(e),e.lookahead<S&&t===c)return T;if(0===e.lookahead)break}if(i=0,e.lookahead>=k&&(e.ins_h=(e.ins_h<<e.hash_shift^e.window[e.strstart+k-1])&e.hash_mask,i=e.prev[e.strstart&e.w_mask]=e.head[e.ins_h],e.head[e.ins_h]=e.strstart),e.prev_length=e.match_length,e.prev_match=e.match_start,e.match_length=k-1,0!==i&&e.prev_length<e.max_lazy_match&&e.strstart-i<=e.w_size-S&&(e.match_length=B(e,i),e.match_length<=5&&(1===e.strategy||e.match_length===k&&4096<e.strstart-e.match_start)&&(e.match_length=k-1)),e.prev_length>=k&&e.match_length<=e.prev_length){for(n=e.strstart+e.lookahead-k,r=a._tr_tally(e,e.strstart-1-e.prev_match,e.prev_length-k),e.lookahead-=e.prev_length-1,e.prev_length-=2;++e.strstart<=n&&(e.ins_h=(e.ins_h<<e.hash_shift^e.window[e.strstart+k-1])&e.hash_mask,i=e.prev[e.strstart&e.w_mask]=e.head[e.ins_h],e.head[e.ins_h]=e.strstart),0!=--e.prev_length;);if(e.match_available=0,e.match_length=k-1,e.strstart++,r&&(P(e,!1),0===e.strm.avail_out))return T}else if(e.match_available){if((r=a._tr_tally(e,0,e.window[e.strstart-1]))&&P(e,!1),e.strstart++,e.lookahead--,0===e.strm.avail_out)return T}else e.match_available=1,e.strstart++,e.lookahead--}return e.match_available&&(r=a._tr_tally(e,0,e.window[e.strstart-1]),e.match_available=0),e.insert=e.strstart<k-1?e.strstart:k-1,t===d?(P(e,!0),0===e.strm.avail_out?A:R):e.last_lit&&(P(e,!1),0===e.strm.avail_out)?T:C}function W(e,t,i,r,n){this.good_length=e,this.max_lazy=t,this.nice_length=i,this.max_chain=r,this.func=n}function Z(){this.strm=null,this.status=0,this.pending_buf=null,this.pending_buf_size=0,this.pending_out=0,this.pending=0,this.wrap=0,this.gzhead=null,this.gzindex=0,this.method=f,this.last_flush=-1,this.w_size=0,this.w_bits=0,this.w_mask=0,this.window=null,this.window_size=0,this.prev=null,this.head=null,this.ins_h=0,this.hash_size=0,this.hash_bits=0,this.hash_mask=0,this.hash_shift=0,this.block_start=0,this.match_length=0,this.prev_match=0,this.match_available=0,this.strstart=0,this.match_start=0,this.lookahead=0,this.prev_length=0,this.max_chain_length=0,this.max_lazy_match=0,this.level=0,this.strategy=0,this.good_match=0,this.nice_match=0,this.dyn_ltree=new n.Buf16(2*y),this.dyn_dtree=new n.Buf16(2*(2*_+1)),this.bl_tree=new n.Buf16(2*(2*x+1)),F(this.dyn_ltree),F(this.dyn_dtree),F(this.bl_tree),this.l_desc=null,this.d_desc=null,this.bl_desc=null,this.bl_count=new n.Buf16(w+1),this.heap=new n.Buf16(2*v+1),F(this.heap),this.heap_len=0,this.heap_max=0,this.depth=new n.Buf16(2*v+1),F(this.depth),this.l_buf=0,this.lit_bufsize=0,this.last_lit=0,this.d_buf=0,this.opt_len=0,this.static_len=0,this.matches=0,this.insert=0,this.bi_buf=0,this.bi_valid=0}function H(e){var t;return e&&e.state?(e.total_in=e.total_out=0,e.data_type=g,(t=e.state).pending=0,t.pending_out=0,t.wrap<0&&(t.wrap=-t.wrap),t.status=t.wrap?z:I,e.adler=2===t.wrap?0:1,t.last_flush=c,a._tr_init(t),p):E(e,h)}function q(e){var t=H(e);return t===p&&function(e){e.window_size=2*e.w_size,F(e.head),e.max_lazy_match=r[e.level].max_lazy,e.good_match=r[e.level].good_length,e.nice_match=r[e.level].nice_length,e.max_chain_length=r[e.level].max_chain,e.strstart=0,e.block_start=0,e.lookahead=0,e.insert=0,e.match_length=e.prev_length=k-1,e.match_available=0,e.ins_h=0}(e.state),t}function V(e,t,i,r,a,s){if(!e)return h;var o=1;if(t===u&&(t=6),r<0?(o=0,r=-r):15<r&&(o=2,r-=16),a<1||b<a||i!==f||r<8||15<r||t<0||9<t||s<0||m<s)return E(e,h);8===r&&(r=9);var l=new Z;return(e.state=l).strm=e,l.wrap=o,l.gzhead=null,l.w_bits=r,l.w_size=1<<l.w_bits,l.w_mask=l.w_size-1,l.hash_bits=a+7,l.hash_size=1<<l.hash_bits,l.hash_mask=l.hash_size-1,l.hash_shift=~~((l.hash_bits+k-1)/k),l.window=new n.Buf8(2*l.w_size),l.head=new n.Buf16(l.hash_size),l.prev=new n.Buf16(l.w_size),l.lit_bufsize=1<<a+6,l.pending_buf_size=4*l.lit_bufsize,l.pending_buf=new n.Buf8(l.pending_buf_size),l.d_buf=1*l.lit_bufsize,l.l_buf=3*l.lit_bufsize,l.level=t,l.strategy=s,l.method=i,q(e)}r=[new W(0,0,0,0,function(e,t){var i=65535;for(i>e.pending_buf_size-5&&(i=e.pending_buf_size-5);;){if(e.lookahead<=1){if(j(e),0===e.lookahead&&t===c)return T;if(0===e.lookahead)break}e.strstart+=e.lookahead,e.lookahead=0;var r=e.block_start+i;if((0===e.strstart||e.strstart>=r)&&(e.lookahead=e.strstart-r,e.strstart=r,P(e,!1),0===e.strm.avail_out))return T;if(e.strstart-e.block_start>=e.w_size-S&&(P(e,!1),0===e.strm.avail_out))return T}return e.insert=0,t===d?(P(e,!0),0===e.strm.avail_out?A:R):(e.strstart>e.block_start&&(P(e,!1),e.strm.avail_out),T)}),new W(4,4,8,4,N),new W(4,5,16,8,N),new W(4,6,32,32,N),new W(4,4,16,16,U),new W(8,16,32,32,U),new W(8,16,128,128,U),new W(8,32,128,256,U),new W(32,128,258,1024,U),new W(32,258,258,4096,U)],i.deflateInit=function(e,t){return V(e,t,f,15,8,0)},i.deflateInit2=V,i.deflateReset=q,i.deflateResetKeep=H,i.deflateSetHeader=function(e,t){return e&&e.state?2!==e.state.wrap?h:(e.state.gzhead=t,p):h},i.deflate=function(e,t){var i,n,s,l;if(!e||!e.state||5<t||t<0)return e?E(e,h):h;if(n=e.state,!e.output||!e.input&&0!==e.avail_in||666===n.status&&t!==d)return E(e,0===e.avail_out?-5:h);if(n.strm=e,i=n.last_flush,n.last_flush=t,n.status===z)if(2===n.wrap)e.adler=0,M(n,31),M(n,139),M(n,8),n.gzhead?(M(n,(n.gzhead.text?1:0)+(n.gzhead.hcrc?2:0)+(n.gzhead.extra?4:0)+(n.gzhead.name?8:0)+(n.gzhead.comment?16:0)),M(n,255&n.gzhead.time),M(n,n.gzhead.time>>8&255),M(n,n.gzhead.time>>16&255),M(n,n.gzhead.time>>24&255),M(n,9===n.level?2:2<=n.strategy||n.level<2?4:0),M(n,255&n.gzhead.os),n.gzhead.extra&&n.gzhead.extra.length&&(M(n,255&n.gzhead.extra.length),M(n,n.gzhead.extra.length>>8&255)),n.gzhead.hcrc&&(e.adler=o(e.adler,n.pending_buf,n.pending,0)),n.gzindex=0,n.status=69):(M(n,0),M(n,0),M(n,0),M(n,0),M(n,0),M(n,9===n.level?2:2<=n.strategy||n.level<2?4:0),M(n,3),n.status=I);else{var u=f+(n.w_bits-8<<4)<<8;u|=(2<=n.strategy||n.level<2?0:n.level<6?1:6===n.level?2:3)<<6,0!==n.strstart&&(u|=32),u+=31-u%31,n.status=I,O(n,u),0!==n.strstart&&(O(n,e.adler>>>16),O(n,65535&e.adler)),e.adler=1}if(69===n.status)if(n.gzhead.extra){for(s=n.pending;n.gzindex<(65535&n.gzhead.extra.length)&&(n.pending!==n.pending_buf_size||(n.gzhead.hcrc&&n.pending>s&&(e.adler=o(e.adler,n.pending_buf,n.pending-s,s)),L(e),s=n.pending,n.pending!==n.pending_buf_size));)M(n,255&n.gzhead.extra[n.gzindex]),n.gzindex++;n.gzhead.hcrc&&n.pending>s&&(e.adler=o(e.adler,n.pending_buf,n.pending-s,s)),n.gzindex===n.gzhead.extra.length&&(n.gzindex=0,n.status=73)}else n.status=73;if(73===n.status)if(n.gzhead.name){s=n.pending;do{if(n.pending===n.pending_buf_size&&(n.gzhead.hcrc&&n.pending>s&&(e.adler=o(e.adler,n.pending_buf,n.pending-s,s)),L(e),s=n.pending,n.pending===n.pending_buf_size)){l=1;break}l=n.gzindex<n.gzhead.name.length?255&n.gzhead.name.charCodeAt(n.gzindex++):0,M(n,l)}while(0!==l);n.gzhead.hcrc&&n.pending>s&&(e.adler=o(e.adler,n.pending_buf,n.pending-s,s)),0===l&&(n.gzindex=0,n.status=91)}else n.status=91;if(91===n.status)if(n.gzhead.comment){s=n.pending;do{if(n.pending===n.pending_buf_size&&(n.gzhead.hcrc&&n.pending>s&&(e.adler=o(e.adler,n.pending_buf,n.pending-s,s)),L(e),s=n.pending,n.pending===n.pending_buf_size)){l=1;break}l=n.gzindex<n.gzhead.comment.length?255&n.gzhead.comment.charCodeAt(n.gzindex++):0,M(n,l)}while(0!==l);n.gzhead.hcrc&&n.pending>s&&(e.adler=o(e.adler,n.pending_buf,n.pending-s,s)),0===l&&(n.status=103)}else n.status=103;if(103===n.status&&(n.gzhead.hcrc?(n.pending+2>n.pending_buf_size&&L(e),n.pending+2<=n.pending_buf_size&&(M(n,255&e.adler),M(n,e.adler>>8&255),e.adler=0,n.status=I)):n.status=I),0!==n.pending){if(L(e),0===e.avail_out)return n.last_flush=-1,p}else if(0===e.avail_in&&D(t)<=D(i)&&t!==d)return E(e,-5);if(666===n.status&&0!==e.avail_in)return E(e,-5);if(0!==e.avail_in||0!==n.lookahead||t!==c&&666!==n.status){var m=2===n.strategy?function(e,t){for(var i;;){if(0===e.lookahead&&(j(e),0===e.lookahead)){if(t===c)return T;break}if(e.match_length=0,i=a._tr_tally(e,0,e.window[e.strstart]),e.lookahead--,e.strstart++,i&&(P(e,!1),0===e.strm.avail_out))return T}return e.insert=0,t===d?(P(e,!0),0===e.strm.avail_out?A:R):e.last_lit&&(P(e,!1),0===e.strm.avail_out)?T:C}(n,t):3===n.strategy?function(e,t){for(var i,r,n,s,o=e.window;;){if(e.lookahead<=$){if(j(e),e.lookahead<=$&&t===c)return T;if(0===e.lookahead)break}if(e.match_length=0,e.lookahead>=k&&0<e.strstart&&(r=o[n=e.strstart-1])===o[++n]&&r===o[++n]&&r===o[++n]){s=e.strstart+$;do{}while(r===o[++n]&&r===o[++n]&&r===o[++n]&&r===o[++n]&&r===o[++n]&&r===o[++n]&&r===o[++n]&&r===o[++n]&&n<s);e.match_length=$-(s-n),e.match_length>e.lookahead&&(e.match_length=e.lookahead)}if(e.match_length>=k?(i=a._tr_tally(e,1,e.match_length-k),e.lookahead-=e.match_length,e.strstart+=e.match_length,e.match_length=0):(i=a._tr_tally(e,0,e.window[e.strstart]),e.lookahead--,e.strstart++),i&&(P(e,!1),0===e.strm.avail_out))return T}return e.insert=0,t===d?(P(e,!0),0===e.strm.avail_out?A:R):e.last_lit&&(P(e,!1),0===e.strm.avail_out)?T:C}(n,t):r[n.level].func(n,t);if(m!==A&&m!==R||(n.status=666),m===T||m===A)return 0===e.avail_out&&(n.last_flush=-1),p;if(m===C&&(1===t?a._tr_align(n):5!==t&&(a._tr_stored_block(n,0,0,!1),3===t&&(F(n.head),0===n.lookahead&&(n.strstart=0,n.block_start=0,n.insert=0))),L(e),0===e.avail_out))return n.last_flush=-1,p}return t!==d?p:n.wrap<=0?1:(2===n.wrap?(M(n,255&e.adler),M(n,e.adler>>8&255),M(n,e.adler>>16&255),M(n,e.adler>>24&255),M(n,255&e.total_in),M(n,e.total_in>>8&255),M(n,e.total_in>>16&255),M(n,e.total_in>>24&255)):(O(n,e.adler>>>16),O(n,65535&e.adler)),L(e),0<n.wrap&&(n.wrap=-n.wrap),0!==n.pending?p:1)},i.deflateEnd=function(e){var t;return e&&e.state?(t=e.state.status)!==z&&69!==t&&73!==t&&91!==t&&103!==t&&t!==I&&666!==t?E(e,h):(e.state=null,t===I?E(e,-3):p):h},i.deflateSetDictionary=function(e,t){var i,r,a,o,l,c,d,u,m=t.length;if(!e||!e.state)return h;if(2===(o=(i=e.state).wrap)||1===o&&i.status!==z||i.lookahead)return h;for(1===o&&(e.adler=s(e.adler,t,m,0)),i.wrap=0,m>=i.w_size&&(0===o&&(F(i.head),i.strstart=0,i.block_start=0,i.insert=0),u=new n.Buf8(i.w_size),n.arraySet(u,t,m-i.w_size,i.w_size,0),t=u,m=i.w_size),l=e.avail_in,c=e.next_in,d=e.input,e.avail_in=m,e.next_in=0,e.input=t,j(i);i.lookahead>=k;){for(r=i.strstart,a=i.lookahead-(k-1);i.ins_h=(i.ins_h<<i.hash_shift^i.window[r+k-1])&i.hash_mask,i.prev[r&i.w_mask]=i.head[i.ins_h],i.head[i.ins_h]=r,r++,--a;);i.strstart=r,i.lookahead=k-1,j(i)}return i.strstart+=i.lookahead,i.block_start=i.strstart,i.insert=i.lookahead,i.lookahead=0,i.match_length=i.prev_length=k-1,i.match_available=0,e.next_in=c,e.input=d,e.avail_in=l,i.wrap=o,p},i.deflateInfo="pako deflate (from Nodeca project)"},{"../utils/common":41,"./adler32":43,"./crc32":45,"./messages":51,"./trees":52}],47:[function(e,t,i){t.exports=function(){this.text=0,this.time=0,this.xflags=0,this.os=0,this.extra=null,this.extra_len=0,this.name="",this.comment="",this.hcrc=0,this.done=!1}},{}],48:[function(e,t,i){t.exports=function(e,t){var i,r,n,a,s,o,l,c,d,p,h,u,m,g,f,b,v,_,x,y,w,k,$,S,z;i=e.state,r=e.next_in,S=e.input,n=r+(e.avail_in-5),a=e.next_out,z=e.output,s=a-(t-e.avail_out),o=a+(e.avail_out-257),l=i.dmax,c=i.wsize,d=i.whave,p=i.wnext,h=i.window,u=i.hold,m=i.bits,g=i.lencode,f=i.distcode,b=(1<<i.lenbits)-1,v=(1<<i.distbits)-1;e:do{m<15&&(u+=S[r++]<<m,m+=8,u+=S[r++]<<m,m+=8),_=g[u&b];t:for(;;){if(u>>>=x=_>>>24,m-=x,0==(x=_>>>16&255))z[a++]=65535&_;else{if(!(16&x)){if(!(64&x)){_=g[(65535&_)+(u&(1<<x)-1)];continue t}if(32&x){i.mode=12;break e}e.msg="invalid literal/length code",i.mode=30;break e}y=65535&_,(x&=15)&&(m<x&&(u+=S[r++]<<m,m+=8),y+=u&(1<<x)-1,u>>>=x,m-=x),m<15&&(u+=S[r++]<<m,m+=8,u+=S[r++]<<m,m+=8),_=f[u&v];i:for(;;){if(u>>>=x=_>>>24,m-=x,!(16&(x=_>>>16&255))){if(!(64&x)){_=f[(65535&_)+(u&(1<<x)-1)];continue i}e.msg="invalid distance code",i.mode=30;break e}if(w=65535&_,m<(x&=15)&&(u+=S[r++]<<m,(m+=8)<x&&(u+=S[r++]<<m,m+=8)),l<(w+=u&(1<<x)-1)){e.msg="invalid distance too far back",i.mode=30;break e}if(u>>>=x,m-=x,(x=a-s)<w){if(d<(x=w-x)&&i.sane){e.msg="invalid distance too far back",i.mode=30;break e}if($=h,(k=0)===p){if(k+=c-x,x<y){for(y-=x;z[a++]=h[k++],--x;);k=a-w,$=z}}else if(p<x){if(k+=c+p-x,(x-=p)<y){for(y-=x;z[a++]=h[k++],--x;);if(k=0,p<y){for(y-=x=p;z[a++]=h[k++],--x;);k=a-w,$=z}}}else if(k+=p-x,x<y){for(y-=x;z[a++]=h[k++],--x;);k=a-w,$=z}for(;2<y;)z[a++]=$[k++],z[a++]=$[k++],z[a++]=$[k++],y-=3;y&&(z[a++]=$[k++],1<y&&(z[a++]=$[k++]))}else{for(k=a-w;z[a++]=z[k++],z[a++]=z[k++],z[a++]=z[k++],2<(y-=3););y&&(z[a++]=z[k++],1<y&&(z[a++]=z[k++]))}break}}break}}while(r<n&&a<o);r-=y=m>>3,u&=(1<<(m-=y<<3))-1,e.next_in=r,e.next_out=a,e.avail_in=r<n?n-r+5:5-(r-n),e.avail_out=a<o?o-a+257:257-(a-o),i.hold=u,i.bits=m}},{}],49:[function(e,t,i){var r=e("../utils/common"),n=e("./adler32"),a=e("./crc32"),s=e("./inffast"),o=e("./inftrees"),l=1,c=2,d=0,p=-2,h=1,u=852,m=592;function g(e){return(e>>>24&255)+(e>>>8&65280)+((65280&e)<<8)+((255&e)<<24)}function f(){this.mode=0,this.last=!1,this.wrap=0,this.havedict=!1,this.flags=0,this.dmax=0,this.check=0,this.total=0,this.head=null,this.wbits=0,this.wsize=0,this.whave=0,this.wnext=0,this.window=null,this.hold=0,this.bits=0,this.length=0,this.offset=0,this.extra=0,this.lencode=null,this.distcode=null,this.lenbits=0,this.distbits=0,this.ncode=0,this.nlen=0,this.ndist=0,this.have=0,this.next=null,this.lens=new r.Buf16(320),this.work=new r.Buf16(288),this.lendyn=null,this.distdyn=null,this.sane=0,this.back=0,this.was=0}function b(e){var t;return e&&e.state?(t=e.state,e.total_in=e.total_out=t.total=0,e.msg="",t.wrap&&(e.adler=1&t.wrap),t.mode=h,t.last=0,t.havedict=0,t.dmax=32768,t.head=null,t.hold=0,t.bits=0,t.lencode=t.lendyn=new r.Buf32(u),t.distcode=t.distdyn=new r.Buf32(m),t.sane=1,t.back=-1,d):p}function v(e){var t;return e&&e.state?((t=e.state).wsize=0,t.whave=0,t.wnext=0,b(e)):p}function _(e,t){var i,r;return e&&e.state?(r=e.state,t<0?(i=0,t=-t):(i=1+(t>>4),t<48&&(t&=15)),t&&(t<8||15<t)?p:(null!==r.window&&r.wbits!==t&&(r.window=null),r.wrap=i,r.wbits=t,v(e))):p}function x(e,t){var i,r;return e?(r=new f,(e.state=r).window=null,(i=_(e,t))!==d&&(e.state=null),i):p}var y,w,k=!0;function $(e){if(k){var t;for(y=new r.Buf32(512),w=new r.Buf32(32),t=0;t<144;)e.lens[t++]=8;for(;t<256;)e.lens[t++]=9;for(;t<280;)e.lens[t++]=7;for(;t<288;)e.lens[t++]=8;for(o(l,e.lens,0,288,y,0,e.work,{bits:9}),t=0;t<32;)e.lens[t++]=5;o(c,e.lens,0,32,w,0,e.work,{bits:5}),k=!1}e.lencode=y,e.lenbits=9,e.distcode=w,e.distbits=5}function S(e,t,i,n){var a,s=e.state;return null===s.window&&(s.wsize=1<<s.wbits,s.wnext=0,s.whave=0,s.window=new r.Buf8(s.wsize)),n>=s.wsize?(r.arraySet(s.window,t,i-s.wsize,s.wsize,0),s.wnext=0,s.whave=s.wsize):(n<(a=s.wsize-s.wnext)&&(a=n),r.arraySet(s.window,t,i-n,a,s.wnext),(n-=a)?(r.arraySet(s.window,t,i-n,n,0),s.wnext=n,s.whave=s.wsize):(s.wnext+=a,s.wnext===s.wsize&&(s.wnext=0),s.whave<s.wsize&&(s.whave+=a))),0}i.inflateReset=v,i.inflateReset2=_,i.inflateResetKeep=b,i.inflateInit=function(e){return x(e,15)},i.inflateInit2=x,i.inflate=function(e,t){var i,u,m,f,b,v,_,x,y,w,k,z,I,T,C,A,R,E,D,F,L,P,M,O,B=0,j=new r.Buf8(4),N=[16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15];if(!e||!e.state||!e.output||!e.input&&0!==e.avail_in)return p;12===(i=e.state).mode&&(i.mode=13),b=e.next_out,m=e.output,_=e.avail_out,f=e.next_in,u=e.input,v=e.avail_in,x=i.hold,y=i.bits,w=v,k=_,P=d;e:for(;;)switch(i.mode){case h:if(0===i.wrap){i.mode=13;break}for(;y<16;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}if(2&i.wrap&&35615===x){j[i.check=0]=255&x,j[1]=x>>>8&255,i.check=a(i.check,j,2,0),y=x=0,i.mode=2;break}if(i.flags=0,i.head&&(i.head.done=!1),!(1&i.wrap)||(((255&x)<<8)+(x>>8))%31){e.msg="incorrect header check",i.mode=30;break}if(8!=(15&x)){e.msg="unknown compression method",i.mode=30;break}if(y-=4,L=8+(15&(x>>>=4)),0===i.wbits)i.wbits=L;else if(L>i.wbits){e.msg="invalid window size",i.mode=30;break}i.dmax=1<<L,e.adler=i.check=1,i.mode=512&x?10:12,y=x=0;break;case 2:for(;y<16;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}if(i.flags=x,8!=(255&i.flags)){e.msg="unknown compression method",i.mode=30;break}if(57344&i.flags){e.msg="unknown header flags set",i.mode=30;break}i.head&&(i.head.text=x>>8&1),512&i.flags&&(j[0]=255&x,j[1]=x>>>8&255,i.check=a(i.check,j,2,0)),y=x=0,i.mode=3;case 3:for(;y<32;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}i.head&&(i.head.time=x),512&i.flags&&(j[0]=255&x,j[1]=x>>>8&255,j[2]=x>>>16&255,j[3]=x>>>24&255,i.check=a(i.check,j,4,0)),y=x=0,i.mode=4;case 4:for(;y<16;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}i.head&&(i.head.xflags=255&x,i.head.os=x>>8),512&i.flags&&(j[0]=255&x,j[1]=x>>>8&255,i.check=a(i.check,j,2,0)),y=x=0,i.mode=5;case 5:if(1024&i.flags){for(;y<16;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}i.length=x,i.head&&(i.head.extra_len=x),512&i.flags&&(j[0]=255&x,j[1]=x>>>8&255,i.check=a(i.check,j,2,0)),y=x=0}else i.head&&(i.head.extra=null);i.mode=6;case 6:if(1024&i.flags&&(v<(z=i.length)&&(z=v),z&&(i.head&&(L=i.head.extra_len-i.length,i.head.extra||(i.head.extra=new Array(i.head.extra_len)),r.arraySet(i.head.extra,u,f,z,L)),512&i.flags&&(i.check=a(i.check,u,z,f)),v-=z,f+=z,i.length-=z),i.length))break e;i.length=0,i.mode=7;case 7:if(2048&i.flags){if(0===v)break e;for(z=0;L=u[f+z++],i.head&&L&&i.length<65536&&(i.head.name+=String.fromCharCode(L)),L&&z<v;);if(512&i.flags&&(i.check=a(i.check,u,z,f)),v-=z,f+=z,L)break e}else i.head&&(i.head.name=null);i.length=0,i.mode=8;case 8:if(4096&i.flags){if(0===v)break e;for(z=0;L=u[f+z++],i.head&&L&&i.length<65536&&(i.head.comment+=String.fromCharCode(L)),L&&z<v;);if(512&i.flags&&(i.check=a(i.check,u,z,f)),v-=z,f+=z,L)break e}else i.head&&(i.head.comment=null);i.mode=9;case 9:if(512&i.flags){for(;y<16;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}if(x!==(65535&i.check)){e.msg="header crc mismatch",i.mode=30;break}y=x=0}i.head&&(i.head.hcrc=i.flags>>9&1,i.head.done=!0),e.adler=i.check=0,i.mode=12;break;case 10:for(;y<32;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}e.adler=i.check=g(x),y=x=0,i.mode=11;case 11:if(0===i.havedict)return e.next_out=b,e.avail_out=_,e.next_in=f,e.avail_in=v,i.hold=x,i.bits=y,2;e.adler=i.check=1,i.mode=12;case 12:if(5===t||6===t)break e;case 13:if(i.last){x>>>=7&y,y-=7&y,i.mode=27;break}for(;y<3;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}switch(i.last=1&x,y-=1,3&(x>>>=1)){case 0:i.mode=14;break;case 1:if($(i),i.mode=20,6!==t)break;x>>>=2,y-=2;break e;case 2:i.mode=17;break;case 3:e.msg="invalid block type",i.mode=30}x>>>=2,y-=2;break;case 14:for(x>>>=7&y,y-=7&y;y<32;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}if((65535&x)!=(x>>>16^65535)){e.msg="invalid stored block lengths",i.mode=30;break}if(i.length=65535&x,y=x=0,i.mode=15,6===t)break e;case 15:i.mode=16;case 16:if(z=i.length){if(v<z&&(z=v),_<z&&(z=_),0===z)break e;r.arraySet(m,u,f,z,b),v-=z,f+=z,_-=z,b+=z,i.length-=z;break}i.mode=12;break;case 17:for(;y<14;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}if(i.nlen=257+(31&x),x>>>=5,y-=5,i.ndist=1+(31&x),x>>>=5,y-=5,i.ncode=4+(15&x),x>>>=4,y-=4,286<i.nlen||30<i.ndist){e.msg="too many length or distance symbols",i.mode=30;break}i.have=0,i.mode=18;case 18:for(;i.have<i.ncode;){for(;y<3;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}i.lens[N[i.have++]]=7&x,x>>>=3,y-=3}for(;i.have<19;)i.lens[N[i.have++]]=0;if(i.lencode=i.lendyn,i.lenbits=7,M={bits:i.lenbits},P=o(0,i.lens,0,19,i.lencode,0,i.work,M),i.lenbits=M.bits,P){e.msg="invalid code lengths set",i.mode=30;break}i.have=0,i.mode=19;case 19:for(;i.have<i.nlen+i.ndist;){for(;A=(B=i.lencode[x&(1<<i.lenbits)-1])>>>16&255,R=65535&B,!((C=B>>>24)<=y);){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}if(R<16)x>>>=C,y-=C,i.lens[i.have++]=R;else{if(16===R){for(O=C+2;y<O;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}if(x>>>=C,y-=C,0===i.have){e.msg="invalid bit length repeat",i.mode=30;break}L=i.lens[i.have-1],z=3+(3&x),x>>>=2,y-=2}else if(17===R){for(O=C+3;y<O;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}y-=C,L=0,z=3+(7&(x>>>=C)),x>>>=3,y-=3}else{for(O=C+7;y<O;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}y-=C,L=0,z=11+(127&(x>>>=C)),x>>>=7,y-=7}if(i.have+z>i.nlen+i.ndist){e.msg="invalid bit length repeat",i.mode=30;break}for(;z--;)i.lens[i.have++]=L}}if(30===i.mode)break;if(0===i.lens[256]){e.msg="invalid code -- missing end-of-block",i.mode=30;break}if(i.lenbits=9,M={bits:i.lenbits},P=o(l,i.lens,0,i.nlen,i.lencode,0,i.work,M),i.lenbits=M.bits,P){e.msg="invalid literal/lengths set",i.mode=30;break}if(i.distbits=6,i.distcode=i.distdyn,M={bits:i.distbits},P=o(c,i.lens,i.nlen,i.ndist,i.distcode,0,i.work,M),i.distbits=M.bits,P){e.msg="invalid distances set",i.mode=30;break}if(i.mode=20,6===t)break e;case 20:i.mode=21;case 21:if(6<=v&&258<=_){e.next_out=b,e.avail_out=_,e.next_in=f,e.avail_in=v,i.hold=x,i.bits=y,s(e,k),b=e.next_out,m=e.output,_=e.avail_out,f=e.next_in,u=e.input,v=e.avail_in,x=i.hold,y=i.bits,12===i.mode&&(i.back=-1);break}for(i.back=0;A=(B=i.lencode[x&(1<<i.lenbits)-1])>>>16&255,R=65535&B,!((C=B>>>24)<=y);){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}if(A&&!(240&A)){for(E=C,D=A,F=R;A=(B=i.lencode[F+((x&(1<<E+D)-1)>>E)])>>>16&255,R=65535&B,!(E+(C=B>>>24)<=y);){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}x>>>=E,y-=E,i.back+=E}if(x>>>=C,y-=C,i.back+=C,i.length=R,0===A){i.mode=26;break}if(32&A){i.back=-1,i.mode=12;break}if(64&A){e.msg="invalid literal/length code",i.mode=30;break}i.extra=15&A,i.mode=22;case 22:if(i.extra){for(O=i.extra;y<O;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}i.length+=x&(1<<i.extra)-1,x>>>=i.extra,y-=i.extra,i.back+=i.extra}i.was=i.length,i.mode=23;case 23:for(;A=(B=i.distcode[x&(1<<i.distbits)-1])>>>16&255,R=65535&B,!((C=B>>>24)<=y);){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}if(!(240&A)){for(E=C,D=A,F=R;A=(B=i.distcode[F+((x&(1<<E+D)-1)>>E)])>>>16&255,R=65535&B,!(E+(C=B>>>24)<=y);){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}x>>>=E,y-=E,i.back+=E}if(x>>>=C,y-=C,i.back+=C,64&A){e.msg="invalid distance code",i.mode=30;break}i.offset=R,i.extra=15&A,i.mode=24;case 24:if(i.extra){for(O=i.extra;y<O;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}i.offset+=x&(1<<i.extra)-1,x>>>=i.extra,y-=i.extra,i.back+=i.extra}if(i.offset>i.dmax){e.msg="invalid distance too far back",i.mode=30;break}i.mode=25;case 25:if(0===_)break e;if(z=k-_,i.offset>z){if((z=i.offset-z)>i.whave&&i.sane){e.msg="invalid distance too far back",i.mode=30;break}I=z>i.wnext?(z-=i.wnext,i.wsize-z):i.wnext-z,z>i.length&&(z=i.length),T=i.window}else T=m,I=b-i.offset,z=i.length;for(_<z&&(z=_),_-=z,i.length-=z;m[b++]=T[I++],--z;);0===i.length&&(i.mode=21);break;case 26:if(0===_)break e;m[b++]=i.length,_--,i.mode=21;break;case 27:if(i.wrap){for(;y<32;){if(0===v)break e;v--,x|=u[f++]<<y,y+=8}if(k-=_,e.total_out+=k,i.total+=k,k&&(e.adler=i.check=i.flags?a(i.check,m,k,b-k):n(i.check,m,k,b-k)),k=_,(i.flags?x:g(x))!==i.check){e.msg="incorrect data check",i.mode=30;break}y=x=0}i.mode=28;case 28:if(i.wrap&&i.flags){for(;y<32;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}if(x!==(4294967295&i.total)){e.msg="incorrect length check",i.mode=30;break}y=x=0}i.mode=29;case 29:P=1;break e;case 30:P=-3;break e;case 31:return-4;default:return p}return e.next_out=b,e.avail_out=_,e.next_in=f,e.avail_in=v,i.hold=x,i.bits=y,(i.wsize||k!==e.avail_out&&i.mode<30&&(i.mode<27||4!==t))&&S(e,e.output,e.next_out,k-e.avail_out)?(i.mode=31,-4):(w-=e.avail_in,k-=e.avail_out,e.total_in+=w,e.total_out+=k,i.total+=k,i.wrap&&k&&(e.adler=i.check=i.flags?a(i.check,m,k,e.next_out-k):n(i.check,m,k,e.next_out-k)),e.data_type=i.bits+(i.last?64:0)+(12===i.mode?128:0)+(20===i.mode||15===i.mode?256:0),(0==w&&0===k||4===t)&&P===d&&(P=-5),P)},i.inflateEnd=function(e){if(!e||!e.state)return p;var t=e.state;return t.window&&(t.window=null),e.state=null,d},i.inflateGetHeader=function(e,t){var i;return e&&e.state&&2&(i=e.state).wrap?((i.head=t).done=!1,d):p},i.inflateSetDictionary=function(e,t){var i,r=t.length;return e&&e.state?0!==(i=e.state).wrap&&11!==i.mode?p:11===i.mode&&n(1,t,r,0)!==i.check?-3:S(e,t,r,r)?(i.mode=31,-4):(i.havedict=1,d):p},i.inflateInfo="pako inflate (from Nodeca project)"},{"../utils/common":41,"./adler32":43,"./crc32":45,"./inffast":48,"./inftrees":50}],50:[function(e,t,i){var r=e("../utils/common"),n=[3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258,0,0],a=[16,16,16,16,16,16,16,16,17,17,17,17,18,18,18,18,19,19,19,19,20,20,20,20,21,21,21,21,16,72,78],s=[1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577,0,0],o=[16,16,16,16,17,17,18,18,19,19,20,20,21,21,22,22,23,23,24,24,25,25,26,26,27,27,28,28,29,29,64,64];t.exports=function(e,t,i,l,c,d,p,h){var u,m,g,f,b,v,_,x,y,w=h.bits,k=0,$=0,S=0,z=0,I=0,T=0,C=0,A=0,R=0,E=0,D=null,F=0,L=new r.Buf16(16),P=new r.Buf16(16),M=null,O=0;for(k=0;k<=15;k++)L[k]=0;for($=0;$<l;$++)L[t[i+$]]++;for(I=w,z=15;1<=z&&0===L[z];z--);if(z<I&&(I=z),0===z)return c[d++]=20971520,c[d++]=20971520,h.bits=1,0;for(S=1;S<z&&0===L[S];S++);for(I<S&&(I=S),k=A=1;k<=15;k++)if(A<<=1,(A-=L[k])<0)return-1;if(0<A&&(0===e||1!==z))return-1;for(P[1]=0,k=1;k<15;k++)P[k+1]=P[k]+L[k];for($=0;$<l;$++)0!==t[i+$]&&(p[P[t[i+$]]++]=$);if(v=0===e?(D=M=p,19):1===e?(D=n,F-=257,M=a,O-=257,256):(D=s,M=o,-1),k=S,b=d,C=$=E=0,g=-1,f=(R=1<<(T=I))-1,1===e&&852<R||2===e&&592<R)return 1;for(;;){for(_=k-C,y=p[$]<v?(x=0,p[$]):p[$]>v?(x=M[O+p[$]],D[F+p[$]]):(x=96,0),u=1<<k-C,S=m=1<<T;c[b+(E>>C)+(m-=u)]=_<<24|x<<16|y,0!==m;);for(u=1<<k-1;E&u;)u>>=1;if(0!==u?(E&=u-1,E+=u):E=0,$++,0==--L[k]){if(k===z)break;k=t[i+p[$]]}if(I<k&&(E&f)!==g){for(0===C&&(C=I),b+=S,A=1<<(T=k-C);T+C<z&&!((A-=L[T+C])<=0);)T++,A<<=1;if(R+=1<<T,1===e&&852<R||2===e&&592<R)return 1;c[g=E&f]=I<<24|T<<16|b-d}}return 0!==E&&(c[b+E]=k-C<<24|64<<16),h.bits=I,0}},{"../utils/common":41}],51:[function(e,t,i){t.exports={2:"need dictionary",1:"stream end",0:"","-1":"file error","-2":"stream error","-3":"data error","-4":"insufficient memory","-5":"buffer error","-6":"incompatible version"}},{}],52:[function(e,t,i){var r=e("../utils/common"),n=0,a=1;function s(e){for(var t=e.length;0<=--t;)e[t]=0}var o=0,l=29,c=256,d=c+1+l,p=30,h=19,u=2*d+1,m=15,g=16,f=7,b=256,v=16,_=17,x=18,y=[0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0],w=[0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13],k=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,3,7],$=[16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15],S=new Array(2*(d+2));s(S);var z=new Array(2*p);s(z);var I=new Array(512);s(I);var T=new Array(256);s(T);var C=new Array(l);s(C);var A,R,E,D=new Array(p);function F(e,t,i,r,n){this.static_tree=e,this.extra_bits=t,this.extra_base=i,this.elems=r,this.max_length=n,this.has_stree=e&&e.length}function L(e,t){this.dyn_tree=e,this.max_code=0,this.stat_desc=t}function P(e){return e<256?I[e]:I[256+(e>>>7)]}function M(e,t){e.pending_buf[e.pending++]=255&t,e.pending_buf[e.pending++]=t>>>8&255}function O(e,t,i){e.bi_valid>g-i?(e.bi_buf|=t<<e.bi_valid&65535,M(e,e.bi_buf),e.bi_buf=t>>g-e.bi_valid,e.bi_valid+=i-g):(e.bi_buf|=t<<e.bi_valid&65535,e.bi_valid+=i)}function B(e,t,i){O(e,i[2*t],i[2*t+1])}function j(e,t){for(var i=0;i|=1&e,e>>>=1,i<<=1,0<--t;);return i>>>1}function N(e,t,i){var r,n,a=new Array(m+1),s=0;for(r=1;r<=m;r++)a[r]=s=s+i[r-1]<<1;for(n=0;n<=t;n++){var o=e[2*n+1];0!==o&&(e[2*n]=j(a[o]++,o))}}function U(e){var t;for(t=0;t<d;t++)e.dyn_ltree[2*t]=0;for(t=0;t<p;t++)e.dyn_dtree[2*t]=0;for(t=0;t<h;t++)e.bl_tree[2*t]=0;e.dyn_ltree[2*b]=1,e.opt_len=e.static_len=0,e.last_lit=e.matches=0}function W(e){8<e.bi_valid?M(e,e.bi_buf):0<e.bi_valid&&(e.pending_buf[e.pending++]=e.bi_buf),e.bi_buf=0,e.bi_valid=0}function Z(e,t,i,r){var n=2*t,a=2*i;return e[n]<e[a]||e[n]===e[a]&&r[t]<=r[i]}function H(e,t,i){for(var r=e.heap[i],n=i<<1;n<=e.heap_len&&(n<e.heap_len&&Z(t,e.heap[n+1],e.heap[n],e.depth)&&n++,!Z(t,r,e.heap[n],e.depth));)e.heap[i]=e.heap[n],i=n,n<<=1;e.heap[i]=r}function q(e,t,i){var r,n,a,s,o=0;if(0!==e.last_lit)for(;r=e.pending_buf[e.d_buf+2*o]<<8|e.pending_buf[e.d_buf+2*o+1],n=e.pending_buf[e.l_buf+o],o++,0===r?B(e,n,t):(B(e,(a=T[n])+c+1,t),0!==(s=y[a])&&O(e,n-=C[a],s),B(e,a=P(--r),i),0!==(s=w[a])&&O(e,r-=D[a],s)),o<e.last_lit;);B(e,b,t)}function V(e,t){var i,r,n,a=t.dyn_tree,s=t.stat_desc.static_tree,o=t.stat_desc.has_stree,l=t.stat_desc.elems,c=-1;for(e.heap_len=0,e.heap_max=u,i=0;i<l;i++)0!==a[2*i]?(e.heap[++e.heap_len]=c=i,e.depth[i]=0):a[2*i+1]=0;for(;e.heap_len<2;)a[2*(n=e.heap[++e.heap_len]=c<2?++c:0)]=1,e.depth[n]=0,e.opt_len--,o&&(e.static_len-=s[2*n+1]);for(t.max_code=c,i=e.heap_len>>1;1<=i;i--)H(e,a,i);for(n=l;i=e.heap[1],e.heap[1]=e.heap[e.heap_len--],H(e,a,1),r=e.heap[1],e.heap[--e.heap_max]=i,e.heap[--e.heap_max]=r,a[2*n]=a[2*i]+a[2*r],e.depth[n]=(e.depth[i]>=e.depth[r]?e.depth[i]:e.depth[r])+1,a[2*i+1]=a[2*r+1]=n,e.heap[1]=n++,H(e,a,1),2<=e.heap_len;);e.heap[--e.heap_max]=e.heap[1],function(e,t){var i,r,n,a,s,o,l=t.dyn_tree,c=t.max_code,d=t.stat_desc.static_tree,p=t.stat_desc.has_stree,h=t.stat_desc.extra_bits,g=t.stat_desc.extra_base,f=t.stat_desc.max_length,b=0;for(a=0;a<=m;a++)e.bl_count[a]=0;for(l[2*e.heap[e.heap_max]+1]=0,i=e.heap_max+1;i<u;i++)f<(a=l[2*l[2*(r=e.heap[i])+1]+1]+1)&&(a=f,b++),l[2*r+1]=a,c<r||(e.bl_count[a]++,s=0,g<=r&&(s=h[r-g]),o=l[2*r],e.opt_len+=o*(a+s),p&&(e.static_len+=o*(d[2*r+1]+s)));if(0!==b){do{for(a=f-1;0===e.bl_count[a];)a--;e.bl_count[a]--,e.bl_count[a+1]+=2,e.bl_count[f]--,b-=2}while(0<b);for(a=f;0!==a;a--)for(r=e.bl_count[a];0!==r;)c<(n=e.heap[--i])||(l[2*n+1]!==a&&(e.opt_len+=(a-l[2*n+1])*l[2*n],l[2*n+1]=a),r--)}}(e,t),N(a,c,e.bl_count)}function G(e,t,i){var r,n,a=-1,s=t[1],o=0,l=7,c=4;for(0===s&&(l=138,c=3),t[2*(i+1)+1]=65535,r=0;r<=i;r++)n=s,s=t[2*(r+1)+1],++o<l&&n===s||(o<c?e.bl_tree[2*n]+=o:0!==n?(n!==a&&e.bl_tree[2*n]++,e.bl_tree[2*v]++):o<=10?e.bl_tree[2*_]++:e.bl_tree[2*x]++,a=n,c=(o=0)===s?(l=138,3):n===s?(l=6,3):(l=7,4))}function Q(e,t,i){var r,n,a=-1,s=t[1],o=0,l=7,c=4;for(0===s&&(l=138,c=3),r=0;r<=i;r++)if(n=s,s=t[2*(r+1)+1],!(++o<l&&n===s)){if(o<c)for(;B(e,n,e.bl_tree),0!=--o;);else 0!==n?(n!==a&&(B(e,n,e.bl_tree),o--),B(e,v,e.bl_tree),O(e,o-3,2)):o<=10?(B(e,_,e.bl_tree),O(e,o-3,3)):(B(e,x,e.bl_tree),O(e,o-11,7));a=n,c=(o=0)===s?(l=138,3):n===s?(l=6,3):(l=7,4)}}s(D);var K=!1;function X(e,t,i,n){O(e,(o<<1)+(n?1:0),3),function(e,t,i){W(e),M(e,i),M(e,~i),r.arraySet(e.pending_buf,e.window,t,i,e.pending),e.pending+=i}(e,t,i)}i._tr_init=function(e){K||(function(){var e,t,i,r,n,a=new Array(m+1);for(r=i=0;r<l-1;r++)for(C[r]=i,e=0;e<1<<y[r];e++)T[i++]=r;for(T[i-1]=r,r=n=0;r<16;r++)for(D[r]=n,e=0;e<1<<w[r];e++)I[n++]=r;for(n>>=7;r<p;r++)for(D[r]=n<<7,e=0;e<1<<w[r]-7;e++)I[256+n++]=r;for(t=0;t<=m;t++)a[t]=0;for(e=0;e<=143;)S[2*e+1]=8,e++,a[8]++;for(;e<=255;)S[2*e+1]=9,e++,a[9]++;for(;e<=279;)S[2*e+1]=7,e++,a[7]++;for(;e<=287;)S[2*e+1]=8,e++,a[8]++;for(N(S,d+1,a),e=0;e<p;e++)z[2*e+1]=5,z[2*e]=j(e,5);A=new F(S,y,c+1,d,m),R=new F(z,w,0,p,m),E=new F(new Array(0),k,0,h,f)}(),K=!0),e.l_desc=new L(e.dyn_ltree,A),e.d_desc=new L(e.dyn_dtree,R),e.bl_desc=new L(e.bl_tree,E),e.bi_buf=0,e.bi_valid=0,U(e)},i._tr_stored_block=X,i._tr_flush_block=function(e,t,i,r){var s,o,l=0;0<e.level?(2===e.strm.data_type&&(e.strm.data_type=function(e){var t,i=4093624447;for(t=0;t<=31;t++,i>>>=1)if(1&i&&0!==e.dyn_ltree[2*t])return n;if(0!==e.dyn_ltree[18]||0!==e.dyn_ltree[20]||0!==e.dyn_ltree[26])return a;for(t=32;t<c;t++)if(0!==e.dyn_ltree[2*t])return a;return n}(e)),V(e,e.l_desc),V(e,e.d_desc),l=function(e){var t;for(G(e,e.dyn_ltree,e.l_desc.max_code),G(e,e.dyn_dtree,e.d_desc.max_code),V(e,e.bl_desc),t=h-1;3<=t&&0===e.bl_tree[2*$[t]+1];t--);return e.opt_len+=3*(t+1)+5+5+4,t}(e),s=e.opt_len+3+7>>>3,(o=e.static_len+3+7>>>3)<=s&&(s=o)):s=o=i+5,i+4<=s&&-1!==t?X(e,t,i,r):4===e.strategy||o===s?(O(e,2+(r?1:0),3),q(e,S,z)):(O(e,4+(r?1:0),3),function(e,t,i,r){var n;for(O(e,t-257,5),O(e,i-1,5),O(e,r-4,4),n=0;n<r;n++)O(e,e.bl_tree[2*$[n]+1],3);Q(e,e.dyn_ltree,t-1),Q(e,e.dyn_dtree,i-1)}(e,e.l_desc.max_code+1,e.d_desc.max_code+1,l+1),q(e,e.dyn_ltree,e.dyn_dtree)),U(e),r&&W(e)},i._tr_tally=function(e,t,i){return e.pending_buf[e.d_buf+2*e.last_lit]=t>>>8&255,e.pending_buf[e.d_buf+2*e.last_lit+1]=255&t,e.pending_buf[e.l_buf+e.last_lit]=255&i,e.last_lit++,0===t?e.dyn_ltree[2*i]++:(e.matches++,t--,e.dyn_ltree[2*(T[i]+c+1)]++,e.dyn_dtree[2*P(t)]++),e.last_lit===e.lit_bufsize-1},i._tr_align=function(e){O(e,2,3),B(e,b,S),function(e){16===e.bi_valid?(M(e,e.bi_buf),e.bi_buf=0,e.bi_valid=0):8<=e.bi_valid&&(e.pending_buf[e.pending++]=255&e.bi_buf,e.bi_buf>>=8,e.bi_valid-=8)}(e)}},{"../utils/common":41}],53:[function(e,t,i){t.exports=function(){this.input=null,this.next_in=0,this.avail_in=0,this.total_in=0,this.output=null,this.next_out=0,this.avail_out=0,this.total_out=0,this.msg="",this.state=null,this.data_type=2,this.adler=0}},{}],54:[function(e,t,i){(function(e){!function(e,t){if(!e.setImmediate){var i,r,n,a,s=1,o={},l=!1,c=e.document,d=Object.getPrototypeOf&&Object.getPrototypeOf(e);d=d&&d.setTimeout?d:e,i="[object process]"==={}.toString.call(e.process)?function(e){process.nextTick(function(){h(e)})}:function(){if(e.postMessage&&!e.importScripts){var t=!0,i=e.onmessage;return e.onmessage=function(){t=!1},e.postMessage("","*"),e.onmessage=i,t}}()?(a="setImmediate$"+Math.random()+"$",e.addEventListener?e.addEventListener("message",u,!1):e.attachEvent("onmessage",u),function(t){e.postMessage(a+t,"*")}):e.MessageChannel?((n=new MessageChannel).port1.onmessage=function(e){h(e.data)},function(e){n.port2.postMessage(e)}):c&&"onreadystatechange"in c.createElement("script")?(r=c.documentElement,function(e){var t=c.createElement("script");t.onreadystatechange=function(){h(e),t.onreadystatechange=null,r.removeChild(t),t=null},r.appendChild(t)}):function(e){setTimeout(h,0,e)},d.setImmediate=function(e){"function"!=typeof e&&(e=new Function(""+e));for(var t=new Array(arguments.length-1),r=0;r<t.length;r++)t[r]=arguments[r+1];var n={callback:e,args:t};return o[s]=n,i(s),s++},d.clearImmediate=p}function p(e){delete o[e]}function h(e){if(l)setTimeout(h,0,e);else{var i=o[e];if(i){l=!0;try{!function(e){var i=e.callback,r=e.args;switch(r.length){case 0:i();break;case 1:i(r[0]);break;case 2:i(r[0],r[1]);break;case 3:i(r[0],r[1],r[2]);break;default:i.apply(t,r)}}(i)}finally{p(e),l=!1}}}}function u(t){t.source===e&&"string"==typeof t.data&&0===t.data.indexOf(a)&&h(+t.data.slice(a.length))}}("undefined"==typeof self?void 0===e?this:e:self)}).call(this,void 0!==Q?Q:"undefined"!=typeof self?self:"undefined"!=typeof window?window:{})},{}]},{},[10])(10);var J=K(Y.exports);class ee extends t{static properties={api:{type:Object},asPanel:{type:Boolean},inlineMode:{type:Boolean},_mode:{type:String},_url:{type:String},_scraping:{type:Boolean},_scrapeError:{type:String},_form:{type:Object},_saving:{type:Boolean},_ingredientInput:{type:String},_ratingHover:{type:Number},_importFile:{type:Object},_importing:{type:Boolean},_importResult:{type:Object},_importError:{type:String},_importDownloadImages:{type:Boolean}};constructor(){super(),this.api=null,this.asPanel=!1,this.inlineMode=!1,this._mode="url",this._url="",this._scraping=!1,this._scrapeError=null,this._saving=!1,this._ingredientInput="",this._ratingHover=0,this._form=this._emptyForm(),this._importFile=null,this._importing=!1,this._importResult=null,this._importError=null,this._importDownloadImages=!0}_emptyForm(){return{name:"",description:"",source_url:"",servings:"",prep_time:"",cook_time:"",image_url:"",tags:"",courses:"",categories:"",collections:"",rating:0,notes:"",ingredients:[],instructions:[],cal:"",fat:"",satf:"",chol:"",sod:"",carb:"",fib:"",sug:"",prot:""}}_close(){this.dispatchEvent(new CustomEvent("rm-close",{bubbles:!0,composed:!0}))}async _handleScrape(){if(this._url.trim()&&!this._scraping){this._scraping=!0,this._scrapeError=null;try{const e=await this.api.scrapeRecipe(this._url.trim());if(e?.recipe){const t=e.recipe,i=t.nutrition||{};this._form={name:t.name||"",description:t.description||"",source_url:t.source_url||this._url.trim(),servings:t.servings||"",prep_time:t.prep_time||"",cook_time:t.cook_time||"",image_url:t.image_url||"",tags:(t.tags||[]).join(", "),courses:(t.courses||[]).join(", "),categories:(t.categories||[]).join(", "),collections:(t.collections||[]).join(", "),rating:t.rating||0,notes:t.notes||"",ingredients:t.ingredients||[],instructions:t.instructions||[],cal:i.calories??"",fat:i.fat??"",satf:i.saturated_fat??"",chol:i.cholesterol??"",sod:i.sodium??"",carb:i.carbohydrates??"",fib:i.fiber??"",sug:i.sugar??"",prot:i.protein??""},this._mode="manual"}else this._scrapeError=e?.error||r("Could not extract recipe from this URL.")}catch(e){this._scrapeError=e.message||r("Scraping failed.")}finally{this._scraping=!1}}}_handleImportFileChange(e){this._importFile=e.target.files[0]||null,this._importResult=null,this._importError=null}async _handleImport(){if(this._importFile&&!this._importing){this._importing=!0,this._importResult=null,this._importError=null;try{let e;try{e=await J.loadAsync(this._importFile)}catch(e){throw new Error(r(n`Could not open ZIP file: ${e.message}`))}const t=Object.values(e.files).find(e=>!e.dir&&e.name.endsWith(".html"));if(!t)throw new Error(r("No HTML file found inside the ZIP — is this a valid Recipe Keeper export?"));const i=await t.async("text");console.log(`[Recipe Keeper Import] HTML extracted (${i.length} chars), sending to backend`);const a=await this.api.importRecipeKeeper(i);console.log(`[Recipe Keeper Import] Phase 1 done: ${a.imported} imported, ${a.failed} failed, ${a.recipe_images?.length??0} need images`);let s=0,o=0;if(this._importDownloadImages&&a.recipe_images?.length){const t=new Set([".jpg",".jpeg",".png",".webp",".gif",".bmp"]);for(const{recipe_id:i,image_filename:r}of a.recipe_images){const n=e.files[r]??Object.values(e.files).find(e=>{const i=r.split("/").pop();return!e.dir&&e.name.split("/").pop()===i&&t.has(e.name.slice(e.name.lastIndexOf(".")).toLowerCase())});if(n)try{const e=await n.async("base64");await this.api.uploadRecipeImage(i,e),s++}catch(e){console.warn(`[Recipe Keeper Import] Could not save image for recipe ${i}:`,e),o++}}console.log(`[Recipe Keeper Import] Phase 2 done: ${s} images saved, ${o} failed`)}this._importResult={...a,imagesSaved:s},a.imported>0&&this.dispatchEvent(new CustomEvent("rm-import-done",{bubbles:!0,composed:!0}))}catch(e){console.error("[Recipe Keeper Import] Failed:",e),this._importError=e.message||String(e)||r("Import failed.")}finally{this._importing=!1}}}async _handleSave(){if(this._form.name.trim()&&!this._saving){this._saving=!0;try{const e=this._form,t=e=>e?e.split(",").map(e=>e.trim()).filter(Boolean):[],i={cal:"calories",fat:"fat",satf:"saturated_fat",chol:"cholesterol",sod:"sodium",carb:"carbohydrates",fib:"fiber",sug:"sugar",prot:"protein"},r={};let n=!1;for(const[t,a]of Object.entries(i))""!==e[t]&&null!=e[t]&&(r[a]=e[t],n=!0);const a={name:e.name,description:e.description,source_url:e.source_url,image_url:e.image_url,servings:parseInt(e.servings)||null,prep_time:parseInt(e.prep_time)||null,cook_time:parseInt(e.cook_time)||null,tags:t(e.tags),courses:t(e.courses),categories:t(e.categories),collections:t(e.collections),rating:e.rating||null,notes:e.notes,ingredients:e.ingredients,instructions:e.instructions,nutrition:n?r:null};this.dispatchEvent(new CustomEvent("rm-add-recipe",{detail:{data:a},bubbles:!0,composed:!0})),this._form=this._emptyForm()}finally{this._saving=!1}}}_setField(e,t){this._form={...this._form,[e]:t}}_addIngredient(){const e=this._ingredientInput.trim();if(!e)return;let t;if(e.startsWith("#"))t={name:e,is_heading:!0};else{const i=e.split(/\s+/);let r="",n="",a="";i.length>=3&&!isNaN(parseFloat(i[0]))?(r=i[0],n=i[1],a=i.slice(2).join(" ")):2!==i.length||isNaN(parseFloat(i[0]))?a=e:(r=i[0],a=i[1]),t={amount:r,unit:n,name:a}}this._form={...this._form,ingredients:[...this._form.ingredients,t]},this._ingredientInput=""}_addIngredientsBulk(e){const t=e.split("\n").map(e=>e.trim()).filter(Boolean).map(e=>{if(e.startsWith("#"))return{name:e,is_heading:!0};const t=e.split(/\s+/);let i="",r="",n="";return t.length>=3&&!isNaN(parseFloat(t[0]))?(i=t[0],r=t[1],n=t.slice(2).join(" ")):2!==t.length||isNaN(parseFloat(t[0]))?n=e:(i=t[0],n=t[1]),{amount:i,unit:r,name:n}});t.length&&(this._form={...this._form,ingredients:[...this._form.ingredients,...t]})}_removeIngredient(e){this._form={...this._form,ingredients:this._form.ingredients.filter((t,i)=>i!==e)}}_addStep(e){e.trim()&&(this._form={...this._form,instructions:[...this._form.instructions,e.trim()]})}_removeStep(e){this._form={...this._form,instructions:this._form.instructions.filter((t,i)=>i!==e)}}_renderPanelContent(){return i`
+*/Y.exports=function e(t,i,r){function a(s,o){if(!i[s]){if(!t[s]){if(!o&&X)return X(s);if(n)return n(s,!0);var l=new Error("Cannot find module '"+s+"'");throw l.code="MODULE_NOT_FOUND",l}var c=i[s]={exports:{}};t[s][0].call(c.exports,function(e){return a(t[s][1][e]||e)},c,c.exports,e,t,i,r)}return i[s].exports}for(var n=X,s=0;s<r.length;s++)a(r[s]);return a}({1:[function(e,t,i){var r=e("./utils"),a=e("./support"),n="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";i.encode=function(e){for(var t,i,a,s,o,l,c,d=[],p=0,h=e.length,u=h,m="string"!==r.getTypeOf(e);p<e.length;)u=h-p,a=m?(t=e[p++],i=p<h?e[p++]:0,p<h?e[p++]:0):(t=e.charCodeAt(p++),i=p<h?e.charCodeAt(p++):0,p<h?e.charCodeAt(p++):0),s=t>>2,o=(3&t)<<4|i>>4,l=1<u?(15&i)<<2|a>>6:64,c=2<u?63&a:64,d.push(n.charAt(s)+n.charAt(o)+n.charAt(l)+n.charAt(c));return d.join("")},i.decode=function(e){var t,i,r,s,o,l,c=0,d=0,p="data:";if(e.substr(0,p.length)===p)throw new Error("Invalid base64 input, it looks like a data url.");var h,u=3*(e=e.replace(/[^A-Za-z0-9+/=]/g,"")).length/4;if(e.charAt(e.length-1)===n.charAt(64)&&u--,e.charAt(e.length-2)===n.charAt(64)&&u--,u%1!=0)throw new Error("Invalid base64 input, bad content length.");for(h=a.uint8array?new Uint8Array(0|u):new Array(0|u);c<e.length;)t=n.indexOf(e.charAt(c++))<<2|(s=n.indexOf(e.charAt(c++)))>>4,i=(15&s)<<4|(o=n.indexOf(e.charAt(c++)))>>2,r=(3&o)<<6|(l=n.indexOf(e.charAt(c++))),h[d++]=t,64!==o&&(h[d++]=i),64!==l&&(h[d++]=r);return h}},{"./support":30,"./utils":32}],2:[function(e,t,i){var r=e("./external"),a=e("./stream/DataWorker"),n=e("./stream/Crc32Probe"),s=e("./stream/DataLengthProbe");function o(e,t,i,r,a){this.compressedSize=e,this.uncompressedSize=t,this.crc32=i,this.compression=r,this.compressedContent=a}o.prototype={getContentWorker:function(){var e=new a(r.Promise.resolve(this.compressedContent)).pipe(this.compression.uncompressWorker()).pipe(new s("data_length")),t=this;return e.on("end",function(){if(this.streamInfo.data_length!==t.uncompressedSize)throw new Error("Bug : uncompressed data size mismatch")}),e},getCompressedWorker:function(){return new a(r.Promise.resolve(this.compressedContent)).withStreamInfo("compressedSize",this.compressedSize).withStreamInfo("uncompressedSize",this.uncompressedSize).withStreamInfo("crc32",this.crc32).withStreamInfo("compression",this.compression)}},o.createWorkerFrom=function(e,t,i){return e.pipe(new n).pipe(new s("uncompressedSize")).pipe(t.compressWorker(i)).pipe(new s("compressedSize")).withStreamInfo("compression",t)},t.exports=o},{"./external":6,"./stream/Crc32Probe":25,"./stream/DataLengthProbe":26,"./stream/DataWorker":27}],3:[function(e,t,i){var r=e("./stream/GenericWorker");i.STORE={magic:"\0\0",compressWorker:function(){return new r("STORE compression")},uncompressWorker:function(){return new r("STORE decompression")}},i.DEFLATE=e("./flate")},{"./flate":7,"./stream/GenericWorker":28}],4:[function(e,t,i){var r=e("./utils"),a=function(){for(var e,t=[],i=0;i<256;i++){e=i;for(var r=0;r<8;r++)e=1&e?3988292384^e>>>1:e>>>1;t[i]=e}return t}();t.exports=function(e,t){return void 0!==e&&e.length?"string"!==r.getTypeOf(e)?function(e,t,i,r){var n=a,s=r+i;e^=-1;for(var o=r;o<s;o++)e=e>>>8^n[255&(e^t[o])];return-1^e}(0|t,e,e.length,0):function(e,t,i,r){var n=a,s=r+i;e^=-1;for(var o=r;o<s;o++)e=e>>>8^n[255&(e^t.charCodeAt(o))];return-1^e}(0|t,e,e.length,0):0}},{"./utils":32}],5:[function(e,t,i){i.base64=!1,i.binary=!1,i.dir=!1,i.createFolders=!0,i.date=null,i.compression=null,i.compressionOptions=null,i.comment=null,i.unixPermissions=null,i.dosPermissions=null},{}],6:[function(e,t,i){var r=null;r="undefined"!=typeof Promise?Promise:e("lie"),t.exports={Promise:r}},{lie:37}],7:[function(e,t,i){var r="undefined"!=typeof Uint8Array&&"undefined"!=typeof Uint16Array&&"undefined"!=typeof Uint32Array,a=e("pako"),n=e("./utils"),s=e("./stream/GenericWorker"),o=r?"uint8array":"array";function l(e,t){s.call(this,"FlateWorker/"+e),this._pako=null,this._pakoAction=e,this._pakoOptions=t,this.meta={}}i.magic="\b\0",n.inherits(l,s),l.prototype.processChunk=function(e){this.meta=e.meta,null===this._pako&&this._createPako(),this._pako.push(n.transformTo(o,e.data),!1)},l.prototype.flush=function(){s.prototype.flush.call(this),null===this._pako&&this._createPako(),this._pako.push([],!0)},l.prototype.cleanUp=function(){s.prototype.cleanUp.call(this),this._pako=null},l.prototype._createPako=function(){this._pako=new a[this._pakoAction]({raw:!0,level:this._pakoOptions.level||-1});var e=this;this._pako.onData=function(t){e.push({data:t,meta:e.meta})}},i.compressWorker=function(e){return new l("Deflate",e)},i.uncompressWorker=function(){return new l("Inflate",{})}},{"./stream/GenericWorker":28,"./utils":32,pako:38}],8:[function(e,t,i){function r(e,t){var i,r="";for(i=0;i<t;i++)r+=String.fromCharCode(255&e),e>>>=8;return r}function a(e,t,i,a,s,d){var p,h,u=e.file,m=e.compression,g=d!==o.utf8encode,f=n.transformTo("string",d(u.name)),b=n.transformTo("string",o.utf8encode(u.name)),v=u.comment,_=n.transformTo("string",d(v)),x=n.transformTo("string",o.utf8encode(v)),y=b.length!==u.name.length,w=x.length!==v.length,k="",$="",S="",z=u.dir,I=u.date,T={crc32:0,compressedSize:0,uncompressedSize:0};t&&!i||(T.crc32=e.crc32,T.compressedSize=e.compressedSize,T.uncompressedSize=e.uncompressedSize);var C=0;t&&(C|=8),g||!y&&!w||(C|=2048);var A=0,R=0;z&&(A|=16),"UNIX"===s?(R=798,A|=function(e,t){var i=e;return e||(i=t?16893:33204),(65535&i)<<16}(u.unixPermissions,z)):(R=20,A|=function(e){return 63&(e||0)}(u.dosPermissions)),p=I.getUTCHours(),p<<=6,p|=I.getUTCMinutes(),p<<=5,p|=I.getUTCSeconds()/2,h=I.getUTCFullYear()-1980,h<<=4,h|=I.getUTCMonth()+1,h<<=5,h|=I.getUTCDate(),y&&($=r(1,1)+r(l(f),4)+b,k+="up"+r($.length,2)+$),w&&(S=r(1,1)+r(l(_),4)+x,k+="uc"+r(S.length,2)+S);var E="";return E+="\n\0",E+=r(C,2),E+=m.magic,E+=r(p,2),E+=r(h,2),E+=r(T.crc32,4),E+=r(T.compressedSize,4),E+=r(T.uncompressedSize,4),E+=r(f.length,2),E+=r(k.length,2),{fileRecord:c.LOCAL_FILE_HEADER+E+f+k,dirRecord:c.CENTRAL_FILE_HEADER+r(R,2)+E+r(_.length,2)+"\0\0\0\0"+r(A,4)+r(a,4)+f+k+_}}var n=e("../utils"),s=e("../stream/GenericWorker"),o=e("../utf8"),l=e("../crc32"),c=e("../signature");function d(e,t,i,r){s.call(this,"ZipFileWorker"),this.bytesWritten=0,this.zipComment=t,this.zipPlatform=i,this.encodeFileName=r,this.streamFiles=e,this.accumulate=!1,this.contentBuffer=[],this.dirRecords=[],this.currentSourceOffset=0,this.entriesCount=0,this.currentFile=null,this._sources=[]}n.inherits(d,s),d.prototype.push=function(e){var t=e.meta.percent||0,i=this.entriesCount,r=this._sources.length;this.accumulate?this.contentBuffer.push(e):(this.bytesWritten+=e.data.length,s.prototype.push.call(this,{data:e.data,meta:{currentFile:this.currentFile,percent:i?(t+100*(i-r-1))/i:100}}))},d.prototype.openedSource=function(e){this.currentSourceOffset=this.bytesWritten,this.currentFile=e.file.name;var t=this.streamFiles&&!e.file.dir;if(t){var i=a(e,t,!1,this.currentSourceOffset,this.zipPlatform,this.encodeFileName);this.push({data:i.fileRecord,meta:{percent:0}})}else this.accumulate=!0},d.prototype.closedSource=function(e){this.accumulate=!1;var t=this.streamFiles&&!e.file.dir,i=a(e,t,!0,this.currentSourceOffset,this.zipPlatform,this.encodeFileName);if(this.dirRecords.push(i.dirRecord),t)this.push({data:function(e){return c.DATA_DESCRIPTOR+r(e.crc32,4)+r(e.compressedSize,4)+r(e.uncompressedSize,4)}(e),meta:{percent:100}});else for(this.push({data:i.fileRecord,meta:{percent:0}});this.contentBuffer.length;)this.push(this.contentBuffer.shift());this.currentFile=null},d.prototype.flush=function(){for(var e=this.bytesWritten,t=0;t<this.dirRecords.length;t++)this.push({data:this.dirRecords[t],meta:{percent:100}});var i=this.bytesWritten-e,a=function(e,t,i,a,s){var o=n.transformTo("string",s(a));return c.CENTRAL_DIRECTORY_END+"\0\0\0\0"+r(e,2)+r(e,2)+r(t,4)+r(i,4)+r(o.length,2)+o}(this.dirRecords.length,i,e,this.zipComment,this.encodeFileName);this.push({data:a,meta:{percent:100}})},d.prototype.prepareNextSource=function(){this.previous=this._sources.shift(),this.openedSource(this.previous.streamInfo),this.isPaused?this.previous.pause():this.previous.resume()},d.prototype.registerPrevious=function(e){this._sources.push(e);var t=this;return e.on("data",function(e){t.processChunk(e)}),e.on("end",function(){t.closedSource(t.previous.streamInfo),t._sources.length?t.prepareNextSource():t.end()}),e.on("error",function(e){t.error(e)}),this},d.prototype.resume=function(){return!!s.prototype.resume.call(this)&&(!this.previous&&this._sources.length?(this.prepareNextSource(),!0):this.previous||this._sources.length||this.generatedError?void 0:(this.end(),!0))},d.prototype.error=function(e){var t=this._sources;if(!s.prototype.error.call(this,e))return!1;for(var i=0;i<t.length;i++)try{t[i].error(e)}catch(e){}return!0},d.prototype.lock=function(){s.prototype.lock.call(this);for(var e=this._sources,t=0;t<e.length;t++)e[t].lock()},t.exports=d},{"../crc32":4,"../signature":23,"../stream/GenericWorker":28,"../utf8":31,"../utils":32}],9:[function(e,t,i){var r=e("../compressions"),a=e("./ZipFileWorker");i.generateWorker=function(e,t,i){var n=new a(t.streamFiles,i,t.platform,t.encodeFileName),s=0;try{e.forEach(function(e,i){s++;var a=function(e,t){var i=e||t,a=r[i];if(!a)throw new Error(i+" is not a valid compression method !");return a}(i.options.compression,t.compression),o=i.options.compressionOptions||t.compressionOptions||{},l=i.dir,c=i.date;i._compressWorker(a,o).withStreamInfo("file",{name:e,dir:l,date:c,comment:i.comment||"",unixPermissions:i.unixPermissions,dosPermissions:i.dosPermissions}).pipe(n)}),n.entriesCount=s}catch(e){n.error(e)}return n}},{"../compressions":3,"./ZipFileWorker":8}],10:[function(e,t,i){function r(){if(!(this instanceof r))return new r;if(arguments.length)throw new Error("The constructor with parameters has been removed in JSZip 3.0, please check the upgrade guide.");this.files=Object.create(null),this.comment=null,this.root="",this.clone=function(){var e=new r;for(var t in this)"function"!=typeof this[t]&&(e[t]=this[t]);return e}}(r.prototype=e("./object")).loadAsync=e("./load"),r.support=e("./support"),r.defaults=e("./defaults"),r.version="3.10.1",r.loadAsync=function(e,t){return(new r).loadAsync(e,t)},r.external=e("./external"),t.exports=r},{"./defaults":5,"./external":6,"./load":11,"./object":15,"./support":30}],11:[function(e,t,i){var r=e("./utils"),a=e("./external"),n=e("./utf8"),s=e("./zipEntries"),o=e("./stream/Crc32Probe"),l=e("./nodejsUtils");function c(e){return new a.Promise(function(t,i){var r=e.decompressed.getContentWorker().pipe(new o);r.on("error",function(e){i(e)}).on("end",function(){r.streamInfo.crc32!==e.decompressed.crc32?i(new Error("Corrupted zip : CRC32 mismatch")):t()}).resume()})}t.exports=function(e,t){var i=this;return t=r.extend(t||{},{base64:!1,checkCRC32:!1,optimizedBinaryString:!1,createFolders:!1,decodeFileName:n.utf8decode}),l.isNode&&l.isStream(e)?a.Promise.reject(new Error("JSZip can't accept a stream when loading a zip file.")):r.prepareContent("the loaded zip file",e,!0,t.optimizedBinaryString,t.base64).then(function(e){var i=new s(t);return i.load(e),i}).then(function(e){var i=[a.Promise.resolve(e)],r=e.files;if(t.checkCRC32)for(var n=0;n<r.length;n++)i.push(c(r[n]));return a.Promise.all(i)}).then(function(e){for(var a=e.shift(),n=a.files,s=0;s<n.length;s++){var o=n[s],l=o.fileNameStr,c=r.resolve(o.fileNameStr);i.file(c,o.decompressed,{binary:!0,optimizedBinaryString:!0,date:o.date,dir:o.dir,comment:o.fileCommentStr.length?o.fileCommentStr:null,unixPermissions:o.unixPermissions,dosPermissions:o.dosPermissions,createFolders:t.createFolders}),o.dir||(i.file(c).unsafeOriginalName=l)}return a.zipComment.length&&(i.comment=a.zipComment),i})}},{"./external":6,"./nodejsUtils":14,"./stream/Crc32Probe":25,"./utf8":31,"./utils":32,"./zipEntries":33}],12:[function(e,t,i){var r=e("../utils"),a=e("../stream/GenericWorker");function n(e,t){a.call(this,"Nodejs stream input adapter for "+e),this._upstreamEnded=!1,this._bindStream(t)}r.inherits(n,a),n.prototype._bindStream=function(e){var t=this;(this._stream=e).pause(),e.on("data",function(e){t.push({data:e,meta:{percent:0}})}).on("error",function(e){t.isPaused?this.generatedError=e:t.error(e)}).on("end",function(){t.isPaused?t._upstreamEnded=!0:t.end()})},n.prototype.pause=function(){return!!a.prototype.pause.call(this)&&(this._stream.pause(),!0)},n.prototype.resume=function(){return!!a.prototype.resume.call(this)&&(this._upstreamEnded?this.end():this._stream.resume(),!0)},t.exports=n},{"../stream/GenericWorker":28,"../utils":32}],13:[function(e,t,i){var r=e("readable-stream").Readable;function a(e,t,i){r.call(this,t),this._helper=e;var a=this;e.on("data",function(e,t){a.push(e)||a._helper.pause(),i&&i(t)}).on("error",function(e){a.emit("error",e)}).on("end",function(){a.push(null)})}e("../utils").inherits(a,r),a.prototype._read=function(){this._helper.resume()},t.exports=a},{"../utils":32,"readable-stream":16}],14:[function(e,t,i){t.exports={isNode:"undefined"!=typeof Buffer,newBufferFrom:function(e,t){if(Buffer.from&&Buffer.from!==Uint8Array.from)return Buffer.from(e,t);if("number"==typeof e)throw new Error('The "data" argument must not be a number');return new Buffer(e,t)},allocBuffer:function(e){if(Buffer.alloc)return Buffer.alloc(e);var t=new Buffer(e);return t.fill(0),t},isBuffer:function(e){return Buffer.isBuffer(e)},isStream:function(e){return e&&"function"==typeof e.on&&"function"==typeof e.pause&&"function"==typeof e.resume}}},{}],15:[function(e,t,i){function r(e,t,i){var r,a=n.getTypeOf(t),o=n.extend(i||{},l);o.date=o.date||new Date,null!==o.compression&&(o.compression=o.compression.toUpperCase()),"string"==typeof o.unixPermissions&&(o.unixPermissions=parseInt(o.unixPermissions,8)),o.unixPermissions&&16384&o.unixPermissions&&(o.dir=!0),o.dosPermissions&&16&o.dosPermissions&&(o.dir=!0),o.dir&&(e=g(e)),o.createFolders&&(r=m(e))&&f.call(this,r,!0);var p="string"===a&&!1===o.binary&&!1===o.base64;i&&void 0!==i.binary||(o.binary=!p),(t instanceof c&&0===t.uncompressedSize||o.dir||!t||0===t.length)&&(o.base64=!1,o.binary=!0,t="",o.compression="STORE",a="string");var b=null;b=t instanceof c||t instanceof s?t:h.isNode&&h.isStream(t)?new u(e,t):n.prepareContent(e,t,o.binary,o.optimizedBinaryString,o.base64);var v=new d(e,b,o);this.files[e]=v}var a=e("./utf8"),n=e("./utils"),s=e("./stream/GenericWorker"),o=e("./stream/StreamHelper"),l=e("./defaults"),c=e("./compressedObject"),d=e("./zipObject"),p=e("./generate"),h=e("./nodejsUtils"),u=e("./nodejs/NodejsStreamInputAdapter"),m=function(e){"/"===e.slice(-1)&&(e=e.substring(0,e.length-1));var t=e.lastIndexOf("/");return 0<t?e.substring(0,t):""},g=function(e){return"/"!==e.slice(-1)&&(e+="/"),e},f=function(e,t){return t=void 0!==t?t:l.createFolders,e=g(e),this.files[e]||r.call(this,e,null,{dir:!0,createFolders:t}),this.files[e]};function b(e){return"[object RegExp]"===Object.prototype.toString.call(e)}var v={load:function(){throw new Error("This method has been removed in JSZip 3.0, please check the upgrade guide.")},forEach:function(e){var t,i,r;for(t in this.files)r=this.files[t],(i=t.slice(this.root.length,t.length))&&t.slice(0,this.root.length)===this.root&&e(i,r)},filter:function(e){var t=[];return this.forEach(function(i,r){e(i,r)&&t.push(r)}),t},file:function(e,t,i){if(1!==arguments.length)return e=this.root+e,r.call(this,e,t,i),this;if(b(e)){var a=e;return this.filter(function(e,t){return!t.dir&&a.test(e)})}var n=this.files[this.root+e];return n&&!n.dir?n:null},folder:function(e){if(!e)return this;if(b(e))return this.filter(function(t,i){return i.dir&&e.test(t)});var t=this.root+e,i=f.call(this,t),r=this.clone();return r.root=i.name,r},remove:function(e){e=this.root+e;var t=this.files[e];if(t||("/"!==e.slice(-1)&&(e+="/"),t=this.files[e]),t&&!t.dir)delete this.files[e];else for(var i=this.filter(function(t,i){return i.name.slice(0,e.length)===e}),r=0;r<i.length;r++)delete this.files[i[r].name];return this},generate:function(){throw new Error("This method has been removed in JSZip 3.0, please check the upgrade guide.")},generateInternalStream:function(e){var t,i={};try{if((i=n.extend(e||{},{streamFiles:!1,compression:"STORE",compressionOptions:null,type:"",platform:"DOS",comment:null,mimeType:"application/zip",encodeFileName:a.utf8encode})).type=i.type.toLowerCase(),i.compression=i.compression.toUpperCase(),"binarystring"===i.type&&(i.type="string"),!i.type)throw new Error("No output type specified.");n.checkSupport(i.type),"darwin"!==i.platform&&"freebsd"!==i.platform&&"linux"!==i.platform&&"sunos"!==i.platform||(i.platform="UNIX"),"win32"===i.platform&&(i.platform="DOS");var r=i.comment||this.comment||"";t=p.generateWorker(this,i,r)}catch(e){(t=new s("error")).error(e)}return new o(t,i.type||"string",i.mimeType)},generateAsync:function(e,t){return this.generateInternalStream(e).accumulate(t)},generateNodeStream:function(e,t){return(e=e||{}).type||(e.type="nodebuffer"),this.generateInternalStream(e).toNodejsStream(t)}};t.exports=v},{"./compressedObject":2,"./defaults":5,"./generate":9,"./nodejs/NodejsStreamInputAdapter":12,"./nodejsUtils":14,"./stream/GenericWorker":28,"./stream/StreamHelper":29,"./utf8":31,"./utils":32,"./zipObject":35}],16:[function(e,t,i){t.exports=e("stream")},{stream:void 0}],17:[function(e,t,i){var r=e("./DataReader");function a(e){r.call(this,e);for(var t=0;t<this.data.length;t++)e[t]=255&e[t]}e("../utils").inherits(a,r),a.prototype.byteAt=function(e){return this.data[this.zero+e]},a.prototype.lastIndexOfSignature=function(e){for(var t=e.charCodeAt(0),i=e.charCodeAt(1),r=e.charCodeAt(2),a=e.charCodeAt(3),n=this.length-4;0<=n;--n)if(this.data[n]===t&&this.data[n+1]===i&&this.data[n+2]===r&&this.data[n+3]===a)return n-this.zero;return-1},a.prototype.readAndCheckSignature=function(e){var t=e.charCodeAt(0),i=e.charCodeAt(1),r=e.charCodeAt(2),a=e.charCodeAt(3),n=this.readData(4);return t===n[0]&&i===n[1]&&r===n[2]&&a===n[3]},a.prototype.readData=function(e){if(this.checkOffset(e),0===e)return[];var t=this.data.slice(this.zero+this.index,this.zero+this.index+e);return this.index+=e,t},t.exports=a},{"../utils":32,"./DataReader":18}],18:[function(e,t,i){var r=e("../utils");function a(e){this.data=e,this.length=e.length,this.index=0,this.zero=0}a.prototype={checkOffset:function(e){this.checkIndex(this.index+e)},checkIndex:function(e){if(this.length<this.zero+e||e<0)throw new Error("End of data reached (data length = "+this.length+", asked index = "+e+"). Corrupted zip ?")},setIndex:function(e){this.checkIndex(e),this.index=e},skip:function(e){this.setIndex(this.index+e)},byteAt:function(){},readInt:function(e){var t,i=0;for(this.checkOffset(e),t=this.index+e-1;t>=this.index;t--)i=(i<<8)+this.byteAt(t);return this.index+=e,i},readString:function(e){return r.transformTo("string",this.readData(e))},readData:function(){},lastIndexOfSignature:function(){},readAndCheckSignature:function(){},readDate:function(){var e=this.readInt(4);return new Date(Date.UTC(1980+(e>>25&127),(e>>21&15)-1,e>>16&31,e>>11&31,e>>5&63,(31&e)<<1))}},t.exports=a},{"../utils":32}],19:[function(e,t,i){var r=e("./Uint8ArrayReader");function a(e){r.call(this,e)}e("../utils").inherits(a,r),a.prototype.readData=function(e){this.checkOffset(e);var t=this.data.slice(this.zero+this.index,this.zero+this.index+e);return this.index+=e,t},t.exports=a},{"../utils":32,"./Uint8ArrayReader":21}],20:[function(e,t,i){var r=e("./DataReader");function a(e){r.call(this,e)}e("../utils").inherits(a,r),a.prototype.byteAt=function(e){return this.data.charCodeAt(this.zero+e)},a.prototype.lastIndexOfSignature=function(e){return this.data.lastIndexOf(e)-this.zero},a.prototype.readAndCheckSignature=function(e){return e===this.readData(4)},a.prototype.readData=function(e){this.checkOffset(e);var t=this.data.slice(this.zero+this.index,this.zero+this.index+e);return this.index+=e,t},t.exports=a},{"../utils":32,"./DataReader":18}],21:[function(e,t,i){var r=e("./ArrayReader");function a(e){r.call(this,e)}e("../utils").inherits(a,r),a.prototype.readData=function(e){if(this.checkOffset(e),0===e)return new Uint8Array(0);var t=this.data.subarray(this.zero+this.index,this.zero+this.index+e);return this.index+=e,t},t.exports=a},{"../utils":32,"./ArrayReader":17}],22:[function(e,t,i){var r=e("../utils"),a=e("../support"),n=e("./ArrayReader"),s=e("./StringReader"),o=e("./NodeBufferReader"),l=e("./Uint8ArrayReader");t.exports=function(e){var t=r.getTypeOf(e);return r.checkSupport(t),"string"!==t||a.uint8array?"nodebuffer"===t?new o(e):a.uint8array?new l(r.transformTo("uint8array",e)):new n(r.transformTo("array",e)):new s(e)}},{"../support":30,"../utils":32,"./ArrayReader":17,"./NodeBufferReader":19,"./StringReader":20,"./Uint8ArrayReader":21}],23:[function(e,t,i){i.LOCAL_FILE_HEADER="PK",i.CENTRAL_FILE_HEADER="PK",i.CENTRAL_DIRECTORY_END="PK",i.ZIP64_CENTRAL_DIRECTORY_LOCATOR="PK",i.ZIP64_CENTRAL_DIRECTORY_END="PK",i.DATA_DESCRIPTOR="PK\b"},{}],24:[function(e,t,i){var r=e("./GenericWorker"),a=e("../utils");function n(e){r.call(this,"ConvertWorker to "+e),this.destType=e}a.inherits(n,r),n.prototype.processChunk=function(e){this.push({data:a.transformTo(this.destType,e.data),meta:e.meta})},t.exports=n},{"../utils":32,"./GenericWorker":28}],25:[function(e,t,i){var r=e("./GenericWorker"),a=e("../crc32");function n(){r.call(this,"Crc32Probe"),this.withStreamInfo("crc32",0)}e("../utils").inherits(n,r),n.prototype.processChunk=function(e){this.streamInfo.crc32=a(e.data,this.streamInfo.crc32||0),this.push(e)},t.exports=n},{"../crc32":4,"../utils":32,"./GenericWorker":28}],26:[function(e,t,i){var r=e("../utils"),a=e("./GenericWorker");function n(e){a.call(this,"DataLengthProbe for "+e),this.propName=e,this.withStreamInfo(e,0)}r.inherits(n,a),n.prototype.processChunk=function(e){if(e){var t=this.streamInfo[this.propName]||0;this.streamInfo[this.propName]=t+e.data.length}a.prototype.processChunk.call(this,e)},t.exports=n},{"../utils":32,"./GenericWorker":28}],27:[function(e,t,i){var r=e("../utils"),a=e("./GenericWorker");function n(e){a.call(this,"DataWorker");var t=this;this.dataIsReady=!1,this.index=0,this.max=0,this.data=null,this.type="",this._tickScheduled=!1,e.then(function(e){t.dataIsReady=!0,t.data=e,t.max=e&&e.length||0,t.type=r.getTypeOf(e),t.isPaused||t._tickAndRepeat()},function(e){t.error(e)})}r.inherits(n,a),n.prototype.cleanUp=function(){a.prototype.cleanUp.call(this),this.data=null},n.prototype.resume=function(){return!!a.prototype.resume.call(this)&&(!this._tickScheduled&&this.dataIsReady&&(this._tickScheduled=!0,r.delay(this._tickAndRepeat,[],this)),!0)},n.prototype._tickAndRepeat=function(){this._tickScheduled=!1,this.isPaused||this.isFinished||(this._tick(),this.isFinished||(r.delay(this._tickAndRepeat,[],this),this._tickScheduled=!0))},n.prototype._tick=function(){if(this.isPaused||this.isFinished)return!1;var e=null,t=Math.min(this.max,this.index+16384);if(this.index>=this.max)return this.end();switch(this.type){case"string":e=this.data.substring(this.index,t);break;case"uint8array":e=this.data.subarray(this.index,t);break;case"array":case"nodebuffer":e=this.data.slice(this.index,t)}return this.index=t,this.push({data:e,meta:{percent:this.max?this.index/this.max*100:0}})},t.exports=n},{"../utils":32,"./GenericWorker":28}],28:[function(e,t,i){function r(e){this.name=e||"default",this.streamInfo={},this.generatedError=null,this.extraStreamInfo={},this.isPaused=!0,this.isFinished=!1,this.isLocked=!1,this._listeners={data:[],end:[],error:[]},this.previous=null}r.prototype={push:function(e){this.emit("data",e)},end:function(){if(this.isFinished)return!1;this.flush();try{this.emit("end"),this.cleanUp(),this.isFinished=!0}catch(e){this.emit("error",e)}return!0},error:function(e){return!this.isFinished&&(this.isPaused?this.generatedError=e:(this.isFinished=!0,this.emit("error",e),this.previous&&this.previous.error(e),this.cleanUp()),!0)},on:function(e,t){return this._listeners[e].push(t),this},cleanUp:function(){this.streamInfo=this.generatedError=this.extraStreamInfo=null,this._listeners=[]},emit:function(e,t){if(this._listeners[e])for(var i=0;i<this._listeners[e].length;i++)this._listeners[e][i].call(this,t)},pipe:function(e){return e.registerPrevious(this)},registerPrevious:function(e){if(this.isLocked)throw new Error("The stream '"+this+"' has already been used.");this.streamInfo=e.streamInfo,this.mergeStreamInfo(),this.previous=e;var t=this;return e.on("data",function(e){t.processChunk(e)}),e.on("end",function(){t.end()}),e.on("error",function(e){t.error(e)}),this},pause:function(){return!this.isPaused&&!this.isFinished&&(this.isPaused=!0,this.previous&&this.previous.pause(),!0)},resume:function(){if(!this.isPaused||this.isFinished)return!1;var e=this.isPaused=!1;return this.generatedError&&(this.error(this.generatedError),e=!0),this.previous&&this.previous.resume(),!e},flush:function(){},processChunk:function(e){this.push(e)},withStreamInfo:function(e,t){return this.extraStreamInfo[e]=t,this.mergeStreamInfo(),this},mergeStreamInfo:function(){for(var e in this.extraStreamInfo)Object.prototype.hasOwnProperty.call(this.extraStreamInfo,e)&&(this.streamInfo[e]=this.extraStreamInfo[e])},lock:function(){if(this.isLocked)throw new Error("The stream '"+this+"' has already been used.");this.isLocked=!0,this.previous&&this.previous.lock()},toString:function(){var e="Worker "+this.name;return this.previous?this.previous+" -> "+e:e}},t.exports=r},{}],29:[function(e,t,i){var r=e("../utils"),a=e("./ConvertWorker"),n=e("./GenericWorker"),s=e("../base64"),o=e("../support"),l=e("../external"),c=null;if(o.nodestream)try{c=e("../nodejs/NodejsStreamOutputAdapter")}catch(e){}function d(e,t){return new l.Promise(function(i,a){var n=[],o=e._internalType,l=e._outputType,c=e._mimeType;e.on("data",function(e,i){n.push(e),t&&t(i)}).on("error",function(e){n=[],a(e)}).on("end",function(){try{var e=function(e,t,i){switch(e){case"blob":return r.newBlob(r.transformTo("arraybuffer",t),i);case"base64":return s.encode(t);default:return r.transformTo(e,t)}}(l,function(e,t){var i,r=0,a=null,n=0;for(i=0;i<t.length;i++)n+=t[i].length;switch(e){case"string":return t.join("");case"array":return Array.prototype.concat.apply([],t);case"uint8array":for(a=new Uint8Array(n),i=0;i<t.length;i++)a.set(t[i],r),r+=t[i].length;return a;case"nodebuffer":return Buffer.concat(t);default:throw new Error("concat : unsupported type '"+e+"'")}}(o,n),c);i(e)}catch(e){a(e)}n=[]}).resume()})}function p(e,t,i){var s=t;switch(t){case"blob":case"arraybuffer":s="uint8array";break;case"base64":s="string"}try{this._internalType=s,this._outputType=t,this._mimeType=i,r.checkSupport(s),this._worker=e.pipe(new a(s)),e.lock()}catch(e){this._worker=new n("error"),this._worker.error(e)}}p.prototype={accumulate:function(e){return d(this,e)},on:function(e,t){var i=this;return"data"===e?this._worker.on(e,function(e){t.call(i,e.data,e.meta)}):this._worker.on(e,function(){r.delay(t,arguments,i)}),this},resume:function(){return r.delay(this._worker.resume,[],this._worker),this},pause:function(){return this._worker.pause(),this},toNodejsStream:function(e){if(r.checkSupport("nodestream"),"nodebuffer"!==this._outputType)throw new Error(this._outputType+" is not supported by this method");return new c(this,{objectMode:"nodebuffer"!==this._outputType},e)}},t.exports=p},{"../base64":1,"../external":6,"../nodejs/NodejsStreamOutputAdapter":13,"../support":30,"../utils":32,"./ConvertWorker":24,"./GenericWorker":28}],30:[function(e,t,i){if(i.base64=!0,i.array=!0,i.string=!0,i.arraybuffer="undefined"!=typeof ArrayBuffer&&"undefined"!=typeof Uint8Array,i.nodebuffer="undefined"!=typeof Buffer,i.uint8array="undefined"!=typeof Uint8Array,"undefined"==typeof ArrayBuffer)i.blob=!1;else{var r=new ArrayBuffer(0);try{i.blob=0===new Blob([r],{type:"application/zip"}).size}catch(e){try{var a=new(self.BlobBuilder||self.WebKitBlobBuilder||self.MozBlobBuilder||self.MSBlobBuilder);a.append(r),i.blob=0===a.getBlob("application/zip").size}catch(e){i.blob=!1}}}try{i.nodestream=!!e("readable-stream").Readable}catch(e){i.nodestream=!1}},{"readable-stream":16}],31:[function(e,t,i){for(var r=e("./utils"),a=e("./support"),n=e("./nodejsUtils"),s=e("./stream/GenericWorker"),o=new Array(256),l=0;l<256;l++)o[l]=252<=l?6:248<=l?5:240<=l?4:224<=l?3:192<=l?2:1;function c(){s.call(this,"utf-8 decode"),this.leftOver=null}function d(){s.call(this,"utf-8 encode")}o[254]=o[254]=1,i.utf8encode=function(e){return a.nodebuffer?n.newBufferFrom(e,"utf-8"):function(e){var t,i,r,n,s,o=e.length,l=0;for(n=0;n<o;n++)55296==(64512&(i=e.charCodeAt(n)))&&n+1<o&&56320==(64512&(r=e.charCodeAt(n+1)))&&(i=65536+(i-55296<<10)+(r-56320),n++),l+=i<128?1:i<2048?2:i<65536?3:4;for(t=a.uint8array?new Uint8Array(l):new Array(l),n=s=0;s<l;n++)55296==(64512&(i=e.charCodeAt(n)))&&n+1<o&&56320==(64512&(r=e.charCodeAt(n+1)))&&(i=65536+(i-55296<<10)+(r-56320),n++),i<128?t[s++]=i:(i<2048?t[s++]=192|i>>>6:(i<65536?t[s++]=224|i>>>12:(t[s++]=240|i>>>18,t[s++]=128|i>>>12&63),t[s++]=128|i>>>6&63),t[s++]=128|63&i);return t}(e)},i.utf8decode=function(e){return a.nodebuffer?r.transformTo("nodebuffer",e).toString("utf-8"):function(e){var t,i,a,n,s=e.length,l=new Array(2*s);for(t=i=0;t<s;)if((a=e[t++])<128)l[i++]=a;else if(4<(n=o[a]))l[i++]=65533,t+=n-1;else{for(a&=2===n?31:3===n?15:7;1<n&&t<s;)a=a<<6|63&e[t++],n--;1<n?l[i++]=65533:a<65536?l[i++]=a:(a-=65536,l[i++]=55296|a>>10&1023,l[i++]=56320|1023&a)}return l.length!==i&&(l.subarray?l=l.subarray(0,i):l.length=i),r.applyFromCharCode(l)}(e=r.transformTo(a.uint8array?"uint8array":"array",e))},r.inherits(c,s),c.prototype.processChunk=function(e){var t=r.transformTo(a.uint8array?"uint8array":"array",e.data);if(this.leftOver&&this.leftOver.length){if(a.uint8array){var n=t;(t=new Uint8Array(n.length+this.leftOver.length)).set(this.leftOver,0),t.set(n,this.leftOver.length)}else t=this.leftOver.concat(t);this.leftOver=null}var s=function(e,t){var i;for((t=t||e.length)>e.length&&(t=e.length),i=t-1;0<=i&&128==(192&e[i]);)i--;return i<0||0===i?t:i+o[e[i]]>t?i:t}(t),l=t;s!==t.length&&(a.uint8array?(l=t.subarray(0,s),this.leftOver=t.subarray(s,t.length)):(l=t.slice(0,s),this.leftOver=t.slice(s,t.length))),this.push({data:i.utf8decode(l),meta:e.meta})},c.prototype.flush=function(){this.leftOver&&this.leftOver.length&&(this.push({data:i.utf8decode(this.leftOver),meta:{}}),this.leftOver=null)},i.Utf8DecodeWorker=c,r.inherits(d,s),d.prototype.processChunk=function(e){this.push({data:i.utf8encode(e.data),meta:e.meta})},i.Utf8EncodeWorker=d},{"./nodejsUtils":14,"./stream/GenericWorker":28,"./support":30,"./utils":32}],32:[function(e,t,i){var r=e("./support"),a=e("./base64"),n=e("./nodejsUtils"),s=e("./external");function o(e){return e}function l(e,t){for(var i=0;i<e.length;++i)t[i]=255&e.charCodeAt(i);return t}e("setimmediate"),i.newBlob=function(e,t){i.checkSupport("blob");try{return new Blob([e],{type:t})}catch(i){try{var r=new(self.BlobBuilder||self.WebKitBlobBuilder||self.MozBlobBuilder||self.MSBlobBuilder);return r.append(e),r.getBlob(t)}catch(e){throw new Error("Bug : can't construct the Blob.")}}};var c={stringifyByChunk:function(e,t,i){var r=[],a=0,n=e.length;if(n<=i)return String.fromCharCode.apply(null,e);for(;a<n;)"array"===t||"nodebuffer"===t?r.push(String.fromCharCode.apply(null,e.slice(a,Math.min(a+i,n)))):r.push(String.fromCharCode.apply(null,e.subarray(a,Math.min(a+i,n)))),a+=i;return r.join("")},stringifyByChar:function(e){for(var t="",i=0;i<e.length;i++)t+=String.fromCharCode(e[i]);return t},applyCanBeUsed:{uint8array:function(){try{return r.uint8array&&1===String.fromCharCode.apply(null,new Uint8Array(1)).length}catch(e){return!1}}(),nodebuffer:function(){try{return r.nodebuffer&&1===String.fromCharCode.apply(null,n.allocBuffer(1)).length}catch(e){return!1}}()}};function d(e){var t=65536,r=i.getTypeOf(e),a=!0;if("uint8array"===r?a=c.applyCanBeUsed.uint8array:"nodebuffer"===r&&(a=c.applyCanBeUsed.nodebuffer),a)for(;1<t;)try{return c.stringifyByChunk(e,r,t)}catch(e){t=Math.floor(t/2)}return c.stringifyByChar(e)}function p(e,t){for(var i=0;i<e.length;i++)t[i]=e[i];return t}i.applyFromCharCode=d;var h={};h.string={string:o,array:function(e){return l(e,new Array(e.length))},arraybuffer:function(e){return h.string.uint8array(e).buffer},uint8array:function(e){return l(e,new Uint8Array(e.length))},nodebuffer:function(e){return l(e,n.allocBuffer(e.length))}},h.array={string:d,array:o,arraybuffer:function(e){return new Uint8Array(e).buffer},uint8array:function(e){return new Uint8Array(e)},nodebuffer:function(e){return n.newBufferFrom(e)}},h.arraybuffer={string:function(e){return d(new Uint8Array(e))},array:function(e){return p(new Uint8Array(e),new Array(e.byteLength))},arraybuffer:o,uint8array:function(e){return new Uint8Array(e)},nodebuffer:function(e){return n.newBufferFrom(new Uint8Array(e))}},h.uint8array={string:d,array:function(e){return p(e,new Array(e.length))},arraybuffer:function(e){return e.buffer},uint8array:o,nodebuffer:function(e){return n.newBufferFrom(e)}},h.nodebuffer={string:d,array:function(e){return p(e,new Array(e.length))},arraybuffer:function(e){return h.nodebuffer.uint8array(e).buffer},uint8array:function(e){return p(e,new Uint8Array(e.length))},nodebuffer:o},i.transformTo=function(e,t){if(t=t||"",!e)return t;i.checkSupport(e);var r=i.getTypeOf(t);return h[r][e](t)},i.resolve=function(e){for(var t=e.split("/"),i=[],r=0;r<t.length;r++){var a=t[r];"."===a||""===a&&0!==r&&r!==t.length-1||(".."===a?i.pop():i.push(a))}return i.join("/")},i.getTypeOf=function(e){return"string"==typeof e?"string":"[object Array]"===Object.prototype.toString.call(e)?"array":r.nodebuffer&&n.isBuffer(e)?"nodebuffer":r.uint8array&&e instanceof Uint8Array?"uint8array":r.arraybuffer&&e instanceof ArrayBuffer?"arraybuffer":void 0},i.checkSupport=function(e){if(!r[e.toLowerCase()])throw new Error(e+" is not supported by this platform")},i.MAX_VALUE_16BITS=65535,i.MAX_VALUE_32BITS=-1,i.pretty=function(e){var t,i,r="";for(i=0;i<(e||"").length;i++)r+="\\x"+((t=e.charCodeAt(i))<16?"0":"")+t.toString(16).toUpperCase();return r},i.delay=function(e,t,i){setImmediate(function(){e.apply(i||null,t||[])})},i.inherits=function(e,t){function i(){}i.prototype=t.prototype,e.prototype=new i},i.extend=function(){var e,t,i={};for(e=0;e<arguments.length;e++)for(t in arguments[e])Object.prototype.hasOwnProperty.call(arguments[e],t)&&void 0===i[t]&&(i[t]=arguments[e][t]);return i},i.prepareContent=function(e,t,n,o,c){return s.Promise.resolve(t).then(function(e){return r.blob&&(e instanceof Blob||-1!==["[object File]","[object Blob]"].indexOf(Object.prototype.toString.call(e)))&&"undefined"!=typeof FileReader?new s.Promise(function(t,i){var r=new FileReader;r.onload=function(e){t(e.target.result)},r.onerror=function(e){i(e.target.error)},r.readAsArrayBuffer(e)}):e}).then(function(t){var d=i.getTypeOf(t);return d?("arraybuffer"===d?t=i.transformTo("uint8array",t):"string"===d&&(c?t=a.decode(t):n&&!0!==o&&(t=function(e){return l(e,r.uint8array?new Uint8Array(e.length):new Array(e.length))}(t))),t):s.Promise.reject(new Error("Can't read the data of '"+e+"'. Is it in a supported JavaScript type (String, Blob, ArrayBuffer, etc) ?"))})}},{"./base64":1,"./external":6,"./nodejsUtils":14,"./support":30,setimmediate:54}],33:[function(e,t,i){var r=e("./reader/readerFor"),a=e("./utils"),n=e("./signature"),s=e("./zipEntry"),o=e("./support");function l(e){this.files=[],this.loadOptions=e}l.prototype={checkSignature:function(e){if(!this.reader.readAndCheckSignature(e)){this.reader.index-=4;var t=this.reader.readString(4);throw new Error("Corrupted zip or bug: unexpected signature ("+a.pretty(t)+", expected "+a.pretty(e)+")")}},isSignature:function(e,t){var i=this.reader.index;this.reader.setIndex(e);var r=this.reader.readString(4)===t;return this.reader.setIndex(i),r},readBlockEndOfCentral:function(){this.diskNumber=this.reader.readInt(2),this.diskWithCentralDirStart=this.reader.readInt(2),this.centralDirRecordsOnThisDisk=this.reader.readInt(2),this.centralDirRecords=this.reader.readInt(2),this.centralDirSize=this.reader.readInt(4),this.centralDirOffset=this.reader.readInt(4),this.zipCommentLength=this.reader.readInt(2);var e=this.reader.readData(this.zipCommentLength),t=o.uint8array?"uint8array":"array",i=a.transformTo(t,e);this.zipComment=this.loadOptions.decodeFileName(i)},readBlockZip64EndOfCentral:function(){this.zip64EndOfCentralSize=this.reader.readInt(8),this.reader.skip(4),this.diskNumber=this.reader.readInt(4),this.diskWithCentralDirStart=this.reader.readInt(4),this.centralDirRecordsOnThisDisk=this.reader.readInt(8),this.centralDirRecords=this.reader.readInt(8),this.centralDirSize=this.reader.readInt(8),this.centralDirOffset=this.reader.readInt(8),this.zip64ExtensibleData={};for(var e,t,i,r=this.zip64EndOfCentralSize-44;0<r;)e=this.reader.readInt(2),t=this.reader.readInt(4),i=this.reader.readData(t),this.zip64ExtensibleData[e]={id:e,length:t,value:i}},readBlockZip64EndOfCentralLocator:function(){if(this.diskWithZip64CentralDirStart=this.reader.readInt(4),this.relativeOffsetEndOfZip64CentralDir=this.reader.readInt(8),this.disksCount=this.reader.readInt(4),1<this.disksCount)throw new Error("Multi-volumes zip are not supported")},readLocalFiles:function(){var e,t;for(e=0;e<this.files.length;e++)t=this.files[e],this.reader.setIndex(t.localHeaderOffset),this.checkSignature(n.LOCAL_FILE_HEADER),t.readLocalPart(this.reader),t.handleUTF8(),t.processAttributes()},readCentralDir:function(){var e;for(this.reader.setIndex(this.centralDirOffset);this.reader.readAndCheckSignature(n.CENTRAL_FILE_HEADER);)(e=new s({zip64:this.zip64},this.loadOptions)).readCentralPart(this.reader),this.files.push(e);if(this.centralDirRecords!==this.files.length&&0!==this.centralDirRecords&&0===this.files.length)throw new Error("Corrupted zip or bug: expected "+this.centralDirRecords+" records in central dir, got "+this.files.length)},readEndOfCentral:function(){var e=this.reader.lastIndexOfSignature(n.CENTRAL_DIRECTORY_END);if(e<0)throw this.isSignature(0,n.LOCAL_FILE_HEADER)?new Error("Corrupted zip: can't find end of central directory"):new Error("Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html");this.reader.setIndex(e);var t=e;if(this.checkSignature(n.CENTRAL_DIRECTORY_END),this.readBlockEndOfCentral(),this.diskNumber===a.MAX_VALUE_16BITS||this.diskWithCentralDirStart===a.MAX_VALUE_16BITS||this.centralDirRecordsOnThisDisk===a.MAX_VALUE_16BITS||this.centralDirRecords===a.MAX_VALUE_16BITS||this.centralDirSize===a.MAX_VALUE_32BITS||this.centralDirOffset===a.MAX_VALUE_32BITS){if(this.zip64=!0,(e=this.reader.lastIndexOfSignature(n.ZIP64_CENTRAL_DIRECTORY_LOCATOR))<0)throw new Error("Corrupted zip: can't find the ZIP64 end of central directory locator");if(this.reader.setIndex(e),this.checkSignature(n.ZIP64_CENTRAL_DIRECTORY_LOCATOR),this.readBlockZip64EndOfCentralLocator(),!this.isSignature(this.relativeOffsetEndOfZip64CentralDir,n.ZIP64_CENTRAL_DIRECTORY_END)&&(this.relativeOffsetEndOfZip64CentralDir=this.reader.lastIndexOfSignature(n.ZIP64_CENTRAL_DIRECTORY_END),this.relativeOffsetEndOfZip64CentralDir<0))throw new Error("Corrupted zip: can't find the ZIP64 end of central directory");this.reader.setIndex(this.relativeOffsetEndOfZip64CentralDir),this.checkSignature(n.ZIP64_CENTRAL_DIRECTORY_END),this.readBlockZip64EndOfCentral()}var i=this.centralDirOffset+this.centralDirSize;this.zip64&&(i+=20,i+=12+this.zip64EndOfCentralSize);var r=t-i;if(0<r)this.isSignature(t,n.CENTRAL_FILE_HEADER)||(this.reader.zero=r);else if(r<0)throw new Error("Corrupted zip: missing "+Math.abs(r)+" bytes.")},prepareReader:function(e){this.reader=r(e)},load:function(e){this.prepareReader(e),this.readEndOfCentral(),this.readCentralDir(),this.readLocalFiles()}},t.exports=l},{"./reader/readerFor":22,"./signature":23,"./support":30,"./utils":32,"./zipEntry":34}],34:[function(e,t,i){var r=e("./reader/readerFor"),a=e("./utils"),n=e("./compressedObject"),s=e("./crc32"),o=e("./utf8"),l=e("./compressions"),c=e("./support");function d(e,t){this.options=e,this.loadOptions=t}d.prototype={isEncrypted:function(){return!(1&~this.bitFlag)},useUTF8:function(){return!(2048&~this.bitFlag)},readLocalPart:function(e){var t,i;if(e.skip(22),this.fileNameLength=e.readInt(2),i=e.readInt(2),this.fileName=e.readData(this.fileNameLength),e.skip(i),-1===this.compressedSize||-1===this.uncompressedSize)throw new Error("Bug or corrupted zip : didn't get enough information from the central directory (compressedSize === -1 || uncompressedSize === -1)");if(null===(t=function(e){for(var t in l)if(Object.prototype.hasOwnProperty.call(l,t)&&l[t].magic===e)return l[t];return null}(this.compressionMethod)))throw new Error("Corrupted zip : compression "+a.pretty(this.compressionMethod)+" unknown (inner file : "+a.transformTo("string",this.fileName)+")");this.decompressed=new n(this.compressedSize,this.uncompressedSize,this.crc32,t,e.readData(this.compressedSize))},readCentralPart:function(e){this.versionMadeBy=e.readInt(2),e.skip(2),this.bitFlag=e.readInt(2),this.compressionMethod=e.readString(2),this.date=e.readDate(),this.crc32=e.readInt(4),this.compressedSize=e.readInt(4),this.uncompressedSize=e.readInt(4);var t=e.readInt(2);if(this.extraFieldsLength=e.readInt(2),this.fileCommentLength=e.readInt(2),this.diskNumberStart=e.readInt(2),this.internalFileAttributes=e.readInt(2),this.externalFileAttributes=e.readInt(4),this.localHeaderOffset=e.readInt(4),this.isEncrypted())throw new Error("Encrypted zip are not supported");e.skip(t),this.readExtraFields(e),this.parseZIP64ExtraField(e),this.fileComment=e.readData(this.fileCommentLength)},processAttributes:function(){this.unixPermissions=null,this.dosPermissions=null;var e=this.versionMadeBy>>8;this.dir=!!(16&this.externalFileAttributes),0==e&&(this.dosPermissions=63&this.externalFileAttributes),3==e&&(this.unixPermissions=this.externalFileAttributes>>16&65535),this.dir||"/"!==this.fileNameStr.slice(-1)||(this.dir=!0)},parseZIP64ExtraField:function(){if(this.extraFields[1]){var e=r(this.extraFields[1].value);this.uncompressedSize===a.MAX_VALUE_32BITS&&(this.uncompressedSize=e.readInt(8)),this.compressedSize===a.MAX_VALUE_32BITS&&(this.compressedSize=e.readInt(8)),this.localHeaderOffset===a.MAX_VALUE_32BITS&&(this.localHeaderOffset=e.readInt(8)),this.diskNumberStart===a.MAX_VALUE_32BITS&&(this.diskNumberStart=e.readInt(4))}},readExtraFields:function(e){var t,i,r,a=e.index+this.extraFieldsLength;for(this.extraFields||(this.extraFields={});e.index+4<a;)t=e.readInt(2),i=e.readInt(2),r=e.readData(i),this.extraFields[t]={id:t,length:i,value:r};e.setIndex(a)},handleUTF8:function(){var e=c.uint8array?"uint8array":"array";if(this.useUTF8())this.fileNameStr=o.utf8decode(this.fileName),this.fileCommentStr=o.utf8decode(this.fileComment);else{var t=this.findExtraFieldUnicodePath();if(null!==t)this.fileNameStr=t;else{var i=a.transformTo(e,this.fileName);this.fileNameStr=this.loadOptions.decodeFileName(i)}var r=this.findExtraFieldUnicodeComment();if(null!==r)this.fileCommentStr=r;else{var n=a.transformTo(e,this.fileComment);this.fileCommentStr=this.loadOptions.decodeFileName(n)}}},findExtraFieldUnicodePath:function(){var e=this.extraFields[28789];if(e){var t=r(e.value);return 1!==t.readInt(1)||s(this.fileName)!==t.readInt(4)?null:o.utf8decode(t.readData(e.length-5))}return null},findExtraFieldUnicodeComment:function(){var e=this.extraFields[25461];if(e){var t=r(e.value);return 1!==t.readInt(1)||s(this.fileComment)!==t.readInt(4)?null:o.utf8decode(t.readData(e.length-5))}return null}},t.exports=d},{"./compressedObject":2,"./compressions":3,"./crc32":4,"./reader/readerFor":22,"./support":30,"./utf8":31,"./utils":32}],35:[function(e,t,i){function r(e,t,i){this.name=e,this.dir=i.dir,this.date=i.date,this.comment=i.comment,this.unixPermissions=i.unixPermissions,this.dosPermissions=i.dosPermissions,this._data=t,this._dataBinary=i.binary,this.options={compression:i.compression,compressionOptions:i.compressionOptions}}var a=e("./stream/StreamHelper"),n=e("./stream/DataWorker"),s=e("./utf8"),o=e("./compressedObject"),l=e("./stream/GenericWorker");r.prototype={internalStream:function(e){var t=null,i="string";try{if(!e)throw new Error("No output type specified.");var r="string"===(i=e.toLowerCase())||"text"===i;"binarystring"!==i&&"text"!==i||(i="string"),t=this._decompressWorker();var n=!this._dataBinary;n&&!r&&(t=t.pipe(new s.Utf8EncodeWorker)),!n&&r&&(t=t.pipe(new s.Utf8DecodeWorker))}catch(e){(t=new l("error")).error(e)}return new a(t,i,"")},async:function(e,t){return this.internalStream(e).accumulate(t)},nodeStream:function(e,t){return this.internalStream(e||"nodebuffer").toNodejsStream(t)},_compressWorker:function(e,t){if(this._data instanceof o&&this._data.compression.magic===e.magic)return this._data.getCompressedWorker();var i=this._decompressWorker();return this._dataBinary||(i=i.pipe(new s.Utf8EncodeWorker)),o.createWorkerFrom(i,e,t)},_decompressWorker:function(){return this._data instanceof o?this._data.getContentWorker():this._data instanceof l?this._data:new n(this._data)}};for(var c=["asText","asBinary","asNodeBuffer","asUint8Array","asArrayBuffer"],d=function(){throw new Error("This method has been removed in JSZip 3.0, please check the upgrade guide.")},p=0;p<c.length;p++)r.prototype[c[p]]=d;t.exports=r},{"./compressedObject":2,"./stream/DataWorker":27,"./stream/GenericWorker":28,"./stream/StreamHelper":29,"./utf8":31}],36:[function(e,t,i){(function(e){var i,r,a=e.MutationObserver||e.WebKitMutationObserver;if(a){var n=0,s=new a(d),o=e.document.createTextNode("");s.observe(o,{characterData:!0}),i=function(){o.data=n=++n%2}}else if(e.setImmediate||void 0===e.MessageChannel)i="document"in e&&"onreadystatechange"in e.document.createElement("script")?function(){var t=e.document.createElement("script");t.onreadystatechange=function(){d(),t.onreadystatechange=null,t.parentNode.removeChild(t),t=null},e.document.documentElement.appendChild(t)}:function(){setTimeout(d,0)};else{var l=new e.MessageChannel;l.port1.onmessage=d,i=function(){l.port2.postMessage(0)}}var c=[];function d(){var e,t;r=!0;for(var i=c.length;i;){for(t=c,c=[],e=-1;++e<i;)t[e]();i=c.length}r=!1}t.exports=function(e){1!==c.push(e)||r||i()}}).call(this,void 0!==Q?Q:"undefined"!=typeof self?self:"undefined"!=typeof window?window:{})},{}],37:[function(e,t,i){var r=e("immediate");function a(){}var n={},s=["REJECTED"],o=["FULFILLED"],l=["PENDING"];function c(e){if("function"!=typeof e)throw new TypeError("resolver must be a function");this.state=l,this.queue=[],this.outcome=void 0,e!==a&&u(this,e)}function d(e,t,i){this.promise=e,"function"==typeof t&&(this.onFulfilled=t,this.callFulfilled=this.otherCallFulfilled),"function"==typeof i&&(this.onRejected=i,this.callRejected=this.otherCallRejected)}function p(e,t,i){r(function(){var r;try{r=t(i)}catch(r){return n.reject(e,r)}r===e?n.reject(e,new TypeError("Cannot resolve promise with itself")):n.resolve(e,r)})}function h(e){var t=e&&e.then;if(e&&("object"==typeof e||"function"==typeof e)&&"function"==typeof t)return function(){t.apply(e,arguments)}}function u(e,t){var i=!1;function r(t){i||(i=!0,n.reject(e,t))}function a(t){i||(i=!0,n.resolve(e,t))}var s=m(function(){t(a,r)});"error"===s.status&&r(s.value)}function m(e,t){var i={};try{i.value=e(t),i.status="success"}catch(e){i.status="error",i.value=e}return i}(t.exports=c).prototype.finally=function(e){if("function"!=typeof e)return this;var t=this.constructor;return this.then(function(i){return t.resolve(e()).then(function(){return i})},function(i){return t.resolve(e()).then(function(){throw i})})},c.prototype.catch=function(e){return this.then(null,e)},c.prototype.then=function(e,t){if("function"!=typeof e&&this.state===o||"function"!=typeof t&&this.state===s)return this;var i=new this.constructor(a);return this.state!==l?p(i,this.state===o?e:t,this.outcome):this.queue.push(new d(i,e,t)),i},d.prototype.callFulfilled=function(e){n.resolve(this.promise,e)},d.prototype.otherCallFulfilled=function(e){p(this.promise,this.onFulfilled,e)},d.prototype.callRejected=function(e){n.reject(this.promise,e)},d.prototype.otherCallRejected=function(e){p(this.promise,this.onRejected,e)},n.resolve=function(e,t){var i=m(h,t);if("error"===i.status)return n.reject(e,i.value);var r=i.value;if(r)u(e,r);else{e.state=o,e.outcome=t;for(var a=-1,s=e.queue.length;++a<s;)e.queue[a].callFulfilled(t)}return e},n.reject=function(e,t){e.state=s,e.outcome=t;for(var i=-1,r=e.queue.length;++i<r;)e.queue[i].callRejected(t);return e},c.resolve=function(e){return e instanceof this?e:n.resolve(new this(a),e)},c.reject=function(e){var t=new this(a);return n.reject(t,e)},c.all=function(e){var t=this;if("[object Array]"!==Object.prototype.toString.call(e))return this.reject(new TypeError("must be an array"));var i=e.length,r=!1;if(!i)return this.resolve([]);for(var s=new Array(i),o=0,l=-1,c=new this(a);++l<i;)d(e[l],l);return c;function d(e,a){t.resolve(e).then(function(e){s[a]=e,++o!==i||r||(r=!0,n.resolve(c,s))},function(e){r||(r=!0,n.reject(c,e))})}},c.race=function(e){var t=this;if("[object Array]"!==Object.prototype.toString.call(e))return this.reject(new TypeError("must be an array"));var i=e.length,r=!1;if(!i)return this.resolve([]);for(var s,o=-1,l=new this(a);++o<i;)s=e[o],t.resolve(s).then(function(e){r||(r=!0,n.resolve(l,e))},function(e){r||(r=!0,n.reject(l,e))});return l}},{immediate:36}],38:[function(e,t,i){var r={};(0,e("./lib/utils/common").assign)(r,e("./lib/deflate"),e("./lib/inflate"),e("./lib/zlib/constants")),t.exports=r},{"./lib/deflate":39,"./lib/inflate":40,"./lib/utils/common":41,"./lib/zlib/constants":44}],39:[function(e,t,i){var r=e("./zlib/deflate"),a=e("./utils/common"),n=e("./utils/strings"),s=e("./zlib/messages"),o=e("./zlib/zstream"),l=Object.prototype.toString,c=0,d=-1,p=0,h=8;function u(e){if(!(this instanceof u))return new u(e);this.options=a.assign({level:d,method:h,chunkSize:16384,windowBits:15,memLevel:8,strategy:p,to:""},e||{});var t=this.options;t.raw&&0<t.windowBits?t.windowBits=-t.windowBits:t.gzip&&0<t.windowBits&&t.windowBits<16&&(t.windowBits+=16),this.err=0,this.msg="",this.ended=!1,this.chunks=[],this.strm=new o,this.strm.avail_out=0;var i=r.deflateInit2(this.strm,t.level,t.method,t.windowBits,t.memLevel,t.strategy);if(i!==c)throw new Error(s[i]);if(t.header&&r.deflateSetHeader(this.strm,t.header),t.dictionary){var m;if(m="string"==typeof t.dictionary?n.string2buf(t.dictionary):"[object ArrayBuffer]"===l.call(t.dictionary)?new Uint8Array(t.dictionary):t.dictionary,(i=r.deflateSetDictionary(this.strm,m))!==c)throw new Error(s[i]);this._dict_set=!0}}function m(e,t){var i=new u(t);if(i.push(e,!0),i.err)throw i.msg||s[i.err];return i.result}u.prototype.push=function(e,t){var i,s,o=this.strm,d=this.options.chunkSize;if(this.ended)return!1;s=t===~~t?t:!0===t?4:0,"string"==typeof e?o.input=n.string2buf(e):"[object ArrayBuffer]"===l.call(e)?o.input=new Uint8Array(e):o.input=e,o.next_in=0,o.avail_in=o.input.length;do{if(0===o.avail_out&&(o.output=new a.Buf8(d),o.next_out=0,o.avail_out=d),1!==(i=r.deflate(o,s))&&i!==c)return this.onEnd(i),!(this.ended=!0);0!==o.avail_out&&(0!==o.avail_in||4!==s&&2!==s)||("string"===this.options.to?this.onData(n.buf2binstring(a.shrinkBuf(o.output,o.next_out))):this.onData(a.shrinkBuf(o.output,o.next_out)))}while((0<o.avail_in||0===o.avail_out)&&1!==i);return 4===s?(i=r.deflateEnd(this.strm),this.onEnd(i),this.ended=!0,i===c):2!==s||(this.onEnd(c),!(o.avail_out=0))},u.prototype.onData=function(e){this.chunks.push(e)},u.prototype.onEnd=function(e){e===c&&("string"===this.options.to?this.result=this.chunks.join(""):this.result=a.flattenChunks(this.chunks)),this.chunks=[],this.err=e,this.msg=this.strm.msg},i.Deflate=u,i.deflate=m,i.deflateRaw=function(e,t){return(t=t||{}).raw=!0,m(e,t)},i.gzip=function(e,t){return(t=t||{}).gzip=!0,m(e,t)}},{"./utils/common":41,"./utils/strings":42,"./zlib/deflate":46,"./zlib/messages":51,"./zlib/zstream":53}],40:[function(e,t,i){var r=e("./zlib/inflate"),a=e("./utils/common"),n=e("./utils/strings"),s=e("./zlib/constants"),o=e("./zlib/messages"),l=e("./zlib/zstream"),c=e("./zlib/gzheader"),d=Object.prototype.toString;function p(e){if(!(this instanceof p))return new p(e);this.options=a.assign({chunkSize:16384,windowBits:0,to:""},e||{});var t=this.options;t.raw&&0<=t.windowBits&&t.windowBits<16&&(t.windowBits=-t.windowBits,0===t.windowBits&&(t.windowBits=-15)),!(0<=t.windowBits&&t.windowBits<16)||e&&e.windowBits||(t.windowBits+=32),15<t.windowBits&&t.windowBits<48&&!(15&t.windowBits)&&(t.windowBits|=15),this.err=0,this.msg="",this.ended=!1,this.chunks=[],this.strm=new l,this.strm.avail_out=0;var i=r.inflateInit2(this.strm,t.windowBits);if(i!==s.Z_OK)throw new Error(o[i]);this.header=new c,r.inflateGetHeader(this.strm,this.header)}function h(e,t){var i=new p(t);if(i.push(e,!0),i.err)throw i.msg||o[i.err];return i.result}p.prototype.push=function(e,t){var i,o,l,c,p,h,u=this.strm,m=this.options.chunkSize,g=this.options.dictionary,f=!1;if(this.ended)return!1;o=t===~~t?t:!0===t?s.Z_FINISH:s.Z_NO_FLUSH,"string"==typeof e?u.input=n.binstring2buf(e):"[object ArrayBuffer]"===d.call(e)?u.input=new Uint8Array(e):u.input=e,u.next_in=0,u.avail_in=u.input.length;do{if(0===u.avail_out&&(u.output=new a.Buf8(m),u.next_out=0,u.avail_out=m),(i=r.inflate(u,s.Z_NO_FLUSH))===s.Z_NEED_DICT&&g&&(h="string"==typeof g?n.string2buf(g):"[object ArrayBuffer]"===d.call(g)?new Uint8Array(g):g,i=r.inflateSetDictionary(this.strm,h)),i===s.Z_BUF_ERROR&&!0===f&&(i=s.Z_OK,f=!1),i!==s.Z_STREAM_END&&i!==s.Z_OK)return this.onEnd(i),!(this.ended=!0);u.next_out&&(0!==u.avail_out&&i!==s.Z_STREAM_END&&(0!==u.avail_in||o!==s.Z_FINISH&&o!==s.Z_SYNC_FLUSH)||("string"===this.options.to?(l=n.utf8border(u.output,u.next_out),c=u.next_out-l,p=n.buf2string(u.output,l),u.next_out=c,u.avail_out=m-c,c&&a.arraySet(u.output,u.output,l,c,0),this.onData(p)):this.onData(a.shrinkBuf(u.output,u.next_out)))),0===u.avail_in&&0===u.avail_out&&(f=!0)}while((0<u.avail_in||0===u.avail_out)&&i!==s.Z_STREAM_END);return i===s.Z_STREAM_END&&(o=s.Z_FINISH),o===s.Z_FINISH?(i=r.inflateEnd(this.strm),this.onEnd(i),this.ended=!0,i===s.Z_OK):o!==s.Z_SYNC_FLUSH||(this.onEnd(s.Z_OK),!(u.avail_out=0))},p.prototype.onData=function(e){this.chunks.push(e)},p.prototype.onEnd=function(e){e===s.Z_OK&&("string"===this.options.to?this.result=this.chunks.join(""):this.result=a.flattenChunks(this.chunks)),this.chunks=[],this.err=e,this.msg=this.strm.msg},i.Inflate=p,i.inflate=h,i.inflateRaw=function(e,t){return(t=t||{}).raw=!0,h(e,t)},i.ungzip=h},{"./utils/common":41,"./utils/strings":42,"./zlib/constants":44,"./zlib/gzheader":47,"./zlib/inflate":49,"./zlib/messages":51,"./zlib/zstream":53}],41:[function(e,t,i){var r="undefined"!=typeof Uint8Array&&"undefined"!=typeof Uint16Array&&"undefined"!=typeof Int32Array;i.assign=function(e){for(var t=Array.prototype.slice.call(arguments,1);t.length;){var i=t.shift();if(i){if("object"!=typeof i)throw new TypeError(i+"must be non-object");for(var r in i)i.hasOwnProperty(r)&&(e[r]=i[r])}}return e},i.shrinkBuf=function(e,t){return e.length===t?e:e.subarray?e.subarray(0,t):(e.length=t,e)};var a={arraySet:function(e,t,i,r,a){if(t.subarray&&e.subarray)e.set(t.subarray(i,i+r),a);else for(var n=0;n<r;n++)e[a+n]=t[i+n]},flattenChunks:function(e){var t,i,r,a,n,s;for(t=r=0,i=e.length;t<i;t++)r+=e[t].length;for(s=new Uint8Array(r),t=a=0,i=e.length;t<i;t++)n=e[t],s.set(n,a),a+=n.length;return s}},n={arraySet:function(e,t,i,r,a){for(var n=0;n<r;n++)e[a+n]=t[i+n]},flattenChunks:function(e){return[].concat.apply([],e)}};i.setTyped=function(e){e?(i.Buf8=Uint8Array,i.Buf16=Uint16Array,i.Buf32=Int32Array,i.assign(i,a)):(i.Buf8=Array,i.Buf16=Array,i.Buf32=Array,i.assign(i,n))},i.setTyped(r)},{}],42:[function(e,t,i){var r=e("./common"),a=!0,n=!0;try{String.fromCharCode.apply(null,[0])}catch(e){a=!1}try{String.fromCharCode.apply(null,new Uint8Array(1))}catch(e){n=!1}for(var s=new r.Buf8(256),o=0;o<256;o++)s[o]=252<=o?6:248<=o?5:240<=o?4:224<=o?3:192<=o?2:1;function l(e,t){if(t<65537&&(e.subarray&&n||!e.subarray&&a))return String.fromCharCode.apply(null,r.shrinkBuf(e,t));for(var i="",s=0;s<t;s++)i+=String.fromCharCode(e[s]);return i}s[254]=s[254]=1,i.string2buf=function(e){var t,i,a,n,s,o=e.length,l=0;for(n=0;n<o;n++)55296==(64512&(i=e.charCodeAt(n)))&&n+1<o&&56320==(64512&(a=e.charCodeAt(n+1)))&&(i=65536+(i-55296<<10)+(a-56320),n++),l+=i<128?1:i<2048?2:i<65536?3:4;for(t=new r.Buf8(l),n=s=0;s<l;n++)55296==(64512&(i=e.charCodeAt(n)))&&n+1<o&&56320==(64512&(a=e.charCodeAt(n+1)))&&(i=65536+(i-55296<<10)+(a-56320),n++),i<128?t[s++]=i:(i<2048?t[s++]=192|i>>>6:(i<65536?t[s++]=224|i>>>12:(t[s++]=240|i>>>18,t[s++]=128|i>>>12&63),t[s++]=128|i>>>6&63),t[s++]=128|63&i);return t},i.buf2binstring=function(e){return l(e,e.length)},i.binstring2buf=function(e){for(var t=new r.Buf8(e.length),i=0,a=t.length;i<a;i++)t[i]=e.charCodeAt(i);return t},i.buf2string=function(e,t){var i,r,a,n,o=t||e.length,c=new Array(2*o);for(i=r=0;i<o;)if((a=e[i++])<128)c[r++]=a;else if(4<(n=s[a]))c[r++]=65533,i+=n-1;else{for(a&=2===n?31:3===n?15:7;1<n&&i<o;)a=a<<6|63&e[i++],n--;1<n?c[r++]=65533:a<65536?c[r++]=a:(a-=65536,c[r++]=55296|a>>10&1023,c[r++]=56320|1023&a)}return l(c,r)},i.utf8border=function(e,t){var i;for((t=t||e.length)>e.length&&(t=e.length),i=t-1;0<=i&&128==(192&e[i]);)i--;return i<0||0===i?t:i+s[e[i]]>t?i:t}},{"./common":41}],43:[function(e,t,i){t.exports=function(e,t,i,r){for(var a=65535&e,n=e>>>16&65535,s=0;0!==i;){for(i-=s=2e3<i?2e3:i;n=n+(a=a+t[r++]|0)|0,--s;);a%=65521,n%=65521}return a|n<<16}},{}],44:[function(e,t,i){t.exports={Z_NO_FLUSH:0,Z_PARTIAL_FLUSH:1,Z_SYNC_FLUSH:2,Z_FULL_FLUSH:3,Z_FINISH:4,Z_BLOCK:5,Z_TREES:6,Z_OK:0,Z_STREAM_END:1,Z_NEED_DICT:2,Z_ERRNO:-1,Z_STREAM_ERROR:-2,Z_DATA_ERROR:-3,Z_BUF_ERROR:-5,Z_NO_COMPRESSION:0,Z_BEST_SPEED:1,Z_BEST_COMPRESSION:9,Z_DEFAULT_COMPRESSION:-1,Z_FILTERED:1,Z_HUFFMAN_ONLY:2,Z_RLE:3,Z_FIXED:4,Z_DEFAULT_STRATEGY:0,Z_BINARY:0,Z_TEXT:1,Z_UNKNOWN:2,Z_DEFLATED:8}},{}],45:[function(e,t,i){var r=function(){for(var e,t=[],i=0;i<256;i++){e=i;for(var r=0;r<8;r++)e=1&e?3988292384^e>>>1:e>>>1;t[i]=e}return t}();t.exports=function(e,t,i,a){var n=r,s=a+i;e^=-1;for(var o=a;o<s;o++)e=e>>>8^n[255&(e^t[o])];return-1^e}},{}],46:[function(e,t,i){var r,a=e("../utils/common"),n=e("./trees"),s=e("./adler32"),o=e("./crc32"),l=e("./messages"),c=0,d=4,p=0,h=-2,u=-1,m=4,g=2,f=8,b=9,v=286,_=30,x=19,y=2*v+1,w=15,k=3,$=258,S=$+k+1,z=42,I=113,T=1,C=2,A=3,R=4;function E(e,t){return e.msg=l[t],t}function D(e){return(e<<1)-(4<e?9:0)}function F(e){for(var t=e.length;0<=--t;)e[t]=0}function L(e){var t=e.state,i=t.pending;i>e.avail_out&&(i=e.avail_out),0!==i&&(a.arraySet(e.output,t.pending_buf,t.pending_out,i,e.next_out),e.next_out+=i,t.pending_out+=i,e.total_out+=i,e.avail_out-=i,t.pending-=i,0===t.pending&&(t.pending_out=0))}function P(e,t){n._tr_flush_block(e,0<=e.block_start?e.block_start:-1,e.strstart-e.block_start,t),e.block_start=e.strstart,L(e.strm)}function M(e,t){e.pending_buf[e.pending++]=t}function O(e,t){e.pending_buf[e.pending++]=t>>>8&255,e.pending_buf[e.pending++]=255&t}function B(e,t){var i,r,a=e.max_chain_length,n=e.strstart,s=e.prev_length,o=e.nice_match,l=e.strstart>e.w_size-S?e.strstart-(e.w_size-S):0,c=e.window,d=e.w_mask,p=e.prev,h=e.strstart+$,u=c[n+s-1],m=c[n+s];e.prev_length>=e.good_match&&(a>>=2),o>e.lookahead&&(o=e.lookahead);do{if(c[(i=t)+s]===m&&c[i+s-1]===u&&c[i]===c[n]&&c[++i]===c[n+1]){n+=2,i++;do{}while(c[++n]===c[++i]&&c[++n]===c[++i]&&c[++n]===c[++i]&&c[++n]===c[++i]&&c[++n]===c[++i]&&c[++n]===c[++i]&&c[++n]===c[++i]&&c[++n]===c[++i]&&n<h);if(r=$-(h-n),n=h-$,s<r){if(e.match_start=t,o<=(s=r))break;u=c[n+s-1],m=c[n+s]}}}while((t=p[t&d])>l&&0!=--a);return s<=e.lookahead?s:e.lookahead}function j(e){var t,i,r,n,l,c,d,p,h,u,m=e.w_size;do{if(n=e.window_size-e.lookahead-e.strstart,e.strstart>=m+(m-S)){for(a.arraySet(e.window,e.window,m,m,0),e.match_start-=m,e.strstart-=m,e.block_start-=m,t=i=e.hash_size;r=e.head[--t],e.head[t]=m<=r?r-m:0,--i;);for(t=i=m;r=e.prev[--t],e.prev[t]=m<=r?r-m:0,--i;);n+=m}if(0===e.strm.avail_in)break;if(c=e.strm,d=e.window,p=e.strstart+e.lookahead,u=void 0,(h=n)<(u=c.avail_in)&&(u=h),i=0===u?0:(c.avail_in-=u,a.arraySet(d,c.input,c.next_in,u,p),1===c.state.wrap?c.adler=s(c.adler,d,u,p):2===c.state.wrap&&(c.adler=o(c.adler,d,u,p)),c.next_in+=u,c.total_in+=u,u),e.lookahead+=i,e.lookahead+e.insert>=k)for(l=e.strstart-e.insert,e.ins_h=e.window[l],e.ins_h=(e.ins_h<<e.hash_shift^e.window[l+1])&e.hash_mask;e.insert&&(e.ins_h=(e.ins_h<<e.hash_shift^e.window[l+k-1])&e.hash_mask,e.prev[l&e.w_mask]=e.head[e.ins_h],e.head[e.ins_h]=l,l++,e.insert--,!(e.lookahead+e.insert<k)););}while(e.lookahead<S&&0!==e.strm.avail_in)}function N(e,t){for(var i,r;;){if(e.lookahead<S){if(j(e),e.lookahead<S&&t===c)return T;if(0===e.lookahead)break}if(i=0,e.lookahead>=k&&(e.ins_h=(e.ins_h<<e.hash_shift^e.window[e.strstart+k-1])&e.hash_mask,i=e.prev[e.strstart&e.w_mask]=e.head[e.ins_h],e.head[e.ins_h]=e.strstart),0!==i&&e.strstart-i<=e.w_size-S&&(e.match_length=B(e,i)),e.match_length>=k)if(r=n._tr_tally(e,e.strstart-e.match_start,e.match_length-k),e.lookahead-=e.match_length,e.match_length<=e.max_lazy_match&&e.lookahead>=k){for(e.match_length--;e.strstart++,e.ins_h=(e.ins_h<<e.hash_shift^e.window[e.strstart+k-1])&e.hash_mask,i=e.prev[e.strstart&e.w_mask]=e.head[e.ins_h],e.head[e.ins_h]=e.strstart,0!=--e.match_length;);e.strstart++}else e.strstart+=e.match_length,e.match_length=0,e.ins_h=e.window[e.strstart],e.ins_h=(e.ins_h<<e.hash_shift^e.window[e.strstart+1])&e.hash_mask;else r=n._tr_tally(e,0,e.window[e.strstart]),e.lookahead--,e.strstart++;if(r&&(P(e,!1),0===e.strm.avail_out))return T}return e.insert=e.strstart<k-1?e.strstart:k-1,t===d?(P(e,!0),0===e.strm.avail_out?A:R):e.last_lit&&(P(e,!1),0===e.strm.avail_out)?T:C}function U(e,t){for(var i,r,a;;){if(e.lookahead<S){if(j(e),e.lookahead<S&&t===c)return T;if(0===e.lookahead)break}if(i=0,e.lookahead>=k&&(e.ins_h=(e.ins_h<<e.hash_shift^e.window[e.strstart+k-1])&e.hash_mask,i=e.prev[e.strstart&e.w_mask]=e.head[e.ins_h],e.head[e.ins_h]=e.strstart),e.prev_length=e.match_length,e.prev_match=e.match_start,e.match_length=k-1,0!==i&&e.prev_length<e.max_lazy_match&&e.strstart-i<=e.w_size-S&&(e.match_length=B(e,i),e.match_length<=5&&(1===e.strategy||e.match_length===k&&4096<e.strstart-e.match_start)&&(e.match_length=k-1)),e.prev_length>=k&&e.match_length<=e.prev_length){for(a=e.strstart+e.lookahead-k,r=n._tr_tally(e,e.strstart-1-e.prev_match,e.prev_length-k),e.lookahead-=e.prev_length-1,e.prev_length-=2;++e.strstart<=a&&(e.ins_h=(e.ins_h<<e.hash_shift^e.window[e.strstart+k-1])&e.hash_mask,i=e.prev[e.strstart&e.w_mask]=e.head[e.ins_h],e.head[e.ins_h]=e.strstart),0!=--e.prev_length;);if(e.match_available=0,e.match_length=k-1,e.strstart++,r&&(P(e,!1),0===e.strm.avail_out))return T}else if(e.match_available){if((r=n._tr_tally(e,0,e.window[e.strstart-1]))&&P(e,!1),e.strstart++,e.lookahead--,0===e.strm.avail_out)return T}else e.match_available=1,e.strstart++,e.lookahead--}return e.match_available&&(r=n._tr_tally(e,0,e.window[e.strstart-1]),e.match_available=0),e.insert=e.strstart<k-1?e.strstart:k-1,t===d?(P(e,!0),0===e.strm.avail_out?A:R):e.last_lit&&(P(e,!1),0===e.strm.avail_out)?T:C}function W(e,t,i,r,a){this.good_length=e,this.max_lazy=t,this.nice_length=i,this.max_chain=r,this.func=a}function Z(){this.strm=null,this.status=0,this.pending_buf=null,this.pending_buf_size=0,this.pending_out=0,this.pending=0,this.wrap=0,this.gzhead=null,this.gzindex=0,this.method=f,this.last_flush=-1,this.w_size=0,this.w_bits=0,this.w_mask=0,this.window=null,this.window_size=0,this.prev=null,this.head=null,this.ins_h=0,this.hash_size=0,this.hash_bits=0,this.hash_mask=0,this.hash_shift=0,this.block_start=0,this.match_length=0,this.prev_match=0,this.match_available=0,this.strstart=0,this.match_start=0,this.lookahead=0,this.prev_length=0,this.max_chain_length=0,this.max_lazy_match=0,this.level=0,this.strategy=0,this.good_match=0,this.nice_match=0,this.dyn_ltree=new a.Buf16(2*y),this.dyn_dtree=new a.Buf16(2*(2*_+1)),this.bl_tree=new a.Buf16(2*(2*x+1)),F(this.dyn_ltree),F(this.dyn_dtree),F(this.bl_tree),this.l_desc=null,this.d_desc=null,this.bl_desc=null,this.bl_count=new a.Buf16(w+1),this.heap=new a.Buf16(2*v+1),F(this.heap),this.heap_len=0,this.heap_max=0,this.depth=new a.Buf16(2*v+1),F(this.depth),this.l_buf=0,this.lit_bufsize=0,this.last_lit=0,this.d_buf=0,this.opt_len=0,this.static_len=0,this.matches=0,this.insert=0,this.bi_buf=0,this.bi_valid=0}function H(e){var t;return e&&e.state?(e.total_in=e.total_out=0,e.data_type=g,(t=e.state).pending=0,t.pending_out=0,t.wrap<0&&(t.wrap=-t.wrap),t.status=t.wrap?z:I,e.adler=2===t.wrap?0:1,t.last_flush=c,n._tr_init(t),p):E(e,h)}function q(e){var t=H(e);return t===p&&function(e){e.window_size=2*e.w_size,F(e.head),e.max_lazy_match=r[e.level].max_lazy,e.good_match=r[e.level].good_length,e.nice_match=r[e.level].nice_length,e.max_chain_length=r[e.level].max_chain,e.strstart=0,e.block_start=0,e.lookahead=0,e.insert=0,e.match_length=e.prev_length=k-1,e.match_available=0,e.ins_h=0}(e.state),t}function V(e,t,i,r,n,s){if(!e)return h;var o=1;if(t===u&&(t=6),r<0?(o=0,r=-r):15<r&&(o=2,r-=16),n<1||b<n||i!==f||r<8||15<r||t<0||9<t||s<0||m<s)return E(e,h);8===r&&(r=9);var l=new Z;return(e.state=l).strm=e,l.wrap=o,l.gzhead=null,l.w_bits=r,l.w_size=1<<l.w_bits,l.w_mask=l.w_size-1,l.hash_bits=n+7,l.hash_size=1<<l.hash_bits,l.hash_mask=l.hash_size-1,l.hash_shift=~~((l.hash_bits+k-1)/k),l.window=new a.Buf8(2*l.w_size),l.head=new a.Buf16(l.hash_size),l.prev=new a.Buf16(l.w_size),l.lit_bufsize=1<<n+6,l.pending_buf_size=4*l.lit_bufsize,l.pending_buf=new a.Buf8(l.pending_buf_size),l.d_buf=1*l.lit_bufsize,l.l_buf=3*l.lit_bufsize,l.level=t,l.strategy=s,l.method=i,q(e)}r=[new W(0,0,0,0,function(e,t){var i=65535;for(i>e.pending_buf_size-5&&(i=e.pending_buf_size-5);;){if(e.lookahead<=1){if(j(e),0===e.lookahead&&t===c)return T;if(0===e.lookahead)break}e.strstart+=e.lookahead,e.lookahead=0;var r=e.block_start+i;if((0===e.strstart||e.strstart>=r)&&(e.lookahead=e.strstart-r,e.strstart=r,P(e,!1),0===e.strm.avail_out))return T;if(e.strstart-e.block_start>=e.w_size-S&&(P(e,!1),0===e.strm.avail_out))return T}return e.insert=0,t===d?(P(e,!0),0===e.strm.avail_out?A:R):(e.strstart>e.block_start&&(P(e,!1),e.strm.avail_out),T)}),new W(4,4,8,4,N),new W(4,5,16,8,N),new W(4,6,32,32,N),new W(4,4,16,16,U),new W(8,16,32,32,U),new W(8,16,128,128,U),new W(8,32,128,256,U),new W(32,128,258,1024,U),new W(32,258,258,4096,U)],i.deflateInit=function(e,t){return V(e,t,f,15,8,0)},i.deflateInit2=V,i.deflateReset=q,i.deflateResetKeep=H,i.deflateSetHeader=function(e,t){return e&&e.state?2!==e.state.wrap?h:(e.state.gzhead=t,p):h},i.deflate=function(e,t){var i,a,s,l;if(!e||!e.state||5<t||t<0)return e?E(e,h):h;if(a=e.state,!e.output||!e.input&&0!==e.avail_in||666===a.status&&t!==d)return E(e,0===e.avail_out?-5:h);if(a.strm=e,i=a.last_flush,a.last_flush=t,a.status===z)if(2===a.wrap)e.adler=0,M(a,31),M(a,139),M(a,8),a.gzhead?(M(a,(a.gzhead.text?1:0)+(a.gzhead.hcrc?2:0)+(a.gzhead.extra?4:0)+(a.gzhead.name?8:0)+(a.gzhead.comment?16:0)),M(a,255&a.gzhead.time),M(a,a.gzhead.time>>8&255),M(a,a.gzhead.time>>16&255),M(a,a.gzhead.time>>24&255),M(a,9===a.level?2:2<=a.strategy||a.level<2?4:0),M(a,255&a.gzhead.os),a.gzhead.extra&&a.gzhead.extra.length&&(M(a,255&a.gzhead.extra.length),M(a,a.gzhead.extra.length>>8&255)),a.gzhead.hcrc&&(e.adler=o(e.adler,a.pending_buf,a.pending,0)),a.gzindex=0,a.status=69):(M(a,0),M(a,0),M(a,0),M(a,0),M(a,0),M(a,9===a.level?2:2<=a.strategy||a.level<2?4:0),M(a,3),a.status=I);else{var u=f+(a.w_bits-8<<4)<<8;u|=(2<=a.strategy||a.level<2?0:a.level<6?1:6===a.level?2:3)<<6,0!==a.strstart&&(u|=32),u+=31-u%31,a.status=I,O(a,u),0!==a.strstart&&(O(a,e.adler>>>16),O(a,65535&e.adler)),e.adler=1}if(69===a.status)if(a.gzhead.extra){for(s=a.pending;a.gzindex<(65535&a.gzhead.extra.length)&&(a.pending!==a.pending_buf_size||(a.gzhead.hcrc&&a.pending>s&&(e.adler=o(e.adler,a.pending_buf,a.pending-s,s)),L(e),s=a.pending,a.pending!==a.pending_buf_size));)M(a,255&a.gzhead.extra[a.gzindex]),a.gzindex++;a.gzhead.hcrc&&a.pending>s&&(e.adler=o(e.adler,a.pending_buf,a.pending-s,s)),a.gzindex===a.gzhead.extra.length&&(a.gzindex=0,a.status=73)}else a.status=73;if(73===a.status)if(a.gzhead.name){s=a.pending;do{if(a.pending===a.pending_buf_size&&(a.gzhead.hcrc&&a.pending>s&&(e.adler=o(e.adler,a.pending_buf,a.pending-s,s)),L(e),s=a.pending,a.pending===a.pending_buf_size)){l=1;break}l=a.gzindex<a.gzhead.name.length?255&a.gzhead.name.charCodeAt(a.gzindex++):0,M(a,l)}while(0!==l);a.gzhead.hcrc&&a.pending>s&&(e.adler=o(e.adler,a.pending_buf,a.pending-s,s)),0===l&&(a.gzindex=0,a.status=91)}else a.status=91;if(91===a.status)if(a.gzhead.comment){s=a.pending;do{if(a.pending===a.pending_buf_size&&(a.gzhead.hcrc&&a.pending>s&&(e.adler=o(e.adler,a.pending_buf,a.pending-s,s)),L(e),s=a.pending,a.pending===a.pending_buf_size)){l=1;break}l=a.gzindex<a.gzhead.comment.length?255&a.gzhead.comment.charCodeAt(a.gzindex++):0,M(a,l)}while(0!==l);a.gzhead.hcrc&&a.pending>s&&(e.adler=o(e.adler,a.pending_buf,a.pending-s,s)),0===l&&(a.status=103)}else a.status=103;if(103===a.status&&(a.gzhead.hcrc?(a.pending+2>a.pending_buf_size&&L(e),a.pending+2<=a.pending_buf_size&&(M(a,255&e.adler),M(a,e.adler>>8&255),e.adler=0,a.status=I)):a.status=I),0!==a.pending){if(L(e),0===e.avail_out)return a.last_flush=-1,p}else if(0===e.avail_in&&D(t)<=D(i)&&t!==d)return E(e,-5);if(666===a.status&&0!==e.avail_in)return E(e,-5);if(0!==e.avail_in||0!==a.lookahead||t!==c&&666!==a.status){var m=2===a.strategy?function(e,t){for(var i;;){if(0===e.lookahead&&(j(e),0===e.lookahead)){if(t===c)return T;break}if(e.match_length=0,i=n._tr_tally(e,0,e.window[e.strstart]),e.lookahead--,e.strstart++,i&&(P(e,!1),0===e.strm.avail_out))return T}return e.insert=0,t===d?(P(e,!0),0===e.strm.avail_out?A:R):e.last_lit&&(P(e,!1),0===e.strm.avail_out)?T:C}(a,t):3===a.strategy?function(e,t){for(var i,r,a,s,o=e.window;;){if(e.lookahead<=$){if(j(e),e.lookahead<=$&&t===c)return T;if(0===e.lookahead)break}if(e.match_length=0,e.lookahead>=k&&0<e.strstart&&(r=o[a=e.strstart-1])===o[++a]&&r===o[++a]&&r===o[++a]){s=e.strstart+$;do{}while(r===o[++a]&&r===o[++a]&&r===o[++a]&&r===o[++a]&&r===o[++a]&&r===o[++a]&&r===o[++a]&&r===o[++a]&&a<s);e.match_length=$-(s-a),e.match_length>e.lookahead&&(e.match_length=e.lookahead)}if(e.match_length>=k?(i=n._tr_tally(e,1,e.match_length-k),e.lookahead-=e.match_length,e.strstart+=e.match_length,e.match_length=0):(i=n._tr_tally(e,0,e.window[e.strstart]),e.lookahead--,e.strstart++),i&&(P(e,!1),0===e.strm.avail_out))return T}return e.insert=0,t===d?(P(e,!0),0===e.strm.avail_out?A:R):e.last_lit&&(P(e,!1),0===e.strm.avail_out)?T:C}(a,t):r[a.level].func(a,t);if(m!==A&&m!==R||(a.status=666),m===T||m===A)return 0===e.avail_out&&(a.last_flush=-1),p;if(m===C&&(1===t?n._tr_align(a):5!==t&&(n._tr_stored_block(a,0,0,!1),3===t&&(F(a.head),0===a.lookahead&&(a.strstart=0,a.block_start=0,a.insert=0))),L(e),0===e.avail_out))return a.last_flush=-1,p}return t!==d?p:a.wrap<=0?1:(2===a.wrap?(M(a,255&e.adler),M(a,e.adler>>8&255),M(a,e.adler>>16&255),M(a,e.adler>>24&255),M(a,255&e.total_in),M(a,e.total_in>>8&255),M(a,e.total_in>>16&255),M(a,e.total_in>>24&255)):(O(a,e.adler>>>16),O(a,65535&e.adler)),L(e),0<a.wrap&&(a.wrap=-a.wrap),0!==a.pending?p:1)},i.deflateEnd=function(e){var t;return e&&e.state?(t=e.state.status)!==z&&69!==t&&73!==t&&91!==t&&103!==t&&t!==I&&666!==t?E(e,h):(e.state=null,t===I?E(e,-3):p):h},i.deflateSetDictionary=function(e,t){var i,r,n,o,l,c,d,u,m=t.length;if(!e||!e.state)return h;if(2===(o=(i=e.state).wrap)||1===o&&i.status!==z||i.lookahead)return h;for(1===o&&(e.adler=s(e.adler,t,m,0)),i.wrap=0,m>=i.w_size&&(0===o&&(F(i.head),i.strstart=0,i.block_start=0,i.insert=0),u=new a.Buf8(i.w_size),a.arraySet(u,t,m-i.w_size,i.w_size,0),t=u,m=i.w_size),l=e.avail_in,c=e.next_in,d=e.input,e.avail_in=m,e.next_in=0,e.input=t,j(i);i.lookahead>=k;){for(r=i.strstart,n=i.lookahead-(k-1);i.ins_h=(i.ins_h<<i.hash_shift^i.window[r+k-1])&i.hash_mask,i.prev[r&i.w_mask]=i.head[i.ins_h],i.head[i.ins_h]=r,r++,--n;);i.strstart=r,i.lookahead=k-1,j(i)}return i.strstart+=i.lookahead,i.block_start=i.strstart,i.insert=i.lookahead,i.lookahead=0,i.match_length=i.prev_length=k-1,i.match_available=0,e.next_in=c,e.input=d,e.avail_in=l,i.wrap=o,p},i.deflateInfo="pako deflate (from Nodeca project)"},{"../utils/common":41,"./adler32":43,"./crc32":45,"./messages":51,"./trees":52}],47:[function(e,t,i){t.exports=function(){this.text=0,this.time=0,this.xflags=0,this.os=0,this.extra=null,this.extra_len=0,this.name="",this.comment="",this.hcrc=0,this.done=!1}},{}],48:[function(e,t,i){t.exports=function(e,t){var i,r,a,n,s,o,l,c,d,p,h,u,m,g,f,b,v,_,x,y,w,k,$,S,z;i=e.state,r=e.next_in,S=e.input,a=r+(e.avail_in-5),n=e.next_out,z=e.output,s=n-(t-e.avail_out),o=n+(e.avail_out-257),l=i.dmax,c=i.wsize,d=i.whave,p=i.wnext,h=i.window,u=i.hold,m=i.bits,g=i.lencode,f=i.distcode,b=(1<<i.lenbits)-1,v=(1<<i.distbits)-1;e:do{m<15&&(u+=S[r++]<<m,m+=8,u+=S[r++]<<m,m+=8),_=g[u&b];t:for(;;){if(u>>>=x=_>>>24,m-=x,0==(x=_>>>16&255))z[n++]=65535&_;else{if(!(16&x)){if(!(64&x)){_=g[(65535&_)+(u&(1<<x)-1)];continue t}if(32&x){i.mode=12;break e}e.msg="invalid literal/length code",i.mode=30;break e}y=65535&_,(x&=15)&&(m<x&&(u+=S[r++]<<m,m+=8),y+=u&(1<<x)-1,u>>>=x,m-=x),m<15&&(u+=S[r++]<<m,m+=8,u+=S[r++]<<m,m+=8),_=f[u&v];i:for(;;){if(u>>>=x=_>>>24,m-=x,!(16&(x=_>>>16&255))){if(!(64&x)){_=f[(65535&_)+(u&(1<<x)-1)];continue i}e.msg="invalid distance code",i.mode=30;break e}if(w=65535&_,m<(x&=15)&&(u+=S[r++]<<m,(m+=8)<x&&(u+=S[r++]<<m,m+=8)),l<(w+=u&(1<<x)-1)){e.msg="invalid distance too far back",i.mode=30;break e}if(u>>>=x,m-=x,(x=n-s)<w){if(d<(x=w-x)&&i.sane){e.msg="invalid distance too far back",i.mode=30;break e}if($=h,(k=0)===p){if(k+=c-x,x<y){for(y-=x;z[n++]=h[k++],--x;);k=n-w,$=z}}else if(p<x){if(k+=c+p-x,(x-=p)<y){for(y-=x;z[n++]=h[k++],--x;);if(k=0,p<y){for(y-=x=p;z[n++]=h[k++],--x;);k=n-w,$=z}}}else if(k+=p-x,x<y){for(y-=x;z[n++]=h[k++],--x;);k=n-w,$=z}for(;2<y;)z[n++]=$[k++],z[n++]=$[k++],z[n++]=$[k++],y-=3;y&&(z[n++]=$[k++],1<y&&(z[n++]=$[k++]))}else{for(k=n-w;z[n++]=z[k++],z[n++]=z[k++],z[n++]=z[k++],2<(y-=3););y&&(z[n++]=z[k++],1<y&&(z[n++]=z[k++]))}break}}break}}while(r<a&&n<o);r-=y=m>>3,u&=(1<<(m-=y<<3))-1,e.next_in=r,e.next_out=n,e.avail_in=r<a?a-r+5:5-(r-a),e.avail_out=n<o?o-n+257:257-(n-o),i.hold=u,i.bits=m}},{}],49:[function(e,t,i){var r=e("../utils/common"),a=e("./adler32"),n=e("./crc32"),s=e("./inffast"),o=e("./inftrees"),l=1,c=2,d=0,p=-2,h=1,u=852,m=592;function g(e){return(e>>>24&255)+(e>>>8&65280)+((65280&e)<<8)+((255&e)<<24)}function f(){this.mode=0,this.last=!1,this.wrap=0,this.havedict=!1,this.flags=0,this.dmax=0,this.check=0,this.total=0,this.head=null,this.wbits=0,this.wsize=0,this.whave=0,this.wnext=0,this.window=null,this.hold=0,this.bits=0,this.length=0,this.offset=0,this.extra=0,this.lencode=null,this.distcode=null,this.lenbits=0,this.distbits=0,this.ncode=0,this.nlen=0,this.ndist=0,this.have=0,this.next=null,this.lens=new r.Buf16(320),this.work=new r.Buf16(288),this.lendyn=null,this.distdyn=null,this.sane=0,this.back=0,this.was=0}function b(e){var t;return e&&e.state?(t=e.state,e.total_in=e.total_out=t.total=0,e.msg="",t.wrap&&(e.adler=1&t.wrap),t.mode=h,t.last=0,t.havedict=0,t.dmax=32768,t.head=null,t.hold=0,t.bits=0,t.lencode=t.lendyn=new r.Buf32(u),t.distcode=t.distdyn=new r.Buf32(m),t.sane=1,t.back=-1,d):p}function v(e){var t;return e&&e.state?((t=e.state).wsize=0,t.whave=0,t.wnext=0,b(e)):p}function _(e,t){var i,r;return e&&e.state?(r=e.state,t<0?(i=0,t=-t):(i=1+(t>>4),t<48&&(t&=15)),t&&(t<8||15<t)?p:(null!==r.window&&r.wbits!==t&&(r.window=null),r.wrap=i,r.wbits=t,v(e))):p}function x(e,t){var i,r;return e?(r=new f,(e.state=r).window=null,(i=_(e,t))!==d&&(e.state=null),i):p}var y,w,k=!0;function $(e){if(k){var t;for(y=new r.Buf32(512),w=new r.Buf32(32),t=0;t<144;)e.lens[t++]=8;for(;t<256;)e.lens[t++]=9;for(;t<280;)e.lens[t++]=7;for(;t<288;)e.lens[t++]=8;for(o(l,e.lens,0,288,y,0,e.work,{bits:9}),t=0;t<32;)e.lens[t++]=5;o(c,e.lens,0,32,w,0,e.work,{bits:5}),k=!1}e.lencode=y,e.lenbits=9,e.distcode=w,e.distbits=5}function S(e,t,i,a){var n,s=e.state;return null===s.window&&(s.wsize=1<<s.wbits,s.wnext=0,s.whave=0,s.window=new r.Buf8(s.wsize)),a>=s.wsize?(r.arraySet(s.window,t,i-s.wsize,s.wsize,0),s.wnext=0,s.whave=s.wsize):(a<(n=s.wsize-s.wnext)&&(n=a),r.arraySet(s.window,t,i-a,n,s.wnext),(a-=n)?(r.arraySet(s.window,t,i-a,a,0),s.wnext=a,s.whave=s.wsize):(s.wnext+=n,s.wnext===s.wsize&&(s.wnext=0),s.whave<s.wsize&&(s.whave+=n))),0}i.inflateReset=v,i.inflateReset2=_,i.inflateResetKeep=b,i.inflateInit=function(e){return x(e,15)},i.inflateInit2=x,i.inflate=function(e,t){var i,u,m,f,b,v,_,x,y,w,k,z,I,T,C,A,R,E,D,F,L,P,M,O,B=0,j=new r.Buf8(4),N=[16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15];if(!e||!e.state||!e.output||!e.input&&0!==e.avail_in)return p;12===(i=e.state).mode&&(i.mode=13),b=e.next_out,m=e.output,_=e.avail_out,f=e.next_in,u=e.input,v=e.avail_in,x=i.hold,y=i.bits,w=v,k=_,P=d;e:for(;;)switch(i.mode){case h:if(0===i.wrap){i.mode=13;break}for(;y<16;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}if(2&i.wrap&&35615===x){j[i.check=0]=255&x,j[1]=x>>>8&255,i.check=n(i.check,j,2,0),y=x=0,i.mode=2;break}if(i.flags=0,i.head&&(i.head.done=!1),!(1&i.wrap)||(((255&x)<<8)+(x>>8))%31){e.msg="incorrect header check",i.mode=30;break}if(8!=(15&x)){e.msg="unknown compression method",i.mode=30;break}if(y-=4,L=8+(15&(x>>>=4)),0===i.wbits)i.wbits=L;else if(L>i.wbits){e.msg="invalid window size",i.mode=30;break}i.dmax=1<<L,e.adler=i.check=1,i.mode=512&x?10:12,y=x=0;break;case 2:for(;y<16;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}if(i.flags=x,8!=(255&i.flags)){e.msg="unknown compression method",i.mode=30;break}if(57344&i.flags){e.msg="unknown header flags set",i.mode=30;break}i.head&&(i.head.text=x>>8&1),512&i.flags&&(j[0]=255&x,j[1]=x>>>8&255,i.check=n(i.check,j,2,0)),y=x=0,i.mode=3;case 3:for(;y<32;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}i.head&&(i.head.time=x),512&i.flags&&(j[0]=255&x,j[1]=x>>>8&255,j[2]=x>>>16&255,j[3]=x>>>24&255,i.check=n(i.check,j,4,0)),y=x=0,i.mode=4;case 4:for(;y<16;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}i.head&&(i.head.xflags=255&x,i.head.os=x>>8),512&i.flags&&(j[0]=255&x,j[1]=x>>>8&255,i.check=n(i.check,j,2,0)),y=x=0,i.mode=5;case 5:if(1024&i.flags){for(;y<16;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}i.length=x,i.head&&(i.head.extra_len=x),512&i.flags&&(j[0]=255&x,j[1]=x>>>8&255,i.check=n(i.check,j,2,0)),y=x=0}else i.head&&(i.head.extra=null);i.mode=6;case 6:if(1024&i.flags&&(v<(z=i.length)&&(z=v),z&&(i.head&&(L=i.head.extra_len-i.length,i.head.extra||(i.head.extra=new Array(i.head.extra_len)),r.arraySet(i.head.extra,u,f,z,L)),512&i.flags&&(i.check=n(i.check,u,z,f)),v-=z,f+=z,i.length-=z),i.length))break e;i.length=0,i.mode=7;case 7:if(2048&i.flags){if(0===v)break e;for(z=0;L=u[f+z++],i.head&&L&&i.length<65536&&(i.head.name+=String.fromCharCode(L)),L&&z<v;);if(512&i.flags&&(i.check=n(i.check,u,z,f)),v-=z,f+=z,L)break e}else i.head&&(i.head.name=null);i.length=0,i.mode=8;case 8:if(4096&i.flags){if(0===v)break e;for(z=0;L=u[f+z++],i.head&&L&&i.length<65536&&(i.head.comment+=String.fromCharCode(L)),L&&z<v;);if(512&i.flags&&(i.check=n(i.check,u,z,f)),v-=z,f+=z,L)break e}else i.head&&(i.head.comment=null);i.mode=9;case 9:if(512&i.flags){for(;y<16;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}if(x!==(65535&i.check)){e.msg="header crc mismatch",i.mode=30;break}y=x=0}i.head&&(i.head.hcrc=i.flags>>9&1,i.head.done=!0),e.adler=i.check=0,i.mode=12;break;case 10:for(;y<32;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}e.adler=i.check=g(x),y=x=0,i.mode=11;case 11:if(0===i.havedict)return e.next_out=b,e.avail_out=_,e.next_in=f,e.avail_in=v,i.hold=x,i.bits=y,2;e.adler=i.check=1,i.mode=12;case 12:if(5===t||6===t)break e;case 13:if(i.last){x>>>=7&y,y-=7&y,i.mode=27;break}for(;y<3;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}switch(i.last=1&x,y-=1,3&(x>>>=1)){case 0:i.mode=14;break;case 1:if($(i),i.mode=20,6!==t)break;x>>>=2,y-=2;break e;case 2:i.mode=17;break;case 3:e.msg="invalid block type",i.mode=30}x>>>=2,y-=2;break;case 14:for(x>>>=7&y,y-=7&y;y<32;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}if((65535&x)!=(x>>>16^65535)){e.msg="invalid stored block lengths",i.mode=30;break}if(i.length=65535&x,y=x=0,i.mode=15,6===t)break e;case 15:i.mode=16;case 16:if(z=i.length){if(v<z&&(z=v),_<z&&(z=_),0===z)break e;r.arraySet(m,u,f,z,b),v-=z,f+=z,_-=z,b+=z,i.length-=z;break}i.mode=12;break;case 17:for(;y<14;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}if(i.nlen=257+(31&x),x>>>=5,y-=5,i.ndist=1+(31&x),x>>>=5,y-=5,i.ncode=4+(15&x),x>>>=4,y-=4,286<i.nlen||30<i.ndist){e.msg="too many length or distance symbols",i.mode=30;break}i.have=0,i.mode=18;case 18:for(;i.have<i.ncode;){for(;y<3;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}i.lens[N[i.have++]]=7&x,x>>>=3,y-=3}for(;i.have<19;)i.lens[N[i.have++]]=0;if(i.lencode=i.lendyn,i.lenbits=7,M={bits:i.lenbits},P=o(0,i.lens,0,19,i.lencode,0,i.work,M),i.lenbits=M.bits,P){e.msg="invalid code lengths set",i.mode=30;break}i.have=0,i.mode=19;case 19:for(;i.have<i.nlen+i.ndist;){for(;A=(B=i.lencode[x&(1<<i.lenbits)-1])>>>16&255,R=65535&B,!((C=B>>>24)<=y);){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}if(R<16)x>>>=C,y-=C,i.lens[i.have++]=R;else{if(16===R){for(O=C+2;y<O;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}if(x>>>=C,y-=C,0===i.have){e.msg="invalid bit length repeat",i.mode=30;break}L=i.lens[i.have-1],z=3+(3&x),x>>>=2,y-=2}else if(17===R){for(O=C+3;y<O;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}y-=C,L=0,z=3+(7&(x>>>=C)),x>>>=3,y-=3}else{for(O=C+7;y<O;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}y-=C,L=0,z=11+(127&(x>>>=C)),x>>>=7,y-=7}if(i.have+z>i.nlen+i.ndist){e.msg="invalid bit length repeat",i.mode=30;break}for(;z--;)i.lens[i.have++]=L}}if(30===i.mode)break;if(0===i.lens[256]){e.msg="invalid code -- missing end-of-block",i.mode=30;break}if(i.lenbits=9,M={bits:i.lenbits},P=o(l,i.lens,0,i.nlen,i.lencode,0,i.work,M),i.lenbits=M.bits,P){e.msg="invalid literal/lengths set",i.mode=30;break}if(i.distbits=6,i.distcode=i.distdyn,M={bits:i.distbits},P=o(c,i.lens,i.nlen,i.ndist,i.distcode,0,i.work,M),i.distbits=M.bits,P){e.msg="invalid distances set",i.mode=30;break}if(i.mode=20,6===t)break e;case 20:i.mode=21;case 21:if(6<=v&&258<=_){e.next_out=b,e.avail_out=_,e.next_in=f,e.avail_in=v,i.hold=x,i.bits=y,s(e,k),b=e.next_out,m=e.output,_=e.avail_out,f=e.next_in,u=e.input,v=e.avail_in,x=i.hold,y=i.bits,12===i.mode&&(i.back=-1);break}for(i.back=0;A=(B=i.lencode[x&(1<<i.lenbits)-1])>>>16&255,R=65535&B,!((C=B>>>24)<=y);){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}if(A&&!(240&A)){for(E=C,D=A,F=R;A=(B=i.lencode[F+((x&(1<<E+D)-1)>>E)])>>>16&255,R=65535&B,!(E+(C=B>>>24)<=y);){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}x>>>=E,y-=E,i.back+=E}if(x>>>=C,y-=C,i.back+=C,i.length=R,0===A){i.mode=26;break}if(32&A){i.back=-1,i.mode=12;break}if(64&A){e.msg="invalid literal/length code",i.mode=30;break}i.extra=15&A,i.mode=22;case 22:if(i.extra){for(O=i.extra;y<O;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}i.length+=x&(1<<i.extra)-1,x>>>=i.extra,y-=i.extra,i.back+=i.extra}i.was=i.length,i.mode=23;case 23:for(;A=(B=i.distcode[x&(1<<i.distbits)-1])>>>16&255,R=65535&B,!((C=B>>>24)<=y);){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}if(!(240&A)){for(E=C,D=A,F=R;A=(B=i.distcode[F+((x&(1<<E+D)-1)>>E)])>>>16&255,R=65535&B,!(E+(C=B>>>24)<=y);){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}x>>>=E,y-=E,i.back+=E}if(x>>>=C,y-=C,i.back+=C,64&A){e.msg="invalid distance code",i.mode=30;break}i.offset=R,i.extra=15&A,i.mode=24;case 24:if(i.extra){for(O=i.extra;y<O;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}i.offset+=x&(1<<i.extra)-1,x>>>=i.extra,y-=i.extra,i.back+=i.extra}if(i.offset>i.dmax){e.msg="invalid distance too far back",i.mode=30;break}i.mode=25;case 25:if(0===_)break e;if(z=k-_,i.offset>z){if((z=i.offset-z)>i.whave&&i.sane){e.msg="invalid distance too far back",i.mode=30;break}I=z>i.wnext?(z-=i.wnext,i.wsize-z):i.wnext-z,z>i.length&&(z=i.length),T=i.window}else T=m,I=b-i.offset,z=i.length;for(_<z&&(z=_),_-=z,i.length-=z;m[b++]=T[I++],--z;);0===i.length&&(i.mode=21);break;case 26:if(0===_)break e;m[b++]=i.length,_--,i.mode=21;break;case 27:if(i.wrap){for(;y<32;){if(0===v)break e;v--,x|=u[f++]<<y,y+=8}if(k-=_,e.total_out+=k,i.total+=k,k&&(e.adler=i.check=i.flags?n(i.check,m,k,b-k):a(i.check,m,k,b-k)),k=_,(i.flags?x:g(x))!==i.check){e.msg="incorrect data check",i.mode=30;break}y=x=0}i.mode=28;case 28:if(i.wrap&&i.flags){for(;y<32;){if(0===v)break e;v--,x+=u[f++]<<y,y+=8}if(x!==(4294967295&i.total)){e.msg="incorrect length check",i.mode=30;break}y=x=0}i.mode=29;case 29:P=1;break e;case 30:P=-3;break e;case 31:return-4;default:return p}return e.next_out=b,e.avail_out=_,e.next_in=f,e.avail_in=v,i.hold=x,i.bits=y,(i.wsize||k!==e.avail_out&&i.mode<30&&(i.mode<27||4!==t))&&S(e,e.output,e.next_out,k-e.avail_out)?(i.mode=31,-4):(w-=e.avail_in,k-=e.avail_out,e.total_in+=w,e.total_out+=k,i.total+=k,i.wrap&&k&&(e.adler=i.check=i.flags?n(i.check,m,k,e.next_out-k):a(i.check,m,k,e.next_out-k)),e.data_type=i.bits+(i.last?64:0)+(12===i.mode?128:0)+(20===i.mode||15===i.mode?256:0),(0==w&&0===k||4===t)&&P===d&&(P=-5),P)},i.inflateEnd=function(e){if(!e||!e.state)return p;var t=e.state;return t.window&&(t.window=null),e.state=null,d},i.inflateGetHeader=function(e,t){var i;return e&&e.state&&2&(i=e.state).wrap?((i.head=t).done=!1,d):p},i.inflateSetDictionary=function(e,t){var i,r=t.length;return e&&e.state?0!==(i=e.state).wrap&&11!==i.mode?p:11===i.mode&&a(1,t,r,0)!==i.check?-3:S(e,t,r,r)?(i.mode=31,-4):(i.havedict=1,d):p},i.inflateInfo="pako inflate (from Nodeca project)"},{"../utils/common":41,"./adler32":43,"./crc32":45,"./inffast":48,"./inftrees":50}],50:[function(e,t,i){var r=e("../utils/common"),a=[3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258,0,0],n=[16,16,16,16,16,16,16,16,17,17,17,17,18,18,18,18,19,19,19,19,20,20,20,20,21,21,21,21,16,72,78],s=[1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577,0,0],o=[16,16,16,16,17,17,18,18,19,19,20,20,21,21,22,22,23,23,24,24,25,25,26,26,27,27,28,28,29,29,64,64];t.exports=function(e,t,i,l,c,d,p,h){var u,m,g,f,b,v,_,x,y,w=h.bits,k=0,$=0,S=0,z=0,I=0,T=0,C=0,A=0,R=0,E=0,D=null,F=0,L=new r.Buf16(16),P=new r.Buf16(16),M=null,O=0;for(k=0;k<=15;k++)L[k]=0;for($=0;$<l;$++)L[t[i+$]]++;for(I=w,z=15;1<=z&&0===L[z];z--);if(z<I&&(I=z),0===z)return c[d++]=20971520,c[d++]=20971520,h.bits=1,0;for(S=1;S<z&&0===L[S];S++);for(I<S&&(I=S),k=A=1;k<=15;k++)if(A<<=1,(A-=L[k])<0)return-1;if(0<A&&(0===e||1!==z))return-1;for(P[1]=0,k=1;k<15;k++)P[k+1]=P[k]+L[k];for($=0;$<l;$++)0!==t[i+$]&&(p[P[t[i+$]]++]=$);if(v=0===e?(D=M=p,19):1===e?(D=a,F-=257,M=n,O-=257,256):(D=s,M=o,-1),k=S,b=d,C=$=E=0,g=-1,f=(R=1<<(T=I))-1,1===e&&852<R||2===e&&592<R)return 1;for(;;){for(_=k-C,y=p[$]<v?(x=0,p[$]):p[$]>v?(x=M[O+p[$]],D[F+p[$]]):(x=96,0),u=1<<k-C,S=m=1<<T;c[b+(E>>C)+(m-=u)]=_<<24|x<<16|y,0!==m;);for(u=1<<k-1;E&u;)u>>=1;if(0!==u?(E&=u-1,E+=u):E=0,$++,0==--L[k]){if(k===z)break;k=t[i+p[$]]}if(I<k&&(E&f)!==g){for(0===C&&(C=I),b+=S,A=1<<(T=k-C);T+C<z&&!((A-=L[T+C])<=0);)T++,A<<=1;if(R+=1<<T,1===e&&852<R||2===e&&592<R)return 1;c[g=E&f]=I<<24|T<<16|b-d}}return 0!==E&&(c[b+E]=k-C<<24|64<<16),h.bits=I,0}},{"../utils/common":41}],51:[function(e,t,i){t.exports={2:"need dictionary",1:"stream end",0:"","-1":"file error","-2":"stream error","-3":"data error","-4":"insufficient memory","-5":"buffer error","-6":"incompatible version"}},{}],52:[function(e,t,i){var r=e("../utils/common"),a=0,n=1;function s(e){for(var t=e.length;0<=--t;)e[t]=0}var o=0,l=29,c=256,d=c+1+l,p=30,h=19,u=2*d+1,m=15,g=16,f=7,b=256,v=16,_=17,x=18,y=[0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0],w=[0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13],k=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,3,7],$=[16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15],S=new Array(2*(d+2));s(S);var z=new Array(2*p);s(z);var I=new Array(512);s(I);var T=new Array(256);s(T);var C=new Array(l);s(C);var A,R,E,D=new Array(p);function F(e,t,i,r,a){this.static_tree=e,this.extra_bits=t,this.extra_base=i,this.elems=r,this.max_length=a,this.has_stree=e&&e.length}function L(e,t){this.dyn_tree=e,this.max_code=0,this.stat_desc=t}function P(e){return e<256?I[e]:I[256+(e>>>7)]}function M(e,t){e.pending_buf[e.pending++]=255&t,e.pending_buf[e.pending++]=t>>>8&255}function O(e,t,i){e.bi_valid>g-i?(e.bi_buf|=t<<e.bi_valid&65535,M(e,e.bi_buf),e.bi_buf=t>>g-e.bi_valid,e.bi_valid+=i-g):(e.bi_buf|=t<<e.bi_valid&65535,e.bi_valid+=i)}function B(e,t,i){O(e,i[2*t],i[2*t+1])}function j(e,t){for(var i=0;i|=1&e,e>>>=1,i<<=1,0<--t;);return i>>>1}function N(e,t,i){var r,a,n=new Array(m+1),s=0;for(r=1;r<=m;r++)n[r]=s=s+i[r-1]<<1;for(a=0;a<=t;a++){var o=e[2*a+1];0!==o&&(e[2*a]=j(n[o]++,o))}}function U(e){var t;for(t=0;t<d;t++)e.dyn_ltree[2*t]=0;for(t=0;t<p;t++)e.dyn_dtree[2*t]=0;for(t=0;t<h;t++)e.bl_tree[2*t]=0;e.dyn_ltree[2*b]=1,e.opt_len=e.static_len=0,e.last_lit=e.matches=0}function W(e){8<e.bi_valid?M(e,e.bi_buf):0<e.bi_valid&&(e.pending_buf[e.pending++]=e.bi_buf),e.bi_buf=0,e.bi_valid=0}function Z(e,t,i,r){var a=2*t,n=2*i;return e[a]<e[n]||e[a]===e[n]&&r[t]<=r[i]}function H(e,t,i){for(var r=e.heap[i],a=i<<1;a<=e.heap_len&&(a<e.heap_len&&Z(t,e.heap[a+1],e.heap[a],e.depth)&&a++,!Z(t,r,e.heap[a],e.depth));)e.heap[i]=e.heap[a],i=a,a<<=1;e.heap[i]=r}function q(e,t,i){var r,a,n,s,o=0;if(0!==e.last_lit)for(;r=e.pending_buf[e.d_buf+2*o]<<8|e.pending_buf[e.d_buf+2*o+1],a=e.pending_buf[e.l_buf+o],o++,0===r?B(e,a,t):(B(e,(n=T[a])+c+1,t),0!==(s=y[n])&&O(e,a-=C[n],s),B(e,n=P(--r),i),0!==(s=w[n])&&O(e,r-=D[n],s)),o<e.last_lit;);B(e,b,t)}function V(e,t){var i,r,a,n=t.dyn_tree,s=t.stat_desc.static_tree,o=t.stat_desc.has_stree,l=t.stat_desc.elems,c=-1;for(e.heap_len=0,e.heap_max=u,i=0;i<l;i++)0!==n[2*i]?(e.heap[++e.heap_len]=c=i,e.depth[i]=0):n[2*i+1]=0;for(;e.heap_len<2;)n[2*(a=e.heap[++e.heap_len]=c<2?++c:0)]=1,e.depth[a]=0,e.opt_len--,o&&(e.static_len-=s[2*a+1]);for(t.max_code=c,i=e.heap_len>>1;1<=i;i--)H(e,n,i);for(a=l;i=e.heap[1],e.heap[1]=e.heap[e.heap_len--],H(e,n,1),r=e.heap[1],e.heap[--e.heap_max]=i,e.heap[--e.heap_max]=r,n[2*a]=n[2*i]+n[2*r],e.depth[a]=(e.depth[i]>=e.depth[r]?e.depth[i]:e.depth[r])+1,n[2*i+1]=n[2*r+1]=a,e.heap[1]=a++,H(e,n,1),2<=e.heap_len;);e.heap[--e.heap_max]=e.heap[1],function(e,t){var i,r,a,n,s,o,l=t.dyn_tree,c=t.max_code,d=t.stat_desc.static_tree,p=t.stat_desc.has_stree,h=t.stat_desc.extra_bits,g=t.stat_desc.extra_base,f=t.stat_desc.max_length,b=0;for(n=0;n<=m;n++)e.bl_count[n]=0;for(l[2*e.heap[e.heap_max]+1]=0,i=e.heap_max+1;i<u;i++)f<(n=l[2*l[2*(r=e.heap[i])+1]+1]+1)&&(n=f,b++),l[2*r+1]=n,c<r||(e.bl_count[n]++,s=0,g<=r&&(s=h[r-g]),o=l[2*r],e.opt_len+=o*(n+s),p&&(e.static_len+=o*(d[2*r+1]+s)));if(0!==b){do{for(n=f-1;0===e.bl_count[n];)n--;e.bl_count[n]--,e.bl_count[n+1]+=2,e.bl_count[f]--,b-=2}while(0<b);for(n=f;0!==n;n--)for(r=e.bl_count[n];0!==r;)c<(a=e.heap[--i])||(l[2*a+1]!==n&&(e.opt_len+=(n-l[2*a+1])*l[2*a],l[2*a+1]=n),r--)}}(e,t),N(n,c,e.bl_count)}function G(e,t,i){var r,a,n=-1,s=t[1],o=0,l=7,c=4;for(0===s&&(l=138,c=3),t[2*(i+1)+1]=65535,r=0;r<=i;r++)a=s,s=t[2*(r+1)+1],++o<l&&a===s||(o<c?e.bl_tree[2*a]+=o:0!==a?(a!==n&&e.bl_tree[2*a]++,e.bl_tree[2*v]++):o<=10?e.bl_tree[2*_]++:e.bl_tree[2*x]++,n=a,c=(o=0)===s?(l=138,3):a===s?(l=6,3):(l=7,4))}function Q(e,t,i){var r,a,n=-1,s=t[1],o=0,l=7,c=4;for(0===s&&(l=138,c=3),r=0;r<=i;r++)if(a=s,s=t[2*(r+1)+1],!(++o<l&&a===s)){if(o<c)for(;B(e,a,e.bl_tree),0!=--o;);else 0!==a?(a!==n&&(B(e,a,e.bl_tree),o--),B(e,v,e.bl_tree),O(e,o-3,2)):o<=10?(B(e,_,e.bl_tree),O(e,o-3,3)):(B(e,x,e.bl_tree),O(e,o-11,7));n=a,c=(o=0)===s?(l=138,3):a===s?(l=6,3):(l=7,4)}}s(D);var K=!1;function X(e,t,i,a){O(e,(o<<1)+(a?1:0),3),function(e,t,i){W(e),M(e,i),M(e,~i),r.arraySet(e.pending_buf,e.window,t,i,e.pending),e.pending+=i}(e,t,i)}i._tr_init=function(e){K||(function(){var e,t,i,r,a,n=new Array(m+1);for(r=i=0;r<l-1;r++)for(C[r]=i,e=0;e<1<<y[r];e++)T[i++]=r;for(T[i-1]=r,r=a=0;r<16;r++)for(D[r]=a,e=0;e<1<<w[r];e++)I[a++]=r;for(a>>=7;r<p;r++)for(D[r]=a<<7,e=0;e<1<<w[r]-7;e++)I[256+a++]=r;for(t=0;t<=m;t++)n[t]=0;for(e=0;e<=143;)S[2*e+1]=8,e++,n[8]++;for(;e<=255;)S[2*e+1]=9,e++,n[9]++;for(;e<=279;)S[2*e+1]=7,e++,n[7]++;for(;e<=287;)S[2*e+1]=8,e++,n[8]++;for(N(S,d+1,n),e=0;e<p;e++)z[2*e+1]=5,z[2*e]=j(e,5);A=new F(S,y,c+1,d,m),R=new F(z,w,0,p,m),E=new F(new Array(0),k,0,h,f)}(),K=!0),e.l_desc=new L(e.dyn_ltree,A),e.d_desc=new L(e.dyn_dtree,R),e.bl_desc=new L(e.bl_tree,E),e.bi_buf=0,e.bi_valid=0,U(e)},i._tr_stored_block=X,i._tr_flush_block=function(e,t,i,r){var s,o,l=0;0<e.level?(2===e.strm.data_type&&(e.strm.data_type=function(e){var t,i=4093624447;for(t=0;t<=31;t++,i>>>=1)if(1&i&&0!==e.dyn_ltree[2*t])return a;if(0!==e.dyn_ltree[18]||0!==e.dyn_ltree[20]||0!==e.dyn_ltree[26])return n;for(t=32;t<c;t++)if(0!==e.dyn_ltree[2*t])return n;return a}(e)),V(e,e.l_desc),V(e,e.d_desc),l=function(e){var t;for(G(e,e.dyn_ltree,e.l_desc.max_code),G(e,e.dyn_dtree,e.d_desc.max_code),V(e,e.bl_desc),t=h-1;3<=t&&0===e.bl_tree[2*$[t]+1];t--);return e.opt_len+=3*(t+1)+5+5+4,t}(e),s=e.opt_len+3+7>>>3,(o=e.static_len+3+7>>>3)<=s&&(s=o)):s=o=i+5,i+4<=s&&-1!==t?X(e,t,i,r):4===e.strategy||o===s?(O(e,2+(r?1:0),3),q(e,S,z)):(O(e,4+(r?1:0),3),function(e,t,i,r){var a;for(O(e,t-257,5),O(e,i-1,5),O(e,r-4,4),a=0;a<r;a++)O(e,e.bl_tree[2*$[a]+1],3);Q(e,e.dyn_ltree,t-1),Q(e,e.dyn_dtree,i-1)}(e,e.l_desc.max_code+1,e.d_desc.max_code+1,l+1),q(e,e.dyn_ltree,e.dyn_dtree)),U(e),r&&W(e)},i._tr_tally=function(e,t,i){return e.pending_buf[e.d_buf+2*e.last_lit]=t>>>8&255,e.pending_buf[e.d_buf+2*e.last_lit+1]=255&t,e.pending_buf[e.l_buf+e.last_lit]=255&i,e.last_lit++,0===t?e.dyn_ltree[2*i]++:(e.matches++,t--,e.dyn_ltree[2*(T[i]+c+1)]++,e.dyn_dtree[2*P(t)]++),e.last_lit===e.lit_bufsize-1},i._tr_align=function(e){O(e,2,3),B(e,b,S),function(e){16===e.bi_valid?(M(e,e.bi_buf),e.bi_buf=0,e.bi_valid=0):8<=e.bi_valid&&(e.pending_buf[e.pending++]=255&e.bi_buf,e.bi_buf>>=8,e.bi_valid-=8)}(e)}},{"../utils/common":41}],53:[function(e,t,i){t.exports=function(){this.input=null,this.next_in=0,this.avail_in=0,this.total_in=0,this.output=null,this.next_out=0,this.avail_out=0,this.total_out=0,this.msg="",this.state=null,this.data_type=2,this.adler=0}},{}],54:[function(e,t,i){(function(e){!function(e,t){if(!e.setImmediate){var i,r,a,n,s=1,o={},l=!1,c=e.document,d=Object.getPrototypeOf&&Object.getPrototypeOf(e);d=d&&d.setTimeout?d:e,i="[object process]"==={}.toString.call(e.process)?function(e){process.nextTick(function(){h(e)})}:function(){if(e.postMessage&&!e.importScripts){var t=!0,i=e.onmessage;return e.onmessage=function(){t=!1},e.postMessage("","*"),e.onmessage=i,t}}()?(n="setImmediate$"+Math.random()+"$",e.addEventListener?e.addEventListener("message",u,!1):e.attachEvent("onmessage",u),function(t){e.postMessage(n+t,"*")}):e.MessageChannel?((a=new MessageChannel).port1.onmessage=function(e){h(e.data)},function(e){a.port2.postMessage(e)}):c&&"onreadystatechange"in c.createElement("script")?(r=c.documentElement,function(e){var t=c.createElement("script");t.onreadystatechange=function(){h(e),t.onreadystatechange=null,r.removeChild(t),t=null},r.appendChild(t)}):function(e){setTimeout(h,0,e)},d.setImmediate=function(e){"function"!=typeof e&&(e=new Function(""+e));for(var t=new Array(arguments.length-1),r=0;r<t.length;r++)t[r]=arguments[r+1];var a={callback:e,args:t};return o[s]=a,i(s),s++},d.clearImmediate=p}function p(e){delete o[e]}function h(e){if(l)setTimeout(h,0,e);else{var i=o[e];if(i){l=!0;try{!function(e){var i=e.callback,r=e.args;switch(r.length){case 0:i();break;case 1:i(r[0]);break;case 2:i(r[0],r[1]);break;case 3:i(r[0],r[1],r[2]);break;default:i.apply(t,r)}}(i)}finally{p(e),l=!1}}}}function u(t){t.source===e&&"string"==typeof t.data&&0===t.data.indexOf(n)&&h(+t.data.slice(n.length))}}("undefined"==typeof self?void 0===e?this:e:self)}).call(this,void 0!==Q?Q:"undefined"!=typeof self?self:"undefined"!=typeof window?window:{})},{}]},{},[10])(10);var J=K(Y.exports);class ee extends t{static properties={api:{type:Object},asPanel:{type:Boolean},inlineMode:{type:Boolean},_mode:{type:String},_url:{type:String},_scraping:{type:Boolean},_scrapeError:{type:String},_form:{type:Object},_saving:{type:Boolean},_ingredientInput:{type:String},_ratingHover:{type:Number},_importFile:{type:Object},_importing:{type:Boolean},_importResult:{type:Object},_importError:{type:String},_importDownloadImages:{type:Boolean}};constructor(){super(),this.api=null,this.asPanel=!1,this.inlineMode=!1,this._mode="url",this._url="",this._scraping=!1,this._scrapeError=null,this._saving=!1,this._ingredientInput="",this._ratingHover=0,this._form=this._emptyForm(),this._importFile=null,this._importing=!1,this._importResult=null,this._importError=null,this._importDownloadImages=!0}_emptyForm(){return{name:"",description:"",source_url:"",servings:"",prep_time:"",cook_time:"",image_url:"",tags:"",courses:"",categories:"",collections:"",rating:0,notes:"",ingredients:[],instructions:[],cal:"",fat:"",satf:"",chol:"",sod:"",carb:"",fib:"",sug:"",prot:""}}_close(){this.dispatchEvent(new CustomEvent("rm-close",{bubbles:!0,composed:!0}))}async _handleScrape(){if(this._url.trim()&&!this._scraping){this._scraping=!0,this._scrapeError=null;try{const e=await this.api.scrapeRecipe(this._url.trim());if(e?.recipe){const t=e.recipe,i=t.nutrition||{};this._form={name:t.name||"",description:t.description||"",source_url:t.source_url||this._url.trim(),servings:t.servings||"",prep_time:t.prep_time||"",cook_time:t.cook_time||"",image_url:t.image_url||"",tags:(t.tags||[]).join(", "),courses:(t.courses||[]).join(", "),categories:(t.categories||[]).join(", "),collections:(t.collections||[]).join(", "),rating:t.rating||0,notes:t.notes||"",ingredients:t.ingredients||[],instructions:t.instructions||[],cal:i.calories??"",fat:i.fat??"",satf:i.saturated_fat??"",chol:i.cholesterol??"",sod:i.sodium??"",carb:i.carbohydrates??"",fib:i.fiber??"",sug:i.sugar??"",prot:i.protein??""},this._mode="manual"}else this._scrapeError=e?.error||r("Could not extract recipe from this URL.")}catch(e){this._scrapeError=e.message||r("Scraping failed.")}finally{this._scraping=!1}}}_handleImportFileChange(e){this._importFile=e.target.files[0]||null,this._importResult=null,this._importError=null}async _handleImport(){if(this._importFile&&!this._importing){this._importing=!0,this._importResult=null,this._importError=null;try{let e;try{e=await J.loadAsync(this._importFile)}catch(e){throw new Error(r(a`Could not open ZIP file: ${e.message}`))}const t=Object.values(e.files).find(e=>!e.dir&&e.name.endsWith(".html"));if(!t)throw new Error(r("No HTML file found inside the ZIP — is this a valid Recipe Keeper export?"));const i=await t.async("text");console.log(`[Recipe Keeper Import] HTML extracted (${i.length} chars), sending to backend`);const n=await this.api.importRecipeKeeper(i);console.log(`[Recipe Keeper Import] Phase 1 done: ${n.imported} imported, ${n.failed} failed, ${n.recipe_images?.length??0} need images`);let s=0,o=0;if(this._importDownloadImages&&n.recipe_images?.length){const t=new Set([".jpg",".jpeg",".png",".webp",".gif",".bmp"]);for(const{recipe_id:i,image_filename:r}of n.recipe_images){const a=e.files[r]??Object.values(e.files).find(e=>{const i=r.split("/").pop();return!e.dir&&e.name.split("/").pop()===i&&t.has(e.name.slice(e.name.lastIndexOf(".")).toLowerCase())});if(a)try{const e=await a.async("base64");await this.api.uploadRecipeImage(i,e),s++}catch(e){console.warn(`[Recipe Keeper Import] Could not save image for recipe ${i}:`,e),o++}}console.log(`[Recipe Keeper Import] Phase 2 done: ${s} images saved, ${o} failed`)}this._importResult={...n,imagesSaved:s},n.imported>0&&this.dispatchEvent(new CustomEvent("rm-import-done",{bubbles:!0,composed:!0}))}catch(e){console.error("[Recipe Keeper Import] Failed:",e),this._importError=e.message||String(e)||r("Import failed.")}finally{this._importing=!1}}}async _handleSave(){if(this._form.name.trim()&&!this._saving){this._saving=!0;try{const e=this._form,t=e=>e?e.split(",").map(e=>e.trim()).filter(Boolean):[],i={cal:"calories",fat:"fat",satf:"saturated_fat",chol:"cholesterol",sod:"sodium",carb:"carbohydrates",fib:"fiber",sug:"sugar",prot:"protein"},r={};let a=!1;for(const[t,n]of Object.entries(i))""!==e[t]&&null!=e[t]&&(r[n]=e[t],a=!0);const n={name:e.name,description:e.description,source_url:e.source_url,image_url:e.image_url,servings:parseInt(e.servings)||null,prep_time:parseInt(e.prep_time)||null,cook_time:parseInt(e.cook_time)||null,tags:t(e.tags),courses:t(e.courses),categories:t(e.categories),collections:t(e.collections),rating:e.rating||null,notes:e.notes,ingredients:e.ingredients,instructions:e.instructions,nutrition:a?r:null};this.dispatchEvent(new CustomEvent("rm-add-recipe",{detail:{data:n},bubbles:!0,composed:!0})),this._form=this._emptyForm()}finally{this._saving=!1}}}_setField(e,t){this._form={...this._form,[e]:t}}_addIngredient(){const e=this._ingredientInput.trim();if(!e)return;let t;if(e.startsWith("#"))t={name:e,is_heading:!0};else{const i=e.split(/\s+/);let r="",a="",n="";i.length>=3&&!isNaN(parseFloat(i[0]))?(r=i[0],a=i[1],n=i.slice(2).join(" ")):2!==i.length||isNaN(parseFloat(i[0]))?n=e:(r=i[0],n=i[1]),t={amount:r,unit:a,name:n}}this._form={...this._form,ingredients:[...this._form.ingredients,t]},this._ingredientInput=""}_addIngredientsBulk(e){const t=e.split("\n").map(e=>e.trim()).filter(Boolean).map(e=>{if(e.startsWith("#"))return{name:e,is_heading:!0};const t=e.split(/\s+/);let i="",r="",a="";return t.length>=3&&!isNaN(parseFloat(t[0]))?(i=t[0],r=t[1],a=t.slice(2).join(" ")):2!==t.length||isNaN(parseFloat(t[0]))?a=e:(i=t[0],a=t[1]),{amount:i,unit:r,name:a}});t.length&&(this._form={...this._form,ingredients:[...this._form.ingredients,...t]})}_removeIngredient(e){this._form={...this._form,ingredients:this._form.ingredients.filter((t,i)=>i!==e)}}_addStep(e){e.trim()&&(this._form={...this._form,instructions:[...this._form.instructions,e.trim()]})}_removeStep(e){this._form={...this._form,instructions:this._form.instructions.filter((t,i)=>i!==e)}}_renderPanelContent(){return i`
       <div class="dialog-header">
         <div class="mode-toggle">
           <button class="mode-btn ${"url"===this._mode?"active":""}" @click=${()=>{this._mode="url"}}>
@@ -2711,9 +2711,9 @@ https://github.com/nodeca/pako/blob/main/LICENSE
           <div class="import-result ${this._importResult.failed>0?"partial":"success"}">
             <ha-icon icon="${this._importResult.failed>0?"mdi:alert-circle-outline":"mdi:check-circle-outline"}"></ha-icon>
             <div>
-              <strong>${r(n`${this._importResult.imported} recipe${1!==this._importResult.imported?"s":""} imported`)}</strong>
-              ${this._importResult.imagesSaved>0?i` ${r(n`with ${this._importResult.imagesSaved} photo${1!==this._importResult.imagesSaved?"s":""}`)}`:""}
-              ${this._importResult.failed>0?i`<br/><small>${r(n`${this._importResult.failed} failed — check HA logs for details`)}</small>`:""}
+              <strong>${r(a`${this._importResult.imported} recipe${1!==this._importResult.imported?"s":""} imported`)}</strong>
+              ${this._importResult.imagesSaved>0?i` ${r(a`with ${this._importResult.imagesSaved} photo${1!==this._importResult.imagesSaved?"s":""}`)}`:""}
+              ${this._importResult.failed>0?i`<br/><small>${r(a`${this._importResult.failed} failed — check HA logs for details`)}</small>`:""}
             </div>
           </div>
         `:this._importError?i`
@@ -2867,7 +2867,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 
         <!-- Ingredients -->
         <div class="field">
-          <label>${r(n`Ingredients (${e.ingredients.length})`)}</label>
+          <label>${r(a`Ingredients (${e.ingredients.length})`)}</label>
           ${e.ingredients.length?i`
             <ul class="ing-list">
               ${e.ingredients.map((e,t)=>i`
@@ -2902,7 +2902,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 
         <!-- Directions -->
         <div class="field">
-          <label>${r(n`Directions (${e.instructions.length} steps)`)}</label>
+          <label>${r(a`Directions (${e.instructions.length} steps)`)}</label>
           ${e.instructions.length?i`
             <ol class="steps-edit">
               ${e.instructions.map((e,t)=>i`
@@ -2988,7 +2988,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
         </div>
 
       </div>
-    `}static styles=a`
+    `}static styles=n`
     :host { display: block; height: 100%; }
 
     .inline-panel {
@@ -3059,7 +3059,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       border-radius: 6px;
       padding: 6px 12px;
       cursor: pointer;
-      font-size: 13px;
+      font-size: calc(13px * var(--rm-font-scale, 1));
       color: var(--rm-text-secondary, #8e8e93);
       display: flex;
       align-items: center;
@@ -3090,7 +3090,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 13px;
+      font-size: calc(13px * var(--rm-font-scale, 1));
       color: var(--rm-text-secondary, #8e8e93);
       background: var(--rm-surface, #2c2c2e);
       border-radius: 8px;
@@ -3105,7 +3105,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       border-radius: 8px;
       color: var(--rm-text, #e5e5ea);
       padding: 10px 12px;
-      font-size: 14px;
+      font-size: calc(14px * var(--rm-font-scale, 1));
     }
     .url-input:focus { outline: none; border-color: var(--rm-accent, #ff6b35); }
     .error-msg {
@@ -3113,7 +3113,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       align-items: center;
       gap: 6px;
       color: var(--error-color, #cf6679);
-      font-size: 13px;
+      font-size: calc(13px * var(--rm-font-scale, 1));
     }
     .error-msg ha-icon { --mdc-icon-size: 16px; }
 
@@ -3121,7 +3121,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     .manual-mode { display: flex; flex-direction: column; gap: 12px; }
     .field { display: flex; flex-direction: column; gap: 4px; }
     .field label {
-      font-size: 11px;
+      font-size: calc(11px * var(--rm-font-scale, 1));
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.06em;
@@ -3133,7 +3133,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       border-radius: 8px;
       color: var(--rm-text, #e5e5ea);
       padding: 8px 10px;
-      font-size: 14px;
+      font-size: calc(14px * var(--rm-font-scale, 1));
       font-family: inherit;
       resize: vertical;
     }
@@ -3150,7 +3150,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       padding: 4px 0;
     }
     .star {
-      font-size: 28px;
+      font-size: calc(28px * var(--rm-font-scale, 1));
       color: var(--rm-border, rgba(255,255,255,0.2));
       cursor: pointer;
       line-height: 1;
@@ -3163,7 +3163,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       background: none;
       border: none;
       cursor: pointer;
-      font-size: 11px;
+      font-size: calc(11px * var(--rm-font-scale, 1));
       color: var(--rm-text-secondary, #8e8e93);
       text-decoration: underline;
       padding: 0;
@@ -3171,7 +3171,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 
     /* Section divider */
     .section-divider {
-      font-size: 11px;
+      font-size: calc(11px * var(--rm-font-scale, 1));
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.08em;
@@ -3188,19 +3188,19 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       gap: 8px;
       padding: 5px 0;
       border-bottom: 1px solid var(--rm-border, rgba(255,255,255,0.06));
-      font-size: 13px;
+      font-size: calc(13px * var(--rm-font-scale, 1));
       color: var(--rm-text, #e5e5ea);
     }
     .ing-list li.ing-heading { font-weight: 700; color: var(--rm-accent, #9fa8da); }
     .ing-text, .step-text { flex: 1; }
     .bulk-hint {
-      font-size: 11px; color: var(--rm-text-secondary, #8e8e93);
+      font-size: calc(11px * var(--rm-font-scale, 1)); color: var(--rm-text-secondary, #8e8e93);
       margin-top: 6px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
     }
     .bulk-hint code {
-      background: rgba(255,255,255,0.08); border-radius: 4px; padding: 1px 5px; font-size: 11px;
+      background: rgba(255,255,255,0.08); border-radius: 4px; padding: 1px 5px; font-size: calc(11px * var(--rm-font-scale, 1));
     }
-    .bulk-btn { padding: 4px 8px !important; font-size: 11px !important; }
+    .bulk-btn { padding: 4px 8px !important; font-size: calc(11px * var(--rm-font-scale, 1)) !important; }
     .remove-btn {
       background: none; border: none; cursor: pointer;
       color: var(--rm-text-secondary, #8e8e93); padding: 2px; flex-shrink: 0;
@@ -3215,7 +3215,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       border-radius: 8px;
       color: var(--rm-text, #e5e5ea);
       padding: 8px 10px;
-      font-size: 13px;
+      font-size: calc(13px * var(--rm-font-scale, 1));
       font-family: inherit;
       resize: none;
     }
@@ -3229,7 +3229,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       color: var(--rm-text, #e5e5ea);
       padding: 9px 14px;
       cursor: pointer;
-      font-size: 14px;
+      font-size: calc(14px * var(--rm-font-scale, 1));
       white-space: nowrap;
       display: inline-flex;
       align-items: center;
@@ -3239,7 +3239,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     }
     .action-btn ha-icon { --mdc-icon-size: 16px; }
     .action-btn.primary { background: var(--rm-accent, #ff6b35); border-color: var(--rm-accent, #ff6b35); color: #fff; }
-    .action-btn.sm { padding: 6px 10px; font-size: 13px; }
+    .action-btn.sm { padding: 6px 10px; font-size: calc(13px * var(--rm-font-scale, 1)); }
     .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
     /* Import mode */
@@ -3250,7 +3250,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       background: var(--rm-surface, #2c2c2e);
       border-radius: 10px;
       padding: 12px 14px;
-      font-size: 13px;
+      font-size: calc(13px * var(--rm-font-scale, 1));
       color: var(--rm-text-secondary, #8e8e93);
       line-height: 1.5;
     }
@@ -3260,7 +3260,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       background: rgba(255,255,255,0.08);
       border-radius: 4px;
       padding: 1px 5px;
-      font-size: 12px;
+      font-size: calc(12px * var(--rm-font-scale, 1));
     }
 
     .file-label {
@@ -3272,7 +3272,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       border-radius: 10px;
       padding: 16px 14px;
       cursor: pointer;
-      font-size: 14px;
+      font-size: calc(14px * var(--rm-font-scale, 1));
       color: var(--rm-text, #e5e5ea);
       transition: border-color 0.15s;
     }
@@ -3284,7 +3284,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 13px;
+      font-size: calc(13px * var(--rm-font-scale, 1));
       color: var(--rm-text-secondary, #8e8e93);
       cursor: pointer;
     }
@@ -3296,7 +3296,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       gap: 10px;
       border-radius: 8px;
       padding: 12px 14px;
-      font-size: 13px;
+      font-size: calc(13px * var(--rm-font-scale, 1));
     }
     .import-result ha-icon { --mdc-icon-size: 20px; flex-shrink: 0; margin-top: 1px; }
     .import-result.success { background: rgba(76, 175, 80, 0.12); color: var(--success-color, #4caf50); }
@@ -3322,7 +3322,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
           <div class="back-to-recipe">
             <button class="back-recipe-btn" @click=${()=>this.dispatchEvent(new CustomEvent("rm-back-to-recipe",{bubbles:!0,composed:!0}))}>
               <ha-icon icon="mdi:arrow-left"></ha-icon>
-              <span>${r(n`Back to ${this.fromRecipe.name}`)}</span>
+              <span>${r(a`Back to ${this.fromRecipe.name}`)}</span>
             </button>
           </div>
         `:""}
@@ -3357,13 +3357,13 @@ https://github.com/nodeca/pako/blob/main/LICENSE
           ${this._loading?i`
             <div class="plan-loading"><ha-circular-progress active></ha-circular-progress></div>
           `:i`
-            ${te.map(n=>i`
+            ${te.map(a=>i`
               <div class="meal-row">
-                <div class="meal-label">${this._mealTypeLabel(n)}</div>
+                <div class="meal-label">${this._mealTypeLabel(a)}</div>
                 <div class="meal-cells">
-                  ${e.map(e=>{const a=this._getEntriesForSlot(e,n);return i`
+                  ${e.map(e=>{const n=this._getEntriesForSlot(e,a);return i`
                       <div class="meal-cell ${e===t?"today":""}">
-                        ${a.map(e=>{const t=this.recipes.find(t=>t.id===e.recipe_id);return i`
+                        ${n.map(e=>{const t=this.recipes.find(t=>t.id===e.recipe_id);return i`
                             <div class="meal-entry" @click=${()=>this._openRecipeDetail(e)}>
                               ${t?.image_url?i`
                                 <img src="${t.image_url}" alt="${t?.name||""}" class="entry-thumb" />
@@ -3382,7 +3382,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
                               </button>
                             </div>
                           `})}
-                        <button class="add-slot-btn" @click=${()=>this._openPicker(e,n)}>
+                        <button class="add-slot-btn" @click=${()=>this._openPicker(e,a)}>
                           <ha-icon icon="mdi:plus"></ha-icon>
                         </button>
                       </div>
@@ -3410,7 +3410,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       <div class="picker-overlay" @click=${e=>{e.target===e.currentTarget&&(this._showPicker=!1)}}>
         <div class="picker-panel">
           <div class="picker-header">
-            <span>${r(n`Add to ${this._mealTypeLabel(e.mealType)}`)}</span>
+            <span>${r(a`Add to ${this._mealTypeLabel(e.mealType)}`)}</span>
             <button class="icon-btn" @click=${()=>{this._showPicker=!1}}><ha-icon icon="mdi:close"></ha-icon></button>
           </div>
           <div class="picker-servings-row">
@@ -3455,7 +3455,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
           </div>
         </div>
       </div>
-    `}static styles=a`
+    `}static styles=n`
     :host { display: block; height: 100%; }
 
     .planner-container {
@@ -3474,7 +3474,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     .back-recipe-btn {
       display: inline-flex; align-items: center; gap: 6px;
       background: none; border: none; cursor: pointer;
-      color: var(--rm-accent, #ff6b35); font-size: 13px; font-weight: 500;
+      color: var(--rm-accent, #ff6b35); font-size: calc(13px * var(--rm-font-scale, 1)); font-weight: 500;
       padding: 4px 6px; border-radius: 8px; transition: background 0.15s;
     }
     .back-recipe-btn:hover { background: var(--rm-accent-soft, rgba(255,107,53,0.12)); }
@@ -3500,12 +3500,12 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 14px;
+      font-size: calc(14px * var(--rm-font-scale, 1));
       font-weight: 500;
       color: var(--rm-text, #e5e5ea);
     }
     .today-badge {
-      font-size: 11px;
+      font-size: calc(11px * var(--rm-font-scale, 1));
       background: var(--rm-accent-soft, rgba(255,107,53,0.15));
       color: var(--rm-accent, #ff6b35);
       border-radius: 10px;
@@ -3514,7 +3514,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     .text-link {
       background: none; border: none; cursor: pointer;
       color: var(--rm-accent, #ff6b35);
-      font-size: 12px; padding: 0;
+      font-size: calc(12px * var(--rm-font-scale, 1)); padding: 0;
     }
 
     /* Day headers */
@@ -3531,8 +3531,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       align-items: center;
       gap: 2px;
     }
-    .day-name { font-size: 10px; text-transform: uppercase; color: var(--rm-text-secondary, #8e8e93); letter-spacing: 0.05em; }
-    .day-num { font-size: 14px; font-weight: 600; color: var(--rm-text, #e5e5ea); }
+    .day-name { font-size: calc(10px * var(--rm-font-scale, 1)); text-transform: uppercase; color: var(--rm-text-secondary, #8e8e93); letter-spacing: 0.05em; }
+    .day-num { font-size: calc(14px * var(--rm-font-scale, 1)); font-weight: 600; color: var(--rm-text, #e5e5ea); }
     .day-header.today .day-num {
       background: var(--rm-accent, #ff6b35);
       color: #fff;
@@ -3542,7 +3542,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
+      font-size: calc(12px * var(--rm-font-scale, 1));
     }
 
     /* Plan scroll */
@@ -3563,7 +3563,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 
     .meal-row { margin-bottom: 8px; }
     .meal-label {
-      font-size: 10px;
+      font-size: calc(10px * var(--rm-font-scale, 1));
       text-transform: uppercase;
       letter-spacing: 0.07em;
       color: var(--rm-text-secondary, #8e8e93);
@@ -3595,7 +3595,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       border-radius: 4px;
       padding: 2px 2px 2px 4px;
       cursor: pointer;
-      font-size: 10px;
+      font-size: calc(10px * var(--rm-font-scale, 1));
       color: var(--rm-text, #e5e5ea);
       position: relative;
       min-height: 22px;
@@ -3621,9 +3621,9 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      font-size: 10px;
+      font-size: calc(10px * var(--rm-font-scale, 1));
     }
-    .entry-servings { font-size: 9px; color: var(--rm-text-secondary, #8e8e93); flex-shrink: 0; }
+    .entry-servings { font-size: calc(9px * var(--rm-font-scale, 1)); color: var(--rm-text-secondary, #8e8e93); flex-shrink: 0; }
     .entry-remove {
       background: rgba(0,0,0,0.35);
       border: none;
@@ -3671,7 +3671,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       border: none;
       cursor: pointer;
       color: var(--error-color, #cf6679);
-      font-size: 13px;
+      font-size: calc(13px * var(--rm-font-scale, 1));
       display: flex;
       align-items: center;
       gap: 5px;
@@ -3708,7 +3708,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       padding: 14px 16px;
       border-bottom: 1px solid var(--rm-border, rgba(255,255,255,0.08));
       font-weight: 600;
-      font-size: 15px;
+      font-size: calc(15px * var(--rm-font-scale, 1));
       color: var(--rm-text, #e5e5ea);
       text-transform: capitalize;
       flex-shrink: 0;
@@ -3728,7 +3728,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       border-bottom: 1px solid var(--rm-border, rgba(255,255,255,0.06));
       flex-shrink: 0;
     }
-    .picker-label { font-size: 13px; color: var(--rm-text-secondary, #8e8e93); }
+    .picker-label { font-size: calc(13px * var(--rm-font-scale, 1)); color: var(--rm-text-secondary, #8e8e93); }
     .servings-ctrl { display: flex; align-items: center; gap: 8px; }
     .scaler-btn {
       background: var(--rm-surface, #2c2c2e);
@@ -3739,7 +3739,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       color: var(--rm-text, #e5e5ea); padding: 0;
     }
     .scaler-btn ha-icon { --mdc-icon-size: 14px; }
-    .servings-val { font-size: 14px; font-weight: 600; color: var(--rm-text, #e5e5ea); min-width: 24px; text-align: center; }
+    .servings-val { font-size: calc(14px * var(--rm-font-scale, 1)); font-weight: 600; color: var(--rm-text, #e5e5ea); min-width: 24px; text-align: center; }
 
     .picker-search-wrap {
       display: flex;
@@ -3756,7 +3756,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       border: none;
       outline: none;
       color: var(--rm-text, #e5e5ea);
-      font-size: 14px;
+      font-size: calc(14px * var(--rm-font-scale, 1));
       padding: 4px 0;
     }
     .picker-search::placeholder { color: var(--rm-text-secondary, #8e8e93); }
@@ -3793,11 +3793,11 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     }
     .picker-placeholder ha-icon { --mdc-icon-size: 22px; }
     .picker-info { flex: 1; min-width: 0; }
-    .picker-name { font-size: 14px; font-weight: 500; color: var(--rm-text, #e5e5ea); display: block; }
-    .picker-tags { font-size: 12px; color: var(--rm-text-secondary, #8e8e93); }
+    .picker-name { font-size: calc(14px * var(--rm-font-scale, 1)); font-weight: 500; color: var(--rm-text, #e5e5ea); display: block; }
+    .picker-tags { font-size: calc(12px * var(--rm-font-scale, 1)); color: var(--rm-text-secondary, #8e8e93); }
     .picker-fav { color: var(--error-color, #cf6679); --mdc-icon-size: 16px; }
-    .picker-empty { padding: 30px; text-align: center; color: var(--rm-text-secondary, #8e8e93); font-size: 14px; }
-  `}try{customElements.define("rm-meal-planner",ie)}catch{}const re="1.0.0",ne=[["en","English"],["es","Español"],["fr","Français"],["de","Deutsch"],["pt","Português"],["nl","Nederlands"],["it","Italiano"]];class ae extends t{static properties={hass:{type:Object},settings:{type:Object},_activeTab:{type:String},_rmVersion:{type:String},_rmcVersion:{type:String},_backupState:{type:String}};constructor(){super(),this.settings={},this._activeTab="appearance",this._rmVersion="…",this._rmcVersion="…",this._backupState=null}updated(e){e.has("hass")&&this.hass&&"…"===this._rmVersion&&this._fetchVersionsFromHacs()}async _backup(){if("loading"!==this._backupState){this._backupState="loading";try{const e=await this.hass.callWS({type:"recipe_manager/backup"}),t=JSON.stringify(e,null,2),i=new Blob([t],{type:"application/json"}),r=URL.createObjectURL(i),n=document.createElement("a");n.href=r,n.download=`recipe-manager-backup-${(new Date).toISOString().slice(0,10)}.json`,n.click(),URL.revokeObjectURL(r),this._backupState="done"}catch(e){console.error("[RM] Backup failed:",e),this._backupState="error"}setTimeout(()=>{this._backupState=null},3e3)}}_fetchVersionsFromHacs(){this.hass&&(this._rmVersion="…",this._rmcVersion="…",this.hass.callWS({type:"hacs/repositories/list"}).then(e=>{const t=e.find(e=>"thekiwismarthome/recipe-manager"===e.full_name.toLowerCase()),i=e.find(e=>"thekiwismarthome/recipe-manager-card"===e.full_name.toLowerCase());this._rmVersion=t?.installed_version??"—",this._rmcVersion=i?.installed_version??re}).catch(()=>{this._rmVersion="—",this._rmcVersion=re}))}_update(e){const t={...this.settings,...e};this.dispatchEvent(new CustomEvent("rm-settings-change",{detail:{settings:t},bubbles:!0,composed:!0}))}render(){const e=this.settings;return i`
+    .picker-empty { padding: 30px; text-align: center; color: var(--rm-text-secondary, #8e8e93); font-size: calc(14px * var(--rm-font-scale, 1)); }
+  `}try{customElements.define("rm-meal-planner",ie)}catch{}const re="1.0.0",ae=[["en","English"],["es","Español"],["fr","Français"],["de","Deutsch"],["pt","Português"],["nl","Nederlands"],["it","Italiano"]];class ne extends t{static properties={hass:{type:Object},settings:{type:Object},_activeTab:{type:String},_rmVersion:{type:String},_rmcVersion:{type:String},_backupState:{type:String}};constructor(){super(),this.settings={},this._activeTab="appearance",this._rmVersion="…",this._rmcVersion="…",this._backupState=null}updated(e){e.has("hass")&&this.hass&&"…"===this._rmVersion&&this._fetchVersionsFromHacs()}async _backup(){if("loading"!==this._backupState){this._backupState="loading";try{const e=await this.hass.callWS({type:"recipe_manager/backup"}),t=JSON.stringify(e,null,2),i=new Blob([t],{type:"application/json"}),r=URL.createObjectURL(i),a=document.createElement("a");a.href=r,a.download=`recipe-manager-backup-${(new Date).toISOString().slice(0,10)}.json`,a.click(),URL.revokeObjectURL(r),this._backupState="done"}catch(e){console.error("[RM] Backup failed:",e),this._backupState="error"}setTimeout(()=>{this._backupState=null},3e3)}}_fetchVersionsFromHacs(){this.hass&&(this._rmVersion="…",this._rmcVersion="…",this.hass.callWS({type:"hacs/repositories/list"}).then(e=>{const t=e.find(e=>"thekiwismarthome/recipe-manager"===e.full_name.toLowerCase()),i=e.find(e=>"thekiwismarthome/recipe-manager-card"===e.full_name.toLowerCase());this._rmVersion=t?.installed_version??"—",this._rmcVersion=i?.installed_version??re}).catch(()=>{this._rmVersion="—",this._rmcVersion=re}))}_update(e){const t={...this.settings,...e};this.dispatchEvent(new CustomEvent("rm-settings-change",{detail:{settings:t},bubbles:!0,composed:!0}))}render(){const e=this.settings;return i`
       <div class="settings-root">
         <div class="tab-bar">
           ${[["appearance","mdi:palette-outline",r("Appearance")],["advanced","mdi:tune-variant",r("Advanced")],["sync","mdi:cloud-sync-outline",r("Sync")],["help","mdi:help-circle-outline",r("Help")]].map(([e,t,r])=>i`
@@ -3815,7 +3815,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
           ${"help"===this._activeTab?this._renderHelp():""}
         </div>
       </div>
-    `}_renderAppearance(e){const t="midnight"===e.theme||"ember"===e.theme||"neon"===e.theme,n="arctic"===e.theme||"meadow"===e.theme||"ocean"===e.theme,a=t||n;return i`
+    `}_renderAppearance(e){const t="midnight"===e.theme||"ember"===e.theme||"neon"===e.theme,a="arctic"===e.theme||"meadow"===e.theme||"ocean"===e.theme,n=t||a;return i`
       <!-- ── Language & Units ── -->
       <div class="section">
         <div class="section-label">${r("Language & Units")}</div>
@@ -3823,7 +3823,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
         <div class="setting-row">
           <span class="setting-name">${r("Language")}</span>
           <select class="theme-select" @change=${e=>this._update({language:e.target.value})}>
-            ${ne.map(([t,r])=>i`
+            ${ae.map(([t,r])=>i`
               <option value="${t}" ?selected=${(e.language??"en")===t}>${r}</option>
             `)}
           </select>
@@ -3864,7 +3864,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
           </select>
         </div>
 
-        ${a?i`
+        ${n?i`
           <div class="setting-row muted-row">
             <span class="setting-name">${r("Dark mode")}</span>
             <span class="muted-note">${r(t?"Always dark for this theme":"Always light for this theme")}</span>
@@ -4057,7 +4057,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
         </div>
       </div>
 
-    `}_handleSoundFileChange(e){const t=e.target.files?.[0];if(!t)return;const i=new FileReader;i.onload=e=>{this._update({timerSoundFile:e.target.result,timerSoundFileName:t.name})},i.readAsDataURL(t)}_testSound(e,t){if("file"!==e)try{const t=new(window.AudioContext||window.webkitAudioContext);if("ding"===e){const e=t.createOscillator(),i=t.createGain();e.connect(i),i.connect(t.destination),e.type="sine",e.frequency.setValueAtTime(1046,t.currentTime),i.gain.setValueAtTime(.6,t.currentTime),i.gain.exponentialRampToValueAtTime(.001,t.currentTime+1),e.start(t.currentTime),e.stop(t.currentTime+1)}else if("alarm"===e)for(let e=0;e<3;e++){const i=t.currentTime+.35*e,r=t.createOscillator(),n=t.createGain();r.connect(n),n.connect(t.destination),r.type="square",r.frequency.setValueAtTime(660,i),n.gain.setValueAtTime(.3,i),n.gain.exponentialRampToValueAtTime(.001,i+.2),r.start(i),r.stop(i+.2)}else if("none"!==e){const e=t.createOscillator(),i=t.createGain();e.connect(i),i.connect(t.destination),e.type="sine",e.frequency.setValueAtTime(880,t.currentTime),i.gain.setValueAtTime(.5,t.currentTime),i.gain.exponentialRampToValueAtTime(.001,t.currentTime+.5),e.start(t.currentTime),e.stop(t.currentTime+.5)}}catch(e){console.warn("Audio test failed:",e)}else if(t){new Audio(t).play().catch(e=>console.warn("Could not play file:",e))}}_renderSync(){const e="loading"===this._backupState?r("Backing up…"):"done"===this._backupState?r("Downloaded ✓"):"error"===this._backupState?r("Failed ✗"):r("Download backup");return i`
+    `}_handleSoundFileChange(e){const t=e.target.files?.[0];if(!t)return;const i=new FileReader;i.onload=e=>{this._update({timerSoundFile:e.target.result,timerSoundFileName:t.name})},i.readAsDataURL(t)}_testSound(e,t){if("file"!==e)try{const t=new(window.AudioContext||window.webkitAudioContext);if("ding"===e){const e=t.createOscillator(),i=t.createGain();e.connect(i),i.connect(t.destination),e.type="sine",e.frequency.setValueAtTime(1046,t.currentTime),i.gain.setValueAtTime(.6,t.currentTime),i.gain.exponentialRampToValueAtTime(.001,t.currentTime+1),e.start(t.currentTime),e.stop(t.currentTime+1)}else if("alarm"===e)for(let e=0;e<3;e++){const i=t.currentTime+.35*e,r=t.createOscillator(),a=t.createGain();r.connect(a),a.connect(t.destination),r.type="square",r.frequency.setValueAtTime(660,i),a.gain.setValueAtTime(.3,i),a.gain.exponentialRampToValueAtTime(.001,i+.2),r.start(i),r.stop(i+.2)}else if("none"!==e){const e=t.createOscillator(),i=t.createGain();e.connect(i),i.connect(t.destination),e.type="sine",e.frequency.setValueAtTime(880,t.currentTime),i.gain.setValueAtTime(.5,t.currentTime),i.gain.exponentialRampToValueAtTime(.001,t.currentTime+.5),e.start(t.currentTime),e.stop(t.currentTime+.5)}}catch(e){console.warn("Audio test failed:",e)}else if(t){new Audio(t).play().catch(e=>console.warn("Could not play file:",e))}}_renderSync(){const e="loading"===this._backupState?r("Backing up…"):"done"===this._backupState?r("Downloaded ✓"):"error"===this._backupState?r("Failed ✗"):r("Download backup");return i`
       <div class="section">
         <div class="section-label">${r("Backup")}</div>
 
@@ -4110,12 +4110,12 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 
         <div class="setting-row">
           <span class="setting-name">${r("Recipe Manager")}</span>
-          <span class="muted-note">${r(n`Integration version ${this._rmVersion}`)}</span>
+          <span class="muted-note">${r(a`Integration version ${this._rmVersion}`)}</span>
         </div>
 
         <div class="setting-row">
           <span class="setting-name">${r("RM Card")}</span>
-          <span class="muted-note">${r(n`Card version ${this._rmcVersion}`)}</span>
+          <span class="muted-note">${r(a`Card version ${this._rmcVersion}`)}</span>
         </div>
 
         <div class="setting-row">
@@ -4131,7 +4131,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
         <div class="placeholder-title">${e}</div>
         <div class="placeholder-msg">${r}</div>
       </div>
-    `}static styles=a`
+    `}static styles=n`
     :host { display: block; height: 100%; overflow: hidden; }
 
     .settings-root { display: flex; flex-direction: column; height: 100%; }
@@ -4148,7 +4148,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       display: flex; align-items: center; gap: 5px;
       background: none; border: none;
       border-bottom: 2px solid transparent;
-      padding: 10px 14px; font-size: 13px; font-weight: 500;
+      padding: 10px 14px; font-size: calc(13px * var(--rm-font-scale, 1)); font-weight: 500;
       color: var(--rm-text-secondary, #6b5c4a);
       cursor: pointer; white-space: nowrap;
       transition: color 0.15s, border-color 0.15s; flex-shrink: 0;
@@ -4162,7 +4162,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     .section { margin-bottom: 8px; }
 
     .section-label {
-      font-size: 11px; font-weight: 700;
+      font-size: calc(11px * var(--rm-font-scale, 1)); font-weight: 700;
       letter-spacing: 0.08em; text-transform: uppercase;
       color: var(--rm-text-muted, #a08060); padding: 16px 20px 6px;
     }
@@ -4174,12 +4174,12 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     }
     .setting-row.muted-row { opacity: 0.5; }
 
-    .setting-name { font-size: 15px; font-weight: 500; flex-shrink: 0; color: var(--rm-text); }
+    .setting-name { font-size: calc(15px * var(--rm-font-scale, 1)); font-weight: 500; flex-shrink: 0; color: var(--rm-text); }
 
     .setting-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-    .setting-hint { font-size: 12px; color: var(--rm-text-muted, #a08060); }
+    .setting-hint { font-size: calc(12px * var(--rm-font-scale, 1)); color: var(--rm-text-muted, #a08060); }
 
-    .muted-note { font-size: 13px; color: var(--rm-text-muted, #a08060); }
+    .muted-note { font-size: calc(13px * var(--rm-font-scale, 1)); color: var(--rm-text-muted, #a08060); }
 
     .backup-btn { min-width: 140px; white-space: nowrap; }
     .backup-btn.done    { background: var(--rm-success, #4caf50); color: #fff; }
@@ -4203,7 +4203,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     .theme-select {
       background: var(--rm-bg-surface, #fff); color: var(--rm-text, #2d2016);
       border: 1px solid var(--rm-border, rgba(0,0,0,0.12));
-      border-radius: 8px; padding: 6px 10px; font-size: 14px; cursor: pointer;
+      border-radius: 8px; padding: 6px 10px; font-size: calc(14px * var(--rm-font-scale, 1)); cursor: pointer;
       min-width: 160px; flex-shrink: 0;
     }
 
@@ -4213,7 +4213,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     }
     .seg-btn {
       background: transparent; border: none; padding: 6px 14px;
-      font-size: 13px; font-weight: 500; cursor: pointer;
+      font-size: calc(13px * var(--rm-font-scale, 1)); font-weight: 500; cursor: pointer;
       color: var(--rm-text-secondary, #6b5c4a);
       border-right: 1px solid var(--rm-border, rgba(0,0,0,0.1));
       transition: background 0.12s, color 0.12s;
@@ -4242,7 +4242,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     .file-label {
       display: flex; align-items: center; gap: 6px;
       background: var(--rm-bg-elevated); border: 1px solid var(--rm-border);
-      border-radius: 8px; padding: 6px 12px; font-size: 13px;
+      border-radius: 8px; padding: 6px 12px; font-size: calc(13px * var(--rm-font-scale, 1));
       color: var(--rm-text); cursor: pointer; transition: background 0.15s;
       flex-shrink: 0;
     }
@@ -4256,9 +4256,9 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       color: var(--rm-text-secondary); text-align: center;
     }
     .placeholder-tab ha-icon { --mdc-icon-size: 48px; opacity: 0.3; }
-    .placeholder-title { font-size: 18px; font-weight: 600; color: var(--rm-text); }
-    .placeholder-msg { font-size: 14px; max-width: 280px; line-height: 1.5; }
-  `}try{customElements.define("rm-settings-view",ae)}catch{}class se extends t{static properties={hass:{type:Object},slmAvailable:{type:Boolean},shoppingLists:{type:Array},api:{type:Object},localItems:{type:Array},settings:{type:Object}};constructor(){super(),this.hass=null,this.slmAvailable=!1,this.shoppingLists=[],this.api=null,this.localItems=[],this.settings=null,this._slmCard=null,this._slmRetryTimeout=null}disconnectedCallback(){super.disconnectedCallback(),this._slmRetryTimeout&&(clearTimeout(this._slmRetryTimeout),this._slmRetryTimeout=null)}get _useSLM(){return this.slmAvailable||!!customElements.get("shopping-list-manager-card")}updated(e){this._useSLM&&(this._slmCard?(e.has("hass")&&this.hass&&(this._slmCard.hass=this.hass),e.has("settings")&&this.settings&&this._slmCard&&this._syncSlmTheme()):this._mountSlmCard())}_syncSlmTheme(){if(!this._slmCard||!this.settings)return;const{theme:e,darkMode:t}=this.settings;this._slmCard.settings={...this._slmCard.settings,theme:e,darkMode:t},this._slmCard.applyColorScheme?.()}_mountSlmCard(){const e=this.shadowRoot?.querySelector(".slm-host");if(!e)return;const t=customElements.get("shopping-list-manager-card");if(!t)return void(this._slmRetryTimeout||(this._slmRetryTimeout=setTimeout(()=>{this._slmRetryTimeout=null,this.isConnected&&this._mountSlmCard()},500)));const i=new t;try{i.setConfig({})}catch(e){}i.style.cssText="display:block;width:100%;height:100%;max-height:100%;min-height:0;",i.isEmbedded=!0,e.appendChild(i),this.hass&&(i.hass=this.hass),this._slmCard=i,setTimeout(()=>this._syncSlmTheme(),0)}_toggleLocalItem(e){const t=this.localItems.map(t=>t.id===e?{...t,checked:!t.checked}:t);this._dispatchLocalUpdate(t)}_clearLocalChecked(){this._dispatchLocalUpdate(this.localItems.filter(e=>!e.checked))}_clearAllLocal(){this._dispatchLocalUpdate([])}_dispatchLocalUpdate(e){this.dispatchEvent(new CustomEvent("rm-shopping-local-update",{detail:{items:e},bubbles:!0,composed:!0}))}render(){return i`
+    .placeholder-title { font-size: calc(18px * var(--rm-font-scale, 1)); font-weight: 600; color: var(--rm-text); }
+    .placeholder-msg { font-size: calc(14px * var(--rm-font-scale, 1)); max-width: 280px; line-height: 1.5; }
+  `}try{customElements.define("rm-settings-view",ne)}catch{}class se extends t{static properties={hass:{type:Object},slmAvailable:{type:Boolean},shoppingLists:{type:Array},api:{type:Object},localItems:{type:Array},settings:{type:Object}};constructor(){super(),this.hass=null,this.slmAvailable=!1,this.shoppingLists=[],this.api=null,this.localItems=[],this.settings=null,this._slmCard=null,this._slmRetryTimeout=null}disconnectedCallback(){super.disconnectedCallback(),this._slmRetryTimeout&&(clearTimeout(this._slmRetryTimeout),this._slmRetryTimeout=null)}get _useSLM(){return this.slmAvailable||!!customElements.get("shopping-list-manager-card")}updated(e){this._useSLM&&(this._slmCard?(e.has("hass")&&this.hass&&(this._slmCard.hass=this.hass),e.has("settings")&&this.settings&&this._slmCard&&this._syncSlmTheme()):this._mountSlmCard())}_syncSlmTheme(){if(!this._slmCard||!this.settings)return;const{theme:e,darkMode:t}=this.settings;this._slmCard.settings={...this._slmCard.settings,theme:e,darkMode:t},this._slmCard.applyColorScheme?.()}_mountSlmCard(){const e=this.shadowRoot?.querySelector(".slm-host");if(!e)return;const t=customElements.get("shopping-list-manager-card");if(!t)return void(this._slmRetryTimeout||(this._slmRetryTimeout=setTimeout(()=>{this._slmRetryTimeout=null,this.isConnected&&this._mountSlmCard()},500)));const i=new t;try{i.setConfig({})}catch(e){}i.style.cssText="display:block;width:100%;height:100%;max-height:100%;min-height:0;",i.isEmbedded=!0,e.appendChild(i),this.hass&&(i.hass=this.hass),this._slmCard=i,setTimeout(()=>this._syncSlmTheme(),0)}_toggleLocalItem(e){const t=this.localItems.map(t=>t.id===e?{...t,checked:!t.checked}:t);this._dispatchLocalUpdate(t)}_clearLocalChecked(){this._dispatchLocalUpdate(this.localItems.filter(e=>!e.checked))}_clearAllLocal(){this._dispatchLocalUpdate([])}_dispatchLocalUpdate(e){this.dispatchEvent(new CustomEvent("rm-shopping-local-update",{detail:{items:e},bubbles:!0,composed:!0}))}render(){return i`
       <div class="shopping-view">
         ${this._useSLM?this._renderSlmMode():this._renderLocalMode()}
       </div>
@@ -4266,7 +4266,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       <div class="slm-card-wrap">
         <div class="slm-host"></div>
       </div>
-    `}_renderLocalMode(){const e=this.localItems.some(e=>e.checked),t=this.localItems.filter(e=>!e.checked),n=this.localItems.filter(e=>e.checked);return i`
+    `}_renderLocalMode(){const e=this.localItems.some(e=>e.checked),t=this.localItems.filter(e=>!e.checked),a=this.localItems.filter(e=>e.checked);return i`
       <div class="sv-header">
         <span class="sv-list-name">${r("My Shopping List")}</span>
         <div class="sv-actions">
@@ -4301,9 +4301,9 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       `:i`
         <div class="sv-items">
           ${t.map(e=>this._renderLocalRow(e))}
-          ${n.length?i`
+          ${a.length?i`
             <div class="sv-divider-label">${r("Checked")}</div>
-            ${n.map(e=>this._renderLocalRow(e))}
+            ${a.map(e=>this._renderLocalRow(e))}
           `:""}
         </div>
       `}
@@ -4324,7 +4324,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
           </div>
         </div>
       </div>
-    `}static styles=a`
+    `}static styles=n`
     :host { display: block; height: 100%; }
 
     .shopping-view {
@@ -4366,7 +4366,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 
     .sv-list-name {
       font-weight: 600;
-      font-size: 15px;
+      font-size: calc(15px * var(--rm-font-scale, 1));
       color: var(--rm-text);
     }
 
@@ -4381,7 +4381,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       border-radius: 8px;
       color: var(--rm-text-secondary);
       padding: 5px 10px;
-      font-size: 12px;
+      font-size: calc(12px * var(--rm-font-scale, 1));
       cursor: pointer;
       transition: background 0.15s;
     }
@@ -4404,8 +4404,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       flex-shrink: 0;
     }
     .sv-install-banner ha-icon { --mdc-icon-size: 20px; color: var(--rm-accent); flex-shrink: 0; margin-top: 1px; }
-    .sv-install-text { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--rm-text-secondary); }
-    .sv-install-text strong { color: var(--rm-text); font-size: 13px; }
+    .sv-install-text { display: flex; flex-direction: column; gap: 2px; font-size: calc(12px * var(--rm-font-scale, 1)); color: var(--rm-text-secondary); }
+    .sv-install-text strong { color: var(--rm-text); font-size: calc(13px * var(--rm-font-scale, 1)); }
 
     /* ── Empty state ────────────────────────────────────────────────────── */
 
@@ -4420,8 +4420,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       gap: 6px;
     }
     .sv-empty ha-icon { --mdc-icon-size: 48px; opacity: 0.35; }
-    .sv-empty p { margin: 0; font-size: 15px; }
-    .sv-hint { font-size: 13px !important; color: var(--rm-text-muted) !important; }
+    .sv-empty p { margin: 0; font-size: calc(15px * var(--rm-font-scale, 1)); }
+    .sv-hint { font-size: calc(13px * var(--rm-font-scale, 1)) !important; color: var(--rm-text-muted) !important; }
 
     /* ── Local item rows ────────────────────────────────────────────────── */
 
@@ -4435,7 +4435,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 
     .sv-divider-label {
       padding: 12px 16px 4px;
-      font-size: 10px;
+      font-size: calc(10px * var(--rm-font-scale, 1));
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.08em;
@@ -4457,7 +4457,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 
     .sv-row-left { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
     .cat-dot { width: 8px; height: 8px; border-radius: 50%; background: #78909c; flex-shrink: 0; }
-    .row-emoji { font-size: 17px; line-height: 1; width: 22px; text-align: center; }
+    .row-emoji { font-size: calc(17px * var(--rm-font-scale, 1)); line-height: 1; width: 22px; text-align: center; }
 
     .sv-row-mid {
       flex: 1;
@@ -4468,9 +4468,9 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       flex-wrap: wrap;
     }
 
-    .sv-item-name { font-size: 14px; color: var(--rm-text); font-weight: 500; }
+    .sv-item-name { font-size: calc(14px * var(--rm-font-scale, 1)); color: var(--rm-text); font-weight: 500; }
     .sv-row-checked .sv-item-name { text-decoration: line-through; }
-    .sv-item-unit { font-size: 12px; color: var(--rm-text-muted); }
+    .sv-item-unit { font-size: calc(12px * var(--rm-font-scale, 1)); color: var(--rm-text-muted); }
 
     .sv-row-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 
@@ -4483,24 +4483,24 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     }
     .sv-checkbox.checked { color: #fff; background: #78909c; border-color: #78909c; }
     .sv-checkbox ha-icon { --mdc-icon-size: 14px; }
-  `}try{customElements.define("rm-shopping-view",se)}catch{}const oe="manual-toggle",le="rm_settings",ce="rm_shopping",de="rm_recent_recipes",pe="rm_timers",he="rm_timer_presets",ue="rm_view_state",me=["grid","detail","settings","planner","shopping"];function ge(e){try{localStorage.setItem(he,JSON.stringify(e))}catch{}}const fe={theme:"soft",darkMode:"system",fontSize:"medium",columns:3,showFavourites:!0,showPlanner:!0,recentCount:12,timerSound:"beep",keepScreenOn:!1,keepScreenOnMins:30,showUnitConversion:!1,language:"en",unitSystem:"imperial"},be={soft:{light:{"--rm-bg-main":"#fafbfc","--rm-bg-surface":"#ffffff","--rm-bg-elevated":"#ffffff","--rm-text":"#424242","--rm-text-secondary":"#757575","--rm-text-muted":"#9e9e9e","--rm-accent":"#9fa8da","--rm-accent-soft":"rgba(159,168,218,0.15)","--rm-border":"#e8eaf6","--rm-shadow":"0 2px 6px rgba(0,0,0,0.08)"},dark:{"--rm-bg-main":"#14161a","--rm-bg-surface":"#1b1f25","--rm-bg-elevated":"#232833","--rm-text":"#e4e7ec","--rm-text-secondary":"#a8b0bd","--rm-text-muted":"#7a8594","--rm-accent":"#9fa8da","--rm-accent-soft":"rgba(159,168,218,0.18)","--rm-border":"#2b313c","--rm-shadow":"0 2px 6px rgba(0,0,0,0.3)"}},arctic:{light:{"--rm-bg-main":"#f0f4f8","--rm-bg-surface":"#ffffff","--rm-bg-elevated":"#ffffff","--rm-text":"#1a2332","--rm-text-secondary":"#526070","--rm-text-muted":"#8097aa","--rm-accent":"#2979ff","--rm-accent-soft":"rgba(41,121,255,0.12)","--rm-border":"#dce6f0","--rm-shadow":"0 2px 6px rgba(26,35,50,0.1)"}},meadow:{light:{"--rm-bg-main":"#f4f7f0","--rm-bg-surface":"#fefffe","--rm-bg-elevated":"#fefffe","--rm-text":"#2d3a2a","--rm-text-secondary":"#6b7c64","--rm-text-muted":"#96a98e","--rm-accent":"#4caf50","--rm-accent-soft":"rgba(76,175,80,0.12)","--rm-border":"#dde8d8","--rm-shadow":"0 2px 6px rgba(45,58,42,0.1)"}},blossom:{light:{"--rm-bg-main":"#fdf8fb","--rm-bg-surface":"#ffffff","--rm-bg-elevated":"#fff8fc","--rm-text":"#3d1f35","--rm-text-secondary":"#8c5e79","--rm-text-muted":"#b48fa5","--rm-accent":"#c2668a","--rm-accent-soft":"rgba(194,102,138,0.12)","--rm-border":"#f0d6e8","--rm-shadow":"0 2px 6px rgba(61,31,53,0.1)"},dark:{"--rm-bg-main":"#1a0d12","--rm-bg-surface":"#241420","--rm-bg-elevated":"#2e1a28","--rm-text":"#f8d0de","--rm-text-secondary":"#c070a0","--rm-text-muted":"#603050","--rm-accent":"#f48fb1","--rm-accent-soft":"rgba(244,143,177,0.15)","--rm-border":"rgba(248,208,222,0.08)","--rm-shadow":"0 2px 8px rgba(0,0,0,0.4)"}},ocean:{light:{"--rm-bg-main":"#f0f7ff","--rm-bg-surface":"#ffffff","--rm-bg-elevated":"#f9fbff","--rm-text":"#1a3a5f","--rm-text-secondary":"#4a6b8c","--rm-text-muted":"#7a9bbd","--rm-accent":"#0077ff","--rm-accent-soft":"rgba(0,119,255,0.12)","--rm-border":"#d0e1f2","--rm-shadow":"0 2px 6px rgba(26,58,95,0.1)"}},midnight:{dark:{"--rm-bg-main":"#0d1117","--rm-bg-surface":"#161b22","--rm-bg-elevated":"#1c2333","--rm-text":"#c9d1d9","--rm-text-secondary":"#8b949e","--rm-text-muted":"#6e7681","--rm-accent":"#58a6ff","--rm-accent-soft":"rgba(88,166,255,0.15)","--rm-border":"#21262d","--rm-shadow":"0 2px 8px rgba(0,0,0,0.5)"}},ember:{dark:{"--rm-bg-main":"#111111","--rm-bg-surface":"#1c1a17","--rm-bg-elevated":"#242018","--rm-text":"#f5f0e8","--rm-text-secondary":"#a89880","--rm-text-muted":"#7a6a55","--rm-accent":"#f0a500","--rm-accent-soft":"rgba(240,165,0,0.15)","--rm-border":"rgba(245,240,232,0.08)","--rm-shadow":"0 2px 8px rgba(0,0,0,0.5)"}},neon:{dark:{"--rm-bg-main":"#0a0b10","--rm-bg-surface":"#121420","--rm-bg-elevated":"#1a1d2e","--rm-text":"#e0e0f0","--rm-text-secondary":"#a0a5c0","--rm-text-muted":"#6a6f8e","--rm-accent":"#bb86fc","--rm-accent-soft":"rgba(187,134,252,0.15)","--rm-border":"#2a2d45","--rm-shadow":"0 2px 8px rgba(0,0,0,0.6)"}}},ve={small:"13px",medium:"15px",large:"17px"};function _e(e){try{localStorage.setItem(le,JSON.stringify(e))}catch{}}function xe(e){try{const t=e.filter(e=>!e.global).map(e=>({...e,savedAt:Date.now()}));localStorage.setItem(pe,JSON.stringify(t))}catch{}}function ye(e){const t=Math.floor(e/3600),i=Math.floor(e%3600/60),r=e%60;return t>0?`${t}:${String(i).padStart(2,"0")}:${String(r).padStart(2,"0")}`:`${i}:${String(r).padStart(2,"0")}`}function we(e){try{const t=new(window.AudioContext||window.webkitAudioContext);t.createGain().connect(t.destination);const i=(e,i,r,n=.6)=>{const a=t.createOscillator(),s=t.createGain();a.connect(s),s.connect(t.destination),a.frequency.value=e,s.gain.setValueAtTime(n,t.currentTime+i),s.gain.exponentialRampToValueAtTime(.001,t.currentTime+i+r),a.start(t.currentTime+i),a.stop(t.currentTime+i+r+.05)};if("beep"===e)i(880,0,.15),i(880,.2,.15),i(880,.4,.15);else if("ding"===e)i(1318,0,.8,.5),i(1047,.1,.6,.3);else if("alarm"===e)for(let e=0;e<5;e++)i(880,.25*e,.12),i(660,.25*e+.13,.1)}catch{}}class ke extends t{static properties={hass:{type:Object},_config:{type:Object},_view:{type:String},_recipes:{type:Array},_tags:{type:Array},_selectedRecipe:{type:Object},_loading:{type:Boolean},_error:{type:String},_searchQuery:{type:String},_activeTag:{type:String},_shoppingLists:{type:Array},_slmAvailable:{type:Boolean},_localShoppingItems:{type:Array},_settings:{type:Object},_wide:{type:Boolean},_sidebarCollapsed:{type:Boolean},_gridScrollPos:{type:Number},_recentRecipeIds:{type:Array},_timers:{type:Array},_timerAlarm:{type:Object},_timerAlarmQueue:{type:Array},_timersPrevView:{type:String},_customTimerInput:{type:String},_hdrStarHover:{type:Number},_mobileMenuOpen:{type:Boolean},_navDirection:{type:String},_closingDetail:{type:Boolean},_gridFilterPreset:{type:Object},_timerPresets:{type:Array},_presetNameInput:{type:String},_presetMinsInput:{type:String},_alarmAddInput:{type:String},_plannerFromRecipe:{type:Object},_globalMode:{type:Boolean},_quickTimerLabel:{type:String},_globalWakeActive:{type:Boolean}};constructor(){super(),this._pendingViewRestore=function(){try{const e=sessionStorage.getItem(ue);return e?JSON.parse(e):null}catch{return null}}(),this._view="grid",this._recipes=[],this._tags=[],this._selectedRecipe=null,this._loading=!1,this._error=null,this._searchQuery="",this._activeTag=null,this._shoppingLists=[],this._slmAvailable=!1,this._localShoppingItems=[],this._settings=function(){try{const e=localStorage.getItem(le);return e?{...fe,...JSON.parse(e)}:{...fe}}catch{return{...fe}}}(),this._languageAutoDetectPending=!function(){try{const e=localStorage.getItem(le);return!(!e||!Object.prototype.hasOwnProperty.call(JSON.parse(e),"language"))}catch{return!1}}(),b(this._settings.language),this._wide=!1,this._sidebarCollapsed=!0,this._gridScrollPos=0,this._recentRecipeIds=function(){try{const e=localStorage.getItem(de);return e?JSON.parse(e):[]}catch{return[]}}(),this._timers=function(){try{const e=localStorage.getItem(pe);if(!e)return[];const t=JSON.parse(e),i=Date.now();return t.map(e=>{const t=e.savedAt?Math.floor((i-e.savedAt)/1e3):0,r=Math.max(0,(e.remaining??0)-(e.running?t:0));return{...e,remaining:r,savedAt:void 0}}).filter(e=>e.remaining>0)}catch{return[]}}(),this._timerAlarm=null,this._timerAlarmQueue=[],this._timersPrevView=null,this._customTimerInput="",this._hdrStarHover=0,this._mobileMenuOpen=!1,this._navDirection="forward",this._closingDetail=!1,this._gridFilterPreset=null,this._timerPresets=function(){try{const e=localStorage.getItem(he);return e?JSON.parse(e):[]}catch{return[]}}(),this._presetNameInput="",this._presetMinsInput="",this._alarmAddInput="",this._plannerFromRecipe=null,this._globalMode=!1,this._quickTimerLabel="",this._alarmLoopActive=!1,this._alarmInterval=null,this._alarmTimeout=null,this._alarmAudio=null,this._unsubscribe=null,this._darkModeQuery=null,this._resizeObserver=null,this._timerTick=null,this._globalWakeActive=!1,this._globalWakeUnsubscribeFn=null}setConfig(e){this._config=e}static getConfigElement(){return document.createElement("recipe-manager-card-editor")}static getStubConfig(){return{}}getCardSize(){return 6}_updateHeight(){requestAnimationFrame(()=>requestAnimationFrame(()=>{const e=this.getBoundingClientRect().top,t=window.innerHeight-Math.max(e,0);t>100&&(this.style.height=`${t}px`)}))}connectedCallback(){super.connectedCallback(),this._darkModeQuery=window.matchMedia("(prefers-color-scheme: dark)"),this._darkModeQuery.addEventListener("change",this._onSystemDark),this._applyTheme(),this._resizeObserver=new ResizeObserver(e=>{const t=e[0]?.contentRect?.width??0;this._wide=t>=620}),this._resizeObserver.observe(this),this._onViewportResize=()=>this._updateHeight(),window.visualViewport?.addEventListener("resize",this._onViewportResize),window.addEventListener("resize",this._onViewportResize),this._updateHeight(),this._timerTick=setInterval(()=>this._tickTimers(),1e3)}disconnectedCallback(){super.disconnectedCallback(),this._unsubscribe&&(this._unsubscribe(),this._unsubscribe=null),this._darkModeQuery?.removeEventListener("change",this._onSystemDark),this._resizeObserver?.disconnect(),window.visualViewport?.removeEventListener("resize",this._onViewportResize),window.removeEventListener("resize",this._onViewportResize),this._timerTick&&(clearInterval(this._timerTick),this._timerTick=null),this._timerAlarm&&(this._stopAlarmLoop(),this._timerAlarm=null),this._timerAlarmQueue=[],xe(this._timers),this._globalWakeActive&&z(oe)}_onSystemDark=()=>{"system"===this._settings.darkMode&&this._applyTheme()};updated(e){if(e.has("hass")&&this.hass&&!this._api&&(this._api=new h(this.hass),this._init()),e.has("hass")&&this.hass&&this._languageAutoDetectPending){this._languageAutoDetectPending=!1;const e=(this.hass.language||"").split("-")[0].toLowerCase(),t=m.includes(e)?e:this._settings.language;this._settings={...this._settings,language:t},_e(this._settings),b(t)}e.has("hass")&&this._api&&(this._api.hass=this.hass),e.has("_settings")&&this._applyTheme(),(e.has("_view")||e.has("_selectedRecipe"))&&this._saveViewState()}_saveViewState(){me.includes(this._view)&&function(e){try{sessionStorage.setItem(ue,JSON.stringify(e))}catch{}}({view:this._view,recipeId:"detail"===this._view?this._selectedRecipe?.id??null:null})}_restoreViewState(){const e=this._pendingViewRestore;if(this._pendingViewRestore=null,e&&me.includes(e.view))if("detail"===e.view&&e.recipeId){const t=this._recipes.find(t=>t.id===e.recipeId);t&&(this._selectedRecipe=t,this._view="detail")}else"detail"!==e.view&&(this._view=e.view)}_applyTheme(){const e=this._settings,t=be[e.theme]??be.soft,i=!t.light,r=!t.dark;let n=i;i||r?r&&(n=!1):n="on"===e.darkMode||"off"!==e.darkMode&&(this._darkModeQuery?.matches??!1);const a=n?t.dark??t.light:t.light??t.dark;for(const[e,t]of Object.entries(a))this.style.setProperty(e,t);this.style.setProperty("--rm-font-size-base",ve[e.fontSize]??"15px"),this.style.setProperty("--rm-grid-columns",`repeat(${e.columns??3}, minmax(0, 1fr))`)}async _init(){this._loading=!0,this._loadLocalShopping();try{await Promise.all([this._loadRecipes(),this._loadTags(),this._loadShoppingLists(),this._loadGlobalTimers()]),this._restoreViewState(),await this._subscribe()}catch(e){this._error=e.message||r("Failed to load recipes")}finally{this._loading=!1}}async _loadGlobalTimers(){try{const{timers:e}=await this._api.getGlobalTimers(),t=Date.now()/1e3;this._timers=[...this._timers.filter(e=>!e.global),...(e||[]).map(e=>this._globalTimerToLocal(e,t))]}catch{}}_globalTimerToLocal(e,t=Date.now()/1e3){const i=e.running?Math.max(0,e.duration-(t-e.start_time)):e.paused_remaining??e.duration;return{id:e.id,label:e.label,total:e.duration,remaining:Math.round(i),running:e.running&&i>0,alarming:e.running&&i<=0,presetId:e.preset_id||null,global:!0,duration:e.duration,start_time:e.start_time,paused_remaining:e.paused_remaining}}_loadLocalShopping(){try{const e=localStorage.getItem(ce);this._localShoppingItems=e?JSON.parse(e):[]}catch{this._localShoppingItems=[]}}_saveLocalShopping(){try{localStorage.setItem(ce,JSON.stringify(this._localShoppingItems))}catch{}}async _loadRecipes(){const e=await this._api.getAllRecipes();this._recipes=e?.recipes??[]}async _loadTags(){const e=await this._api.getTags();this._tags=e?.tags??[]}async _loadShoppingLists(){try{this._shoppingLists=(await this._api.getShoppingLists())?.lists??[],this._slmAvailable=!0}catch{this._shoppingLists=[],this._slmAvailable=!1}}async _subscribe(){if(!this._unsubscribe)try{this._unsubscribe=await this._api.subscribe(async e=>{const t=e.event_type??e.event,i=e.data??{};/recipe_(added|updated|deleted)/.test(t)?(await Promise.all([this._loadRecipes(),this._loadTags()]),this._selectedRecipe&&(this._selectedRecipe=this._recipes.find(e=>e.id===this._selectedRecipe.id)??this._selectedRecipe)):"recipe_manager_global_timer_added"===t?this._timers.find(e=>e.id===i.id)||(this._timers=[...this._timers,this._globalTimerToLocal(i)]):"recipe_manager_global_timer_updated"===t?this._timers=this._timers.map(e=>e.id===i.id?this._globalTimerToLocal(i):e):"recipe_manager_global_timer_deleted"===t&&(this._timers=this._timers.filter(e=>e.id!==i.timer_id),this._timerAlarm?.id===i.timer_id&&(this._stopAlarmLoop(),this._timerAlarm=this._timerAlarmQueue.length?this._timerAlarmQueue.shift():null,this._timerAlarm&&this._startAlarmLoop(this._settings.timerSound??"beep",this._settings.timerSoundFile)))})}catch{}}get _filteredRecipes(){let e=this._recipes;if(this._activeTag&&(e=e.filter(e=>e.tags?.includes(this._activeTag)||e.courses?.includes(this._activeTag)||e.categories?.includes(this._activeTag)||e.collections?.includes(this._activeTag))),this._searchQuery.trim()){const t=this._searchQuery.trim().toLowerCase();e=e.filter(e=>e.name?.toLowerCase().includes(t)||e.description?.toLowerCase().includes(t)||e.tags?.some(e=>e.toLowerCase().includes(t)))}return e}get _recentRecipes(){const e=this._settings.recentCount??12;return this._recentRecipeIds.slice(0,e).map(e=>this._recipes.find(t=>t.id===e)).filter(Boolean)}_handleSettingsChange(e){const t=this._settings.language;this._settings=e.detail.settings,_e(this._settings),this._settings.language!==t&&b(this._settings.language)}async _toggleGlobalWakeLock(){y()&&(this._globalWakeActive?(await z(oe),this._globalWakeActive=!1):(await S(oe),this._globalWakeActive=!0))}_tickTimers(){if(!this._timers.length)return;let e=!1;const t=[],i=Date.now()/1e3,r=this._timers.map(r=>{if(r.alarming||!r.running)return r;const n=r.global?Math.max(0,r.duration-(i-r.start_time)):r.remaining-1;if(e=!0,n<=0){if(r.presetId)return{...r,remaining:0,running:!1,alarming:!0};t.push({id:r.id,label:r.label})}return{...r,remaining:Math.round(n),running:n>0}});e&&(this._timers=r,xe(this._timers)),t.length&&(this._timerAlarm||(this._timerAlarm=t.shift(),this._startAlarmLoop(this._settings.timerSound??"beep",this._settings.timerSoundFile)),t.length&&(this._timerAlarmQueue=[...this._timerAlarmQueue,...t]))}async _startTimer(e,t,i=null,a=!1){const s=t||r(n`${Math.floor(e/60)} min timer`);if(a&&this._api)try{const t=Date.now()/1e3;return void await this._api.addGlobalTimer({label:s,duration:e,start_time:t,running:!0,paused_remaining:null,...i?{preset_id:i}:{}})}catch(e){console.warn("Global timer failed, falling back to local:",e)}const o=Date.now().toString(36);this._timers=[...this._timers,{id:o,label:s,total:e,remaining:e,running:!0,presetId:i||null}],xe(this._timers)}_stopTimer(e){const t=this._timers.find(t=>t.id===e);this._timers=this._timers.filter(t=>t.id!==e),xe(this._timers),t?.global&&this._api&&this._api.deleteGlobalTimer(e).catch(()=>{})}_pauseTimer(e){const t=this._timers.find(t=>t.id===e),i=!!t&&t.running;if(this._timers=this._timers.map(t=>t.id===e?{...t,running:!t.running}:t),xe(this._timers),t?.global&&this._api)if(i){const t=this._timers.find(t=>t.id===e);this._api.updateGlobalTimer(e,{running:!1,paused_remaining:t?.remaining??0}).catch(()=>{})}else{const i=this._timers.find(t=>t.id===e),r=Date.now()/1e3-(t.duration-(i?.remaining??0));this._timers=this._timers.map(i=>i.id===e?{...i,start_time:r,duration:t.duration,running:!0}:i),this._api.updateGlobalTimer(e,{running:!0,start_time:r,paused_remaining:null}).catch(()=>{})}}_addTimeToTimer(e,t){const i=this._timers.find(t=>t.id===e);if(this._timers=this._timers.map(i=>i.id===e?{...i,remaining:i.remaining+t,total:i.total+t,running:!0,alarming:!1}:i),this._timerAlarm?.id===e?(this._stopAlarmLoop(),this._timerAlarm=this._timerAlarmQueue.length?this._timerAlarmQueue.shift():null,this._timerAlarm&&this._startAlarmLoop(this._settings.timerSound??"beep",this._settings.timerSoundFile)):this._timerAlarmQueue=this._timerAlarmQueue.filter(t=>t.id!==e),xe(this._timers),i?.global&&this._api){const r=this._timers.find(t=>t.id===e),n=Date.now()/1e3-(i.duration-(r?.remaining??0)),a=i.duration+t;this._timers=this._timers.map(t=>t.id===e?{...t,start_time:n,duration:a}:t),this._api.updateGlobalTimer(e,{running:!0,start_time:n}).catch(()=>{})}}_dismissAlarm(){this._timerAlarm&&(this._stopAlarmLoop(),this._stopTimer(this._timerAlarm.id),this._timerAlarm=this._timerAlarmQueue.length?this._timerAlarmQueue.shift():null,this._timerAlarm&&this._startAlarmLoop(this._settings.timerSound??"beep",this._settings.timerSoundFile))}_addPresetTimer(){const e=this._presetNameInput.trim(),t=parseFloat(this._presetMinsInput);if(!e||!t||t<=0)return;const i={id:Date.now().toString(36),name:e,seconds:Math.round(60*t)};this._timerPresets=[...this._timerPresets,i],ge(this._timerPresets),this._presetNameInput="",this._presetMinsInput=""}_removePreset(e){this._timerPresets=this._timerPresets.filter(t=>t.id!==e),ge(this._timerPresets)}_startAlarmLoop(e,t){if(this._stopAlarmLoop(),"none"!==e)if("file"===e&&t){this._alarmLoopActive=!0;const e=()=>{this._alarmLoopActive&&(this._alarmAudio=new Audio(t),this._alarmAudio.onended=()=>{this._alarmLoopActive&&(this._alarmTimeout=setTimeout(e,2e3))},this._alarmAudio.onerror=()=>{this._alarmLoopActive&&(this._alarmTimeout=setTimeout(()=>we("beep"),2e3))},this._alarmAudio.play().catch(()=>{}))};e()}else we(e),this._alarmInterval=setInterval(()=>we(e),4e3)}_stopAlarmLoop(){this._alarmLoopActive=!1,this._alarmInterval&&(clearInterval(this._alarmInterval),this._alarmInterval=null),this._alarmTimeout&&(clearTimeout(this._alarmTimeout),this._alarmTimeout=null),this._alarmAudio&&(this._alarmAudio.pause(),this._alarmAudio.onended=null,this._alarmAudio.onerror=null,this._alarmAudio=null)}_handleStartTimer(e){const{seconds:t,label:i}=e.detail;this._startTimer(t,i,null,this._globalMode)}_handleSearch(e){this._searchQuery=e.detail?.query??""}_handleTagFilter(e){const t=e.detail?.tag;this._activeTag=this._activeTag===t?null:t}_handleChipNav(e){const{filterMode:t,value:i}=e.detail;this._navDirection="back","tags"===t?(this._activeTag=i,this._gridFilterPreset=null):(this._activeTag=null,this._gridFilterPreset={filterMode:t,selectedValues:[i]}),this._view="grid"}_handleBack(){this._closingDetail||("detail"===this._view&&this._selectedRecipe&&!this._closingDetail?(this._closingDetail=!0,this._view="grid"):(this._navDirection="back",this._view="grid",this._selectedRecipe=null,this._closingDetail=!1))}_onDetailTransitionEnd(e){e.target===e.currentTarget&&"transform"===e.propertyName&&this._closingDetail&&(this._closingDetail=!1,this._selectedRecipe=null)}_handleShowGrid(){this._navDirection="back",this._view="grid",this._selectedRecipe=null}_handleShowPlanner(){this._plannerFromRecipe=this._selectedRecipe||null,this._navDirection="forward",this._view="planner"}_handleBackToRecipe(){this._plannerFromRecipe&&(this._selectedRecipe=this._plannerFromRecipe,this._plannerFromRecipe=null,this._navDirection="back",this._view="detail")}_handleOpenRecipe(e){const t=this.shadowRoot?.querySelector("rm-recipe-grid");if(t){const e=t.shadowRoot?.querySelector(".grid-scroll");this._gridScrollPos=e?.scrollTop??0}const i=e.detail?.recipe;if(this._closingDetail=!1,this._navDirection="forward",this._selectedRecipe=i,this._view="detail",i?.id){const e=[i.id,...this._recentRecipeIds.filter(e=>e!==i.id)].slice(0,50);this._recentRecipeIds=e,function(e){try{localStorage.setItem(de,JSON.stringify(e))}catch{}}(e)}}async _handleToggleFavourite(e){const{recipeId:t}=e.detail;await this._api.toggleFavourite(t),await this._loadRecipes(),this._selectedRecipe?.id===t&&(this._selectedRecipe=this._recipes.find(e=>e.id===t)??this._selectedRecipe)}async _handleDeleteRecipe(e){await this._api.deleteRecipe(e.detail.recipeId),await this._loadRecipes(),await this._loadTags(),this._navDirection="back",this._view="grid",this._selectedRecipe=null}async _handleUpdateRecipe(e){const{recipeId:t,data:i}=e.detail;await this._api.updateRecipe(t,i),await this._loadRecipes(),await this._loadTags(),this._selectedRecipe?.id===t&&(this._selectedRecipe=this._recipes.find(e=>e.id===t)??null)}async _handleAddRecipe(e){try{await this._api.addRecipe(e.detail.data),this._navDirection="back",this._view="grid",await this._loadRecipes(),await this._loadTags()}catch(e){console.error("[Recipe Manager] Failed to save recipe:",e)}}async _handleImportDone(){this._navDirection="back",this._view="grid",await this._loadRecipes(),await this._loadTags()}async _handleAddToShopping(e){const{ingredients:t,listId:i,recipeName:r}=e.detail;if(this._slmAvailable&&i)try{(await this._api.addIngredientsToShoppingList(i,t,r)).filter(e=>!e.success).length&&console.warn("Some ingredients failed to add to SLM")}catch(e){console.error("Shopping list error:",e)}else{const e=t.map(e=>({id:Math.random().toString(36).slice(2,10),name:e.name,amount:e.amount||null,unit:e.unit||null,checked:!1}));this._localShoppingItems=[...this._localShoppingItems,...e],this._saveLocalShopping()}}_handleShoppingLocalUpdate(e){this._localShoppingItems=e.detail.items,this._saveLocalShopping()}_renderStars(e){const t=e||0,a=this._hdrStarHover,s=a>0?a:t;return i`
+  `}try{customElements.define("rm-shopping-view",se)}catch{}const oe="manual-toggle",le="rm_settings",ce="rm_shopping",de="rm_recent_recipes",pe="rm_timers",he="rm_timer_presets",ue="rm_view_state",me=["grid","detail","settings","planner","shopping"];function ge(e){try{localStorage.setItem(he,JSON.stringify(e))}catch{}}const fe={theme:"soft",darkMode:"system",fontSize:"medium",columns:3,showFavourites:!0,showPlanner:!0,recentCount:12,timerSound:"beep",keepScreenOn:!1,keepScreenOnMins:30,showUnitConversion:!1,language:"en",unitSystem:"imperial"},be={soft:{light:{"--rm-bg-main":"#fafbfc","--rm-bg-surface":"#ffffff","--rm-bg-elevated":"#ffffff","--rm-text":"#424242","--rm-text-secondary":"#757575","--rm-text-muted":"#9e9e9e","--rm-accent":"#9fa8da","--rm-accent-soft":"rgba(159,168,218,0.15)","--rm-border":"#e8eaf6","--rm-shadow":"0 2px 6px rgba(0,0,0,0.08)"},dark:{"--rm-bg-main":"#14161a","--rm-bg-surface":"#1b1f25","--rm-bg-elevated":"#232833","--rm-text":"#e4e7ec","--rm-text-secondary":"#a8b0bd","--rm-text-muted":"#7a8594","--rm-accent":"#9fa8da","--rm-accent-soft":"rgba(159,168,218,0.18)","--rm-border":"#2b313c","--rm-shadow":"0 2px 6px rgba(0,0,0,0.3)"}},arctic:{light:{"--rm-bg-main":"#f0f4f8","--rm-bg-surface":"#ffffff","--rm-bg-elevated":"#ffffff","--rm-text":"#1a2332","--rm-text-secondary":"#526070","--rm-text-muted":"#8097aa","--rm-accent":"#2979ff","--rm-accent-soft":"rgba(41,121,255,0.12)","--rm-border":"#dce6f0","--rm-shadow":"0 2px 6px rgba(26,35,50,0.1)"}},meadow:{light:{"--rm-bg-main":"#f4f7f0","--rm-bg-surface":"#fefffe","--rm-bg-elevated":"#fefffe","--rm-text":"#2d3a2a","--rm-text-secondary":"#6b7c64","--rm-text-muted":"#96a98e","--rm-accent":"#4caf50","--rm-accent-soft":"rgba(76,175,80,0.12)","--rm-border":"#dde8d8","--rm-shadow":"0 2px 6px rgba(45,58,42,0.1)"}},blossom:{light:{"--rm-bg-main":"#fdf8fb","--rm-bg-surface":"#ffffff","--rm-bg-elevated":"#fff8fc","--rm-text":"#3d1f35","--rm-text-secondary":"#8c5e79","--rm-text-muted":"#b48fa5","--rm-accent":"#c2668a","--rm-accent-soft":"rgba(194,102,138,0.12)","--rm-border":"#f0d6e8","--rm-shadow":"0 2px 6px rgba(61,31,53,0.1)"},dark:{"--rm-bg-main":"#1a0d12","--rm-bg-surface":"#241420","--rm-bg-elevated":"#2e1a28","--rm-text":"#f8d0de","--rm-text-secondary":"#c070a0","--rm-text-muted":"#603050","--rm-accent":"#f48fb1","--rm-accent-soft":"rgba(244,143,177,0.15)","--rm-border":"rgba(248,208,222,0.08)","--rm-shadow":"0 2px 8px rgba(0,0,0,0.4)"}},ocean:{light:{"--rm-bg-main":"#f0f7ff","--rm-bg-surface":"#ffffff","--rm-bg-elevated":"#f9fbff","--rm-text":"#1a3a5f","--rm-text-secondary":"#4a6b8c","--rm-text-muted":"#7a9bbd","--rm-accent":"#0077ff","--rm-accent-soft":"rgba(0,119,255,0.12)","--rm-border":"#d0e1f2","--rm-shadow":"0 2px 6px rgba(26,58,95,0.1)"}},midnight:{dark:{"--rm-bg-main":"#0d1117","--rm-bg-surface":"#161b22","--rm-bg-elevated":"#1c2333","--rm-text":"#c9d1d9","--rm-text-secondary":"#8b949e","--rm-text-muted":"#6e7681","--rm-accent":"#58a6ff","--rm-accent-soft":"rgba(88,166,255,0.15)","--rm-border":"#21262d","--rm-shadow":"0 2px 8px rgba(0,0,0,0.5)"}},ember:{dark:{"--rm-bg-main":"#111111","--rm-bg-surface":"#1c1a17","--rm-bg-elevated":"#242018","--rm-text":"#f5f0e8","--rm-text-secondary":"#a89880","--rm-text-muted":"#7a6a55","--rm-accent":"#f0a500","--rm-accent-soft":"rgba(240,165,0,0.15)","--rm-border":"rgba(245,240,232,0.08)","--rm-shadow":"0 2px 8px rgba(0,0,0,0.5)"}},neon:{dark:{"--rm-bg-main":"#0a0b10","--rm-bg-surface":"#121420","--rm-bg-elevated":"#1a1d2e","--rm-text":"#e0e0f0","--rm-text-secondary":"#a0a5c0","--rm-text-muted":"#6a6f8e","--rm-accent":"#bb86fc","--rm-accent-soft":"rgba(187,134,252,0.15)","--rm-border":"#2a2d45","--rm-shadow":"0 2px 8px rgba(0,0,0,0.6)"}}},ve={small:"13px",medium:"15px",large:"17px"};function _e(e){try{localStorage.setItem(le,JSON.stringify(e))}catch{}}function xe(e){try{const t=e.filter(e=>!e.global).map(e=>({...e,savedAt:Date.now()}));localStorage.setItem(pe,JSON.stringify(t))}catch{}}function ye(e){const t=Math.floor(e/3600),i=Math.floor(e%3600/60),r=e%60;return t>0?`${t}:${String(i).padStart(2,"0")}:${String(r).padStart(2,"0")}`:`${i}:${String(r).padStart(2,"0")}`}function we(e){try{const t=new(window.AudioContext||window.webkitAudioContext);t.createGain().connect(t.destination);const i=(e,i,r,a=.6)=>{const n=t.createOscillator(),s=t.createGain();n.connect(s),s.connect(t.destination),n.frequency.value=e,s.gain.setValueAtTime(a,t.currentTime+i),s.gain.exponentialRampToValueAtTime(.001,t.currentTime+i+r),n.start(t.currentTime+i),n.stop(t.currentTime+i+r+.05)};if("beep"===e)i(880,0,.15),i(880,.2,.15),i(880,.4,.15);else if("ding"===e)i(1318,0,.8,.5),i(1047,.1,.6,.3);else if("alarm"===e)for(let e=0;e<5;e++)i(880,.25*e,.12),i(660,.25*e+.13,.1)}catch{}}class ke extends t{static properties={hass:{type:Object},_config:{type:Object},_view:{type:String},_recipes:{type:Array},_tags:{type:Array},_selectedRecipe:{type:Object},_loading:{type:Boolean},_error:{type:String},_searchQuery:{type:String},_activeTag:{type:String},_shoppingLists:{type:Array},_slmAvailable:{type:Boolean},_localShoppingItems:{type:Array},_settings:{type:Object},_wide:{type:Boolean},_sidebarCollapsed:{type:Boolean},_gridScrollPos:{type:Number},_recentRecipeIds:{type:Array},_timers:{type:Array},_timerAlarm:{type:Object},_timerAlarmQueue:{type:Array},_timersPrevView:{type:String},_customTimerInput:{type:String},_hdrStarHover:{type:Number},_mobileMenuOpen:{type:Boolean},_navDirection:{type:String},_closingDetail:{type:Boolean},_gridFilterPreset:{type:Object},_timerPresets:{type:Array},_presetNameInput:{type:String},_presetMinsInput:{type:String},_alarmAddInput:{type:String},_plannerFromRecipe:{type:Object},_globalMode:{type:Boolean},_quickTimerLabel:{type:String},_globalWakeActive:{type:Boolean}};constructor(){super(),this._pendingViewRestore=function(){try{const e=sessionStorage.getItem(ue);return e?JSON.parse(e):null}catch{return null}}(),this._view="grid",this._recipes=[],this._tags=[],this._selectedRecipe=null,this._loading=!1,this._error=null,this._searchQuery="",this._activeTag=null,this._shoppingLists=[],this._slmAvailable=!1,this._localShoppingItems=[],this._settings=function(){try{const e=localStorage.getItem(le);return e?{...fe,...JSON.parse(e)}:{...fe}}catch{return{...fe}}}(),this._languageAutoDetectPending=!function(){try{const e=localStorage.getItem(le);return!(!e||!Object.prototype.hasOwnProperty.call(JSON.parse(e),"language"))}catch{return!1}}(),b(this._settings.language),this._wide=!1,this._sidebarCollapsed=!0,this._gridScrollPos=0,this._recentRecipeIds=function(){try{const e=localStorage.getItem(de);return e?JSON.parse(e):[]}catch{return[]}}(),this._timers=function(){try{const e=localStorage.getItem(pe);if(!e)return[];const t=JSON.parse(e),i=Date.now();return t.map(e=>{const t=e.savedAt?Math.floor((i-e.savedAt)/1e3):0,r=Math.max(0,(e.remaining??0)-(e.running?t:0));return{...e,remaining:r,savedAt:void 0}}).filter(e=>e.remaining>0)}catch{return[]}}(),this._timerAlarm=null,this._timerAlarmQueue=[],this._timersPrevView=null,this._customTimerInput="",this._hdrStarHover=0,this._mobileMenuOpen=!1,this._navDirection="forward",this._closingDetail=!1,this._gridFilterPreset=null,this._timerPresets=function(){try{const e=localStorage.getItem(he);return e?JSON.parse(e):[]}catch{return[]}}(),this._presetNameInput="",this._presetMinsInput="",this._alarmAddInput="",this._plannerFromRecipe=null,this._globalMode=!1,this._quickTimerLabel="",this._alarmLoopActive=!1,this._alarmInterval=null,this._alarmTimeout=null,this._alarmAudio=null,this._unsubscribe=null,this._darkModeQuery=null,this._resizeObserver=null,this._timerTick=null,this._globalWakeActive=!1,this._globalWakeUnsubscribeFn=null}setConfig(e){this._config=e}static getConfigElement(){return document.createElement("recipe-manager-card-editor")}static getStubConfig(){return{}}getCardSize(){return 6}_updateHeight(){requestAnimationFrame(()=>requestAnimationFrame(()=>{const e=this.getBoundingClientRect().top,t=window.innerHeight-Math.max(e,0);t>100&&(this.style.height=`${t}px`)}))}connectedCallback(){super.connectedCallback(),this._darkModeQuery=window.matchMedia("(prefers-color-scheme: dark)"),this._darkModeQuery.addEventListener("change",this._onSystemDark),this._applyTheme(),this._resizeObserver=new ResizeObserver(e=>{const t=e[0]?.contentRect?.width??0;this._wide=t>=620}),this._resizeObserver.observe(this),this._onViewportResize=()=>this._updateHeight(),window.visualViewport?.addEventListener("resize",this._onViewportResize),window.addEventListener("resize",this._onViewportResize),this._updateHeight(),this._timerTick=setInterval(()=>this._tickTimers(),1e3)}disconnectedCallback(){super.disconnectedCallback(),this._unsubscribe&&(this._unsubscribe(),this._unsubscribe=null),this._darkModeQuery?.removeEventListener("change",this._onSystemDark),this._resizeObserver?.disconnect(),window.visualViewport?.removeEventListener("resize",this._onViewportResize),window.removeEventListener("resize",this._onViewportResize),this._timerTick&&(clearInterval(this._timerTick),this._timerTick=null),this._timerAlarm&&(this._stopAlarmLoop(),this._timerAlarm=null),this._timerAlarmQueue=[],xe(this._timers),this._globalWakeActive&&z(oe)}_onSystemDark=()=>{"system"===this._settings.darkMode&&this._applyTheme()};updated(e){if(e.has("hass")&&this.hass&&!this._api&&(this._api=new h(this.hass),this._init()),e.has("hass")&&this.hass&&this._languageAutoDetectPending){this._languageAutoDetectPending=!1;const e=(this.hass.language||"").split("-")[0].toLowerCase(),t=m.includes(e)?e:this._settings.language;this._settings={...this._settings,language:t},_e(this._settings),b(t)}e.has("hass")&&this._api&&(this._api.hass=this.hass),e.has("_settings")&&this._applyTheme(),(e.has("_view")||e.has("_selectedRecipe"))&&this._saveViewState()}_saveViewState(){me.includes(this._view)&&function(e){try{sessionStorage.setItem(ue,JSON.stringify(e))}catch{}}({view:this._view,recipeId:"detail"===this._view?this._selectedRecipe?.id??null:null})}_restoreViewState(){const e=this._pendingViewRestore;if(this._pendingViewRestore=null,e&&me.includes(e.view))if("detail"===e.view&&e.recipeId){const t=this._recipes.find(t=>t.id===e.recipeId);t&&(this._selectedRecipe=t,this._view="detail")}else"detail"!==e.view&&(this._view=e.view)}_applyTheme(){const e=this._settings,t=be[e.theme]??be.soft,i=!t.light,r=!t.dark;let a=i;i||r?r&&(a=!1):a="on"===e.darkMode||"off"!==e.darkMode&&(this._darkModeQuery?.matches??!1);const n=a?t.dark??t.light:t.light??t.dark;for(const[e,t]of Object.entries(n))this.style.setProperty(e,t);this.style.setProperty("--rm-font-size-base",ve[e.fontSize]??"15px"),this.style.setProperty("--rm-font-scale",String(parseFloat(ve[e.fontSize]??"15px")/15)),this.style.setProperty("--rm-grid-columns",`repeat(${e.columns??3}, minmax(0, 1fr))`)}async _init(){this._loading=!0,this._loadLocalShopping();try{await Promise.all([this._loadRecipes(),this._loadTags(),this._loadShoppingLists(),this._loadGlobalTimers()]),this._restoreViewState(),await this._subscribe()}catch(e){this._error=e.message||r("Failed to load recipes")}finally{this._loading=!1}}async _loadGlobalTimers(){try{const{timers:e}=await this._api.getGlobalTimers(),t=Date.now()/1e3;this._timers=[...this._timers.filter(e=>!e.global),...(e||[]).map(e=>this._globalTimerToLocal(e,t))]}catch{}}_globalTimerToLocal(e,t=Date.now()/1e3){const i=e.running?Math.max(0,e.duration-(t-e.start_time)):e.paused_remaining??e.duration;return{id:e.id,label:e.label,total:e.duration,remaining:Math.round(i),running:e.running&&i>0,alarming:e.running&&i<=0,presetId:e.preset_id||null,global:!0,duration:e.duration,start_time:e.start_time,paused_remaining:e.paused_remaining}}_loadLocalShopping(){try{const e=localStorage.getItem(ce);this._localShoppingItems=e?JSON.parse(e):[]}catch{this._localShoppingItems=[]}}_saveLocalShopping(){try{localStorage.setItem(ce,JSON.stringify(this._localShoppingItems))}catch{}}async _loadRecipes(){const e=await this._api.getAllRecipes();this._recipes=e?.recipes??[]}async _loadTags(){const e=await this._api.getTags();this._tags=e?.tags??[]}async _loadShoppingLists(){try{this._shoppingLists=(await this._api.getShoppingLists())?.lists??[],this._slmAvailable=!0}catch{this._shoppingLists=[],this._slmAvailable=!1}}async _subscribe(){if(!this._unsubscribe)try{this._unsubscribe=await this._api.subscribe(async e=>{const t=e.event_type??e.event,i=e.data??{};/recipe_(added|updated|deleted)/.test(t)?(await Promise.all([this._loadRecipes(),this._loadTags()]),this._selectedRecipe&&(this._selectedRecipe=this._recipes.find(e=>e.id===this._selectedRecipe.id)??this._selectedRecipe)):"recipe_manager_global_timer_added"===t?this._timers.find(e=>e.id===i.id)||(this._timers=[...this._timers,this._globalTimerToLocal(i)]):"recipe_manager_global_timer_updated"===t?this._timers=this._timers.map(e=>e.id===i.id?this._globalTimerToLocal(i):e):"recipe_manager_global_timer_deleted"===t&&(this._timers=this._timers.filter(e=>e.id!==i.timer_id),this._timerAlarm?.id===i.timer_id&&(this._stopAlarmLoop(),this._timerAlarm=this._timerAlarmQueue.length?this._timerAlarmQueue.shift():null,this._timerAlarm&&this._startAlarmLoop(this._settings.timerSound??"beep",this._settings.timerSoundFile)))})}catch{}}get _filteredRecipes(){let e=this._recipes;if(this._activeTag&&(e=e.filter(e=>e.tags?.includes(this._activeTag)||e.courses?.includes(this._activeTag)||e.categories?.includes(this._activeTag)||e.collections?.includes(this._activeTag))),this._searchQuery.trim()){const t=this._searchQuery.trim().toLowerCase();e=e.filter(e=>e.name?.toLowerCase().includes(t)||e.description?.toLowerCase().includes(t)||e.tags?.some(e=>e.toLowerCase().includes(t)))}return e}get _recentRecipes(){const e=this._settings.recentCount??12;return this._recentRecipeIds.slice(0,e).map(e=>this._recipes.find(t=>t.id===e)).filter(Boolean)}_handleSettingsChange(e){const t=this._settings.language;this._settings=e.detail.settings,_e(this._settings),this._settings.language!==t&&b(this._settings.language)}async _toggleGlobalWakeLock(){y()&&(this._globalWakeActive?(await z(oe),this._globalWakeActive=!1):(await S(oe),this._globalWakeActive=!0))}_tickTimers(){if(!this._timers.length)return;let e=!1;const t=[],i=Date.now()/1e3,r=this._timers.map(r=>{if(r.alarming||!r.running)return r;const a=r.global?Math.max(0,r.duration-(i-r.start_time)):r.remaining-1;if(e=!0,a<=0){if(r.presetId)return{...r,remaining:0,running:!1,alarming:!0};t.push({id:r.id,label:r.label})}return{...r,remaining:Math.round(a),running:a>0}});e&&(this._timers=r,xe(this._timers)),t.length&&(this._timerAlarm||(this._timerAlarm=t.shift(),this._startAlarmLoop(this._settings.timerSound??"beep",this._settings.timerSoundFile)),t.length&&(this._timerAlarmQueue=[...this._timerAlarmQueue,...t]))}async _startTimer(e,t,i=null,n=!1){const s=t||r(a`${Math.floor(e/60)} min timer`);if(n&&this._api)try{const t=Date.now()/1e3;return void await this._api.addGlobalTimer({label:s,duration:e,start_time:t,running:!0,paused_remaining:null,...i?{preset_id:i}:{}})}catch(e){console.warn("Global timer failed, falling back to local:",e)}const o=Date.now().toString(36);this._timers=[...this._timers,{id:o,label:s,total:e,remaining:e,running:!0,presetId:i||null}],xe(this._timers)}_stopTimer(e){const t=this._timers.find(t=>t.id===e);this._timers=this._timers.filter(t=>t.id!==e),xe(this._timers),t?.global&&this._api&&this._api.deleteGlobalTimer(e).catch(()=>{})}_pauseTimer(e){const t=this._timers.find(t=>t.id===e),i=!!t&&t.running;if(this._timers=this._timers.map(t=>t.id===e?{...t,running:!t.running}:t),xe(this._timers),t?.global&&this._api)if(i){const t=this._timers.find(t=>t.id===e);this._api.updateGlobalTimer(e,{running:!1,paused_remaining:t?.remaining??0}).catch(()=>{})}else{const i=this._timers.find(t=>t.id===e),r=Date.now()/1e3-(t.duration-(i?.remaining??0));this._timers=this._timers.map(i=>i.id===e?{...i,start_time:r,duration:t.duration,running:!0}:i),this._api.updateGlobalTimer(e,{running:!0,start_time:r,paused_remaining:null}).catch(()=>{})}}_addTimeToTimer(e,t){const i=this._timers.find(t=>t.id===e);if(this._timers=this._timers.map(i=>i.id===e?{...i,remaining:i.remaining+t,total:i.total+t,running:!0,alarming:!1}:i),this._timerAlarm?.id===e?(this._stopAlarmLoop(),this._timerAlarm=this._timerAlarmQueue.length?this._timerAlarmQueue.shift():null,this._timerAlarm&&this._startAlarmLoop(this._settings.timerSound??"beep",this._settings.timerSoundFile)):this._timerAlarmQueue=this._timerAlarmQueue.filter(t=>t.id!==e),xe(this._timers),i?.global&&this._api){const r=this._timers.find(t=>t.id===e),a=Date.now()/1e3-(i.duration-(r?.remaining??0)),n=i.duration+t;this._timers=this._timers.map(t=>t.id===e?{...t,start_time:a,duration:n}:t),this._api.updateGlobalTimer(e,{running:!0,start_time:a}).catch(()=>{})}}_dismissAlarm(){this._timerAlarm&&(this._stopAlarmLoop(),this._stopTimer(this._timerAlarm.id),this._timerAlarm=this._timerAlarmQueue.length?this._timerAlarmQueue.shift():null,this._timerAlarm&&this._startAlarmLoop(this._settings.timerSound??"beep",this._settings.timerSoundFile))}_addPresetTimer(){const e=this._presetNameInput.trim(),t=parseFloat(this._presetMinsInput);if(!e||!t||t<=0)return;const i={id:Date.now().toString(36),name:e,seconds:Math.round(60*t)};this._timerPresets=[...this._timerPresets,i],ge(this._timerPresets),this._presetNameInput="",this._presetMinsInput=""}_removePreset(e){this._timerPresets=this._timerPresets.filter(t=>t.id!==e),ge(this._timerPresets)}_startAlarmLoop(e,t){if(this._stopAlarmLoop(),"none"!==e)if("file"===e&&t){this._alarmLoopActive=!0;const e=()=>{this._alarmLoopActive&&(this._alarmAudio=new Audio(t),this._alarmAudio.onended=()=>{this._alarmLoopActive&&(this._alarmTimeout=setTimeout(e,2e3))},this._alarmAudio.onerror=()=>{this._alarmLoopActive&&(this._alarmTimeout=setTimeout(()=>we("beep"),2e3))},this._alarmAudio.play().catch(()=>{}))};e()}else we(e),this._alarmInterval=setInterval(()=>we(e),4e3)}_stopAlarmLoop(){this._alarmLoopActive=!1,this._alarmInterval&&(clearInterval(this._alarmInterval),this._alarmInterval=null),this._alarmTimeout&&(clearTimeout(this._alarmTimeout),this._alarmTimeout=null),this._alarmAudio&&(this._alarmAudio.pause(),this._alarmAudio.onended=null,this._alarmAudio.onerror=null,this._alarmAudio=null)}_handleStartTimer(e){const{seconds:t,label:i}=e.detail;this._startTimer(t,i,null,this._globalMode)}_handleSearch(e){this._searchQuery=e.detail?.query??""}_handleTagFilter(e){const t=e.detail?.tag;this._activeTag=this._activeTag===t?null:t}_handleChipNav(e){const{filterMode:t,value:i}=e.detail;this._navDirection="back","tags"===t?(this._activeTag=i,this._gridFilterPreset=null):(this._activeTag=null,this._gridFilterPreset={filterMode:t,selectedValues:[i]}),this._view="grid"}_handleBack(){this._closingDetail||("detail"===this._view&&this._selectedRecipe&&!this._closingDetail?(this._closingDetail=!0,this._view="grid"):(this._navDirection="back",this._view="grid",this._selectedRecipe=null,this._closingDetail=!1))}_onDetailTransitionEnd(e){e.target===e.currentTarget&&"transform"===e.propertyName&&this._closingDetail&&(this._closingDetail=!1,this._selectedRecipe=null)}_handleShowGrid(){this._navDirection="back",this._view="grid",this._selectedRecipe=null}_handleShowPlanner(){this._plannerFromRecipe=this._selectedRecipe||null,this._navDirection="forward",this._view="planner"}_handleBackToRecipe(){this._plannerFromRecipe&&(this._selectedRecipe=this._plannerFromRecipe,this._plannerFromRecipe=null,this._navDirection="back",this._view="detail")}_handleOpenRecipe(e){const t=this.shadowRoot?.querySelector("rm-recipe-grid");if(t){const e=t.shadowRoot?.querySelector(".grid-scroll");this._gridScrollPos=e?.scrollTop??0}const i=e.detail?.recipe;if(this._closingDetail=!1,this._navDirection="forward",this._selectedRecipe=i,this._view="detail",i?.id){const e=[i.id,...this._recentRecipeIds.filter(e=>e!==i.id)].slice(0,50);this._recentRecipeIds=e,function(e){try{localStorage.setItem(de,JSON.stringify(e))}catch{}}(e)}}async _handleToggleFavourite(e){const{recipeId:t}=e.detail;await this._api.toggleFavourite(t),await this._loadRecipes(),this._selectedRecipe?.id===t&&(this._selectedRecipe=this._recipes.find(e=>e.id===t)??this._selectedRecipe)}async _handleDeleteRecipe(e){await this._api.deleteRecipe(e.detail.recipeId),await this._loadRecipes(),await this._loadTags(),this._navDirection="back",this._view="grid",this._selectedRecipe=null}async _handleUpdateRecipe(e){const{recipeId:t,data:i}=e.detail;await this._api.updateRecipe(t,i),await this._loadRecipes(),await this._loadTags(),this._selectedRecipe?.id===t&&(this._selectedRecipe=this._recipes.find(e=>e.id===t)??null)}async _handleAddRecipe(e){try{await this._api.addRecipe(e.detail.data),this._navDirection="back",this._view="grid",await this._loadRecipes(),await this._loadTags()}catch(e){console.error("[Recipe Manager] Failed to save recipe:",e)}}async _handleImportDone(){this._navDirection="back",this._view="grid",await this._loadRecipes(),await this._loadTags()}async _handleAddToShopping(e){const{ingredients:t,listId:i,recipeName:r}=e.detail;if(this._slmAvailable&&i)try{(await this._api.addIngredientsToShoppingList(i,t,r)).filter(e=>!e.success).length&&console.warn("Some ingredients failed to add to SLM")}catch(e){console.error("Shopping list error:",e)}else{const e=t.map(e=>({id:Math.random().toString(36).slice(2,10),name:e.name,amount:e.amount||null,unit:e.unit||null,checked:!1}));this._localShoppingItems=[...this._localShoppingItems,...e],this._saveLocalShopping()}}_handleShoppingLocalUpdate(e){this._localShoppingItems=e.detail.items,this._saveLocalShopping()}_renderStars(e){const t=e||0,n=this._hdrStarHover,s=n>0?n:t;return i`
       <div class="header-stars"
         @mouseleave=${()=>{this._hdrStarHover=0}}
-        title="${r(a>0?n`Set rating: ${a}★`:t>0?n`Rating: ${t}★ — click to change`:"Click to rate")}">
+        title="${r(n>0?a`Set rating: ${n}★`:t>0?a`Rating: ${t}★ — click to change`:"Click to rate")}">
         ${[1,2,3,4,5].map(e=>i`
           <span class="hdr-star ${e<=s?"filled":""}"
             @mouseover=${()=>{this._hdrStarHover=e}}
             @click=${()=>this._handleRateRecipe(e)}>★</span>
         `)}
       </div>
-    `}async _handleRateRecipe(e){if(!this._selectedRecipe)return;const t=this._selectedRecipe.rating===e?null:e;this._hdrStarHover=0,await this._handleUpdateRecipe({detail:{recipeId:this._selectedRecipe.id,data:{rating:t}}})}_renderSidebar(){const e=this._view,t=this._sidebarCollapsed,a=(a,s,o,l=!1,c=null)=>i`
+    `}async _handleRateRecipe(e){if(!this._selectedRecipe)return;const t=this._selectedRecipe.rating===e?null:e;this._hdrStarHover=0,await this._handleUpdateRecipe({detail:{recipeId:this._selectedRecipe.id,data:{rating:t}}})}_renderSidebar(){const e=this._view,t=this._sidebarCollapsed,n=(n,s,o,l=!1,c=null)=>i`
       <button
         class="sb-item ${e===o?"active":""} ${l?"placeholder":""}"
-        title="${l?r(n`${s} — coming soon`):s}"
+        title="${l?r(a`${s} — coming soon`):s}"
         @click=${l?void 0:c||(()=>{this._navDirection="forward",this._view=o,this._selectedRecipe=null})}
         ?disabled=${l}
       >
-        <ha-icon icon="${a}"></ha-icon>
+        <ha-icon icon="${n}"></ha-icon>
         ${t?"":i`<span>${s}</span>`}
       </button>
     `;return i`
@@ -4542,10 +4542,10 @@ https://github.com/nodeca/pako/blob/main/LICENSE
         </div>
 
         <div class="sb-nav">
-          ${a("mdi:home",r("Home"),"grid")}
-          ${a("mdi:cart-outline",r("Shopping List"),"shopping")}
-          ${this._settings.showPlanner?a("mdi:calendar-week",r("Meal Planner"),"planner",!1,()=>{this._plannerFromRecipe=null,this._navDirection="forward",this._view="planner",this._selectedRecipe=null}):""}
-          ${a("mdi:book-open-variant",r("Cookbook"),"cookbook",!0)}
+          ${n("mdi:home",r("Home"),"grid")}
+          ${n("mdi:cart-outline",r("Shopping List"),"shopping")}
+          ${this._settings.showPlanner?n("mdi:calendar-week",r("Meal Planner"),"planner",!1,()=>{this._plannerFromRecipe=null,this._navDirection="forward",this._view="planner",this._selectedRecipe=null}):""}
+          ${n("mdi:book-open-variant",r("Cookbook"),"cookbook",!0)}
           <button
             class="sb-item ${"timers"===e?"active":""}"
             title="${r("Timers")}"
@@ -4570,20 +4570,20 @@ https://github.com/nodeca/pako/blob/main/LICENSE
           </button>
         </div>
       </nav>
-    `}_renderHeader(){const e=("detail"===this._view||this._closingDetail)&&this._selectedRecipe,t="settings"===this._view,n="add"===this._view,a="timers"===this._view,s=this._wide,o=t?r("Settings"):n?r("New Recipe"):a?r("Timers"):e?"":"planner"===this._view?r("Meal Planner"):"shopping"===this._view?r("Shopping List"):r("Recipes");return i`
+    `}_renderHeader(){const e=("detail"===this._view||this._closingDetail)&&this._selectedRecipe,t="settings"===this._view,a="add"===this._view,n="timers"===this._view,s=this._wide,o=t?r("Settings"):a?r("New Recipe"):n?r("Timers"):e?"":"planner"===this._view?r("Meal Planner"):"shopping"===this._view?r("Shopping List"):r("Recipes");return i`
       <div class="rm-header">
         <div class="rm-header-left">
-          ${e||n?i`
+          ${e||a?i`
             <button class="icon-btn" @click=${this._handleBack} title="${r("Back")}">
               <ha-icon icon="mdi:arrow-left"></ha-icon>
             </button>
-          `:a&&"detail"===this._timersPrevView?i`
+          `:n&&"detail"===this._timersPrevView?i`
             <button class="icon-btn"
               @click=${()=>{this._navDirection="back",this._view="detail",this._timersPrevView=null}}
               title="${r("Back to recipe")}">
               <ha-icon icon="mdi:arrow-left"></ha-icon>
             </button>
-          `:s||"grid"===this._view||t||a?"":i`
+          `:s||"grid"===this._view||t||n?"":i`
             <button class="icon-btn" @click=${this._handleShowGrid}>
               <ha-icon icon="mdi:arrow-left"></ha-icon>
             </button>
@@ -4617,7 +4617,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
             <ha-icon icon="${this._globalWakeActive?"mdi:eye":"mdi:eye-off-outline"}"></ha-icon>
           </button>
 
-          ${t||n||a?i`
+          ${t||a||n?i`
             <button class="icon-btn" @click=${this._handleShowGrid}>
               <ha-icon icon="mdi:close"></ha-icon>
             </button>
@@ -4720,13 +4720,13 @@ https://github.com/nodeca/pako/blob/main/LICENSE
           `:""}
         </div>
       </div>
-    `}_renderTimersView(){const e=this._customTimerInput.trim(),t=this._presetNameInput.trim()&&this._presetMinsInput.trim(),n=this._timers.filter(e=>!e.presetId),a=263.9;return i`
+    `}_renderTimersView(){const e=this._customTimerInput.trim(),t=this._presetNameInput.trim()&&this._presetMinsInput.trim(),a=this._timers.filter(e=>!e.presetId),n=263.9;return i`
       <div class="timers-view">
 
         <!-- Active timers (non-preset): horizontal wrap of square arc tiles -->
-        ${n.length?i`
+        ${a.length?i`
           <div class="timer-list">
-            ${n.map(e=>{const t=e.remaining<60?"#f59e0b":"var(--rm-accent)",n=a*(1-e.remaining/e.total);return i`
+            ${a.map(e=>{const t=e.remaining<60?"#f59e0b":"var(--rm-accent)",a=n*(1-e.remaining/e.total);return i`
                 <div class="timer-card">
                   <button class="preset-remove" @click=${()=>this._stopTimer(e.id)} title="${r("Remove")}">
                     <ha-icon icon="mdi:close"></ha-icon>
@@ -4738,7 +4738,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
                       <circle cx="50" cy="50" r="42" fill="none" stroke="var(--rm-border)" stroke-width="6"/>
                       <circle cx="50" cy="50" r="42" fill="none"
                         stroke="${t}" stroke-width="6" stroke-linecap="round"
-                        stroke-dasharray="${a}" stroke-dashoffset="${n}"
+                        stroke-dasharray="${n}" stroke-dashoffset="${a}"
                         transform="rotate(-90 50 50)"
                         style="transition: stroke-dashoffset 0.8s linear, stroke 0.3s;"/>
                     </svg>
@@ -4822,7 +4822,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
         <!-- Preset timers grid (bottom) -->
         ${this._timerPresets.length?i`
           <div class="timer-presets-grid">
-            ${this._timerPresets.map(e=>{const t=this._timers.find(t=>t.presetId===e.id),n=t&&t.running,s=t&&t.alarming,o=t?t.remaining:e.seconds,l=t?t.total:e.seconds,c=s?"var(--error-color, #cf6679)":o<60&&t?"#f59e0b":"var(--rm-accent)",d=s?0:t?a*(1-o/l):a;return i`
+            ${this._timerPresets.map(e=>{const t=this._timers.find(t=>t.presetId===e.id),a=t&&t.running,s=t&&t.alarming,o=t?t.remaining:e.seconds,l=t?t.total:e.seconds,c=s?"var(--error-color, #cf6679)":o<60&&t?"#f59e0b":"var(--rm-accent)",d=s?0:t?n*(1-o/l):n;return i`
                 <div class="timer-preset-card ${s?"alarming":""}">
                   <button class="preset-remove" @click=${()=>{t&&this._stopTimer(t.id),this._removePreset(e.id)}} title="${r("Remove")}">
                     <ha-icon icon="mdi:close"></ha-icon>
@@ -4833,7 +4833,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
                       <circle cx="50" cy="50" r="44" fill="none" stroke="var(--rm-border)" stroke-width="7"/>
                       <circle cx="50" cy="50" r="44" fill="none"
                         stroke="${c}" stroke-width="7" stroke-linecap="round"
-                        stroke-dasharray="${a}" stroke-dashoffset="${d}"
+                        stroke-dasharray="${n}" stroke-dashoffset="${d}"
                         transform="rotate(-90 50 50)"
                         style="transition: stroke-dashoffset 0.8s linear, stroke 0.3s;"/>
                     </svg>
@@ -4851,7 +4851,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
                       <button class="preset-arc-btn" @click=${()=>this._addTimeToTimer(t.id,60)}>${r("+1m")}</button>
                       <button class="preset-arc-btn" @click=${()=>this._addTimeToTimer(t.id,300)}>${r("+5m")}</button>
                       <button class="preset-arc-btn stop" @click=${()=>this._stopTimer(t.id)}>${r("Stop")}</button>
-                    `:n?i`
+                    `:a?i`
                       <button class="preset-arc-btn" @click=${()=>this._addTimeToTimer(t.id,30)}>${r("+30s")}</button>
                       <button class="preset-arc-btn" @click=${()=>this._addTimeToTimer(t.id,60)}>${r("+1m")}</button>
                       <button class="preset-arc-btn" @click=${()=>this._pauseTimer(t.id)}>
@@ -4896,9 +4896,9 @@ https://github.com/nodeca/pako/blob/main/LICENSE
           </div>
         </div>
       </div>
-    `:""}_renderBottomNav(){const e=this._view,t=(t,r,n,a)=>i`
-      <button class="rm-bn-btn ${e===n?"active":""}"
-        @click=${a||(()=>{this._navDirection="forward",this._view=n,this._selectedRecipe=null})}
+    `:""}_renderBottomNav(){const e=this._view,t=(t,r,a,n)=>i`
+      <button class="rm-bn-btn ${e===a?"active":""}"
+        @click=${n||(()=>{this._navDirection="forward",this._view=a,this._selectedRecipe=null})}
         title="${r}">
         <ha-icon icon="${t}"></ha-icon>
         <span>${r}</span>
@@ -4958,7 +4958,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
         <!-- Timer alarm modal -->
         ${this._timerAlarm?this._renderTimerAlarm():""}
       </ha-card>
-    `}static styles=a`
+    `}static styles=n`
     :host {
       display: block;
       height: 100vh;
@@ -5040,7 +5040,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       align-items: center;
       gap: 8px;
       font-weight: 700;
-      font-size: 15px;
+      font-size: calc(15px * var(--rm-font-scale, 1));
       color: var(--rm-accent);
       overflow: hidden;
     }
@@ -5074,7 +5074,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     .sb-search-icon { --mdc-icon-size: 16px; color: var(--rm-text-muted); flex-shrink: 0; }
     .sb-search-input {
       flex: 1; background: none; border: none; outline: none;
-      color: var(--rm-text); font-size: 13px; padding: 7px 0;
+      color: var(--rm-text); font-size: calc(13px * var(--rm-font-scale, 1)); padding: 7px 0;
     }
     .sb-search-input::placeholder { color: var(--rm-text-muted); }
     .sb-search-clear {
@@ -5088,7 +5088,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       width: 100%; padding: 8px 10px;
       background: var(--rm-accent); color: #fff;
       border: none; border-radius: 8px;
-      font-size: 13px; font-weight: 600; cursor: pointer;
+      font-size: calc(13px * var(--rm-font-scale, 1)); font-weight: 600; cursor: pointer;
       transition: opacity 0.15s;
     }
     .sb-new-btn:hover { opacity: 0.88; }
@@ -5121,7 +5121,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       display: flex; align-items: center; gap: 10px;
       width: 100%; padding: 9px 10px;
       background: none; border: none; border-radius: 8px;
-      font-size: 14px; color: var(--rm-text-secondary);
+      font-size: calc(14px * var(--rm-font-scale, 1)); color: var(--rm-text-secondary);
       cursor: pointer; text-align: left;
       transition: background 0.12s, color 0.12s;
       position: relative;
@@ -5140,7 +5140,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       background: var(--rm-accent);
       color: #fff;
       border-radius: 10px;
-      font-size: 11px;
+      font-size: calc(11px * var(--rm-font-scale, 1));
       font-weight: 700;
       padding: 1px 6px;
       min-width: 18px;
@@ -5150,7 +5150,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       position: absolute;
       top: 4px; right: 4px;
       margin-left: 0;
-      font-size: 9px;
+      font-size: calc(9px * var(--rm-font-scale, 1));
       padding: 1px 4px;
     }
 
@@ -5184,7 +5184,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 
     .rm-title {
       display: flex; align-items: center; gap: 8px;
-      font-size: 17px; font-weight: 600; color: var(--rm-text);
+      font-size: calc(17px * var(--rm-font-scale, 1)); font-weight: 600; color: var(--rm-text);
       overflow: hidden; white-space: nowrap; flex: 1; min-width: 0;
     }
     .rm-title ha-icon { --mdc-icon-size: 22px; color: var(--rm-accent); flex-shrink: 0; }
@@ -5197,7 +5197,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       align-items: center;
     }
     .hdr-star {
-      font-size: 18px;
+      font-size: calc(18px * var(--rm-font-scale, 1));
       color: var(--rm-border, rgba(0,0,0,0.2));
       line-height: 1;
       cursor: pointer;
@@ -5223,14 +5223,14 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       color: var(--rm-accent);
       border-radius: 10px;
       padding: 3px 8px;
-      font-size: 11px;
+      font-size: calc(11px * var(--rm-font-scale, 1));
       font-weight: 700;
       white-space: nowrap;
     }
     .timer-pill.paused { opacity: 0.6; }
     .timer-pill ha-icon { --mdc-icon-size: 12px; }
     .timer-more {
-      font-size: 11px;
+      font-size: calc(11px * var(--rm-font-scale, 1));
       color: var(--rm-text-secondary);
       padding: 0 4px;
     }
@@ -5258,7 +5258,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     .text-btn {
       background: var(--rm-accent); color: #fff; border: none;
       border-radius: var(--rm-radius-sm); padding: 8px 16px;
-      cursor: pointer; font-size: 14px; font-weight: 500;
+      cursor: pointer; font-size: calc(14px * var(--rm-font-scale, 1)); font-weight: 500;
     }
 
     .rm-loading {
@@ -5271,7 +5271,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       color: var(--rm-text-secondary); text-align: center;
     }
     .rm-error ha-icon { --mdc-icon-size: 48px; color: var(--error-color, #cf6679); }
-    .rm-error p { margin: 0; font-size: 14px; }
+    .rm-error p { margin: 0; font-size: calc(14px * var(--rm-font-scale, 1)); }
 
     /* ── Timers view ─────────────────────────── */
 
@@ -5292,11 +5292,11 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       padding: 40px 0 24px;
       color: var(--rm-text-secondary);
       text-align: center;
-      font-size: 14px;
+      font-size: calc(14px * var(--rm-font-scale, 1));
     }
     .timer-empty ha-icon { --mdc-icon-size: 48px; opacity: 0.35; }
     .timer-empty p { margin: 0; }
-    .timer-empty-hint { font-size: 12px !important; color: var(--rm-text-muted) !important; }
+    .timer-empty-hint { font-size: calc(12px * var(--rm-font-scale, 1)) !important; color: var(--rm-text-muted) !important; }
 
     /* Active timer list: horizontal wrap of square arc tiles */
     .timer-list {
@@ -5318,7 +5318,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       box-sizing: border-box;
     }
     .timer-card-name {
-      font-size: 11px; font-weight: 600; color: var(--rm-text);
+      font-size: calc(11px * var(--rm-font-scale, 1)); font-weight: 600; color: var(--rm-text);
       text-align: center; width: 100%;
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
@@ -5383,12 +5383,12 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       justify-content: center;
     }
     .preset-arc-time {
-      font-size: 17px; font-weight: 700;
+      font-size: calc(17px * var(--rm-font-scale, 1)); font-weight: 700;
       color: var(--rm-text); line-height: 1;
       font-variant-numeric: tabular-nums;
     }
     .preset-arc-name {
-      font-size: 11px; font-weight: 600; color: var(--rm-text);
+      font-size: calc(11px * var(--rm-font-scale, 1)); font-weight: 600; color: var(--rm-text);
       text-align: center; width: 100%;
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
@@ -5397,7 +5397,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     }
     .preset-arc-btn {
       background: var(--rm-bg); border: 1px solid var(--rm-border);
-      border-radius: 10px; padding: 2px 6px; font-size: 10px;
+      border-radius: 10px; padding: 2px 6px; font-size: calc(10px * var(--rm-font-scale, 1));
       color: var(--rm-text-secondary); cursor: pointer; transition: all 0.15s;
     }
     .preset-arc-btn:hover { background: var(--rm-accent-soft); color: var(--rm-accent); border-color: var(--rm-accent); }
@@ -5405,7 +5405,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     .preset-arc-btn.stop:hover { background: rgba(207,102,121,0.12); }
     .preset-arc-btn.play {
       background: var(--rm-accent); color: #fff; border-color: var(--rm-accent);
-      padding: 3px 12px; font-size: 11px; border-radius: 12px;
+      padding: 3px 12px; font-size: calc(11px * var(--rm-font-scale, 1)); border-radius: 12px;
     }
     .preset-arc-btn.play:hover { opacity: 0.85; }
     .preset-remove {
@@ -5432,7 +5432,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       justify-content: space-between;
     }
     .timer-add-title {
-      font-size: 12px;
+      font-size: calc(12px * var(--rm-font-scale, 1));
       font-weight: 600;
       color: var(--rm-text-muted);
       text-transform: uppercase;
@@ -5446,7 +5446,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       border-radius: 20px;
       border: 1px solid var(--rm-border);
       cursor: pointer;
-      font-size: 12px;
+      font-size: calc(12px * var(--rm-font-scale, 1));
       color: var(--rm-text-muted);
       transition: all 0.15s;
       user-select: none;
@@ -5460,7 +5460,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     }
     .timer-add-group { display: flex; flex-direction: column; gap: 5px; }
     .timer-add-group-label {
-      font-size: 11px;
+      font-size: calc(11px * var(--rm-font-scale, 1));
       font-weight: 500;
       color: var(--rm-text-muted);
       opacity: 0.7;
@@ -5473,7 +5473,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       border-radius: 8px;
       color: var(--rm-text);
       padding: 6px 9px;
-      font-size: 13px;
+      font-size: calc(13px * var(--rm-font-scale, 1));
       font-family: inherit;
       min-width: 0;
     }
@@ -5495,7 +5495,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       color: var(--rm-text);
       padding: 8px 14px;
       cursor: pointer;
-      font-size: 14px;
+      font-size: calc(14px * var(--rm-font-scale, 1));
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -5546,13 +5546,13 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     }
 
     .alarm-label {
-      font-size: 18px;
+      font-size: calc(18px * var(--rm-font-scale, 1));
       font-weight: 700;
       color: var(--rm-text);
     }
 
     .alarm-sub {
-      font-size: 13px;
+      font-size: calc(13px * var(--rm-font-scale, 1));
       color: var(--rm-text-secondary);
       margin-bottom: 8px;
     }
@@ -5571,7 +5571,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       color: var(--rm-text);
       padding: 10px;
       cursor: pointer;
-      font-size: 13px;
+      font-size: calc(13px * var(--rm-font-scale, 1));
       font-weight: 500;
       transition: background 0.15s;
     }
@@ -5591,7 +5591,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     .alarm-custom-input {
       flex: 1; background: var(--rm-bg-elevated); border: 1px solid var(--rm-border);
       border-radius: 8px; color: var(--rm-text); padding: 8px 10px;
-      font-size: 13px; font-family: inherit;
+      font-size: calc(13px * var(--rm-font-scale, 1)); font-family: inherit;
     }
     .alarm-custom-input:focus { outline: none; border-color: var(--rm-accent); }
 
@@ -5657,7 +5657,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       border: none;
       cursor: pointer;
       color: var(--rm-text-muted);
-      font-size: 10px;
+      font-size: calc(10px * var(--rm-font-scale, 1));
       font-weight: 500;
       padding: 6px 4px;
       position: relative;
@@ -5690,7 +5690,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       background: var(--rm-accent);
       color: #fff;
       border-radius: 8px;
-      font-size: 9px;
+      font-size: calc(9px * var(--rm-font-scale, 1));
       font-weight: 700;
       padding: 1px 4px;
       min-width: 14px;
@@ -5733,7 +5733,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       flex-shrink: 0;
     }
     .rm-mm-logo { color: var(--rm-accent); --mdc-icon-size: 22px; }
-    .rm-mm-title { flex: 1; font-weight: 700; font-size: 15px; color: var(--rm-text); }
+    .rm-mm-title { flex: 1; font-weight: 700; font-size: calc(15px * var(--rm-font-scale, 1)); color: var(--rm-text); }
 
     .rm-mm-items { padding: 8px 0; flex: 1; overflow-y: auto; }
 
@@ -5747,7 +5747,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       border: none;
       cursor: pointer;
       color: var(--rm-text-secondary);
-      font-size: 14px;
+      font-size: calc(14px * var(--rm-font-scale, 1));
       text-align: left;
       transition: background 0.12s, color 0.12s;
       -webkit-tap-highlight-color: transparent;
@@ -5758,7 +5758,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 
     .rm-mm-soon {
       margin-left: auto;
-      font-size: 10px;
+      font-size: calc(10px * var(--rm-font-scale, 1));
       font-weight: 700;
       background: var(--rm-accent-soft);
       color: var(--rm-accent);
