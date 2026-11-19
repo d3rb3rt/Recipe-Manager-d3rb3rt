@@ -1,3 +1,27 @@
+# Recipe Manager 2026.11.3 — Clear search everywhere
+
+- Bundles **Recipe Manager Card 2026.11.3**: a clear (X) button and the Escape key on every recipe search, including the meal planner's recipe picker, and the sidebar X that was hidden on the wide layout.
+
+---
+
+# Recipe Manager 2026.11.2 — German recipes
+
+- **German ingredient units:** recipes imported from German sites now split into amount, unit and name: "2 EL Olivenöl", "1 Prise Salz", "1,5 TL Zimt", "1 Pck. Vanillezucker", "2 Zehen Knoblauch", "1 Dose Tomaten" and "ca. 200 g Butter". EL, TL, Prise, Bund, Pck., Zehe, Stück, Dose, Stängel and more are understood, along with decimal commas and ½ style fractions.
+- **Fixes an ingredient bug in every language:** an ingredient with no amount that starts with a unit letter was cut ("Gurke" became "urke", "Lauch" became "auch", "2 cloves garlic" became unit "clove" and name "s garlic").
+- Bundles **Recipe Manager Card 2026.11.2** with complete German translations.
+
+---
+
+# Recipe Manager 2026.11.1
+
+First release on calendar versioning (`YYYY.M.N`, the same as Shopping List Manager).
+
+- Bundles **Recipe Manager Card 2026.11.1**: Fresh and Compact interface styles, filter and sort sheet with star ratings, new Timers view with Voice PE / ESPHome timers, planner day view.
+- **Global timer sensors:** `sensor.recipe_manager_timers` (active count, full list as an attribute) and `sensor.recipe_manager_next_timer` (timestamp of the soonest running timer). They update on global timer events and at the next finish time.
+- **Website:** live demo and user manual (GitHub Pages).
+
+---
+
 # Release Notes — Recipe Manager v1.0.0
 
 First public release of the Recipe Manager Home Assistant integration.
